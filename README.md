@@ -1,21 +1,17 @@
-# Sistema de troca de mensagens instantâneas (estilo BBS/IRC) — Parte 1
+# Sistema de troca de mensagens instantâneas
 
 Projeto da disciplina de Sistemas Distribuídos. Bots (clientes) se conectam a servidores
 através de um broker usando ZeroMQ. Esta primeira parte implementa login, criação de
 canais e listagem de canais, com persistência em disco.
 
-## Escolhas
-
-| Item | Escolha |
-|---|---|
-| Linguagens do grupo | C++ (esta pasta), Java e Node.js |
-| Mensagens | ZeroMQ (REQ/REP com broker ROUTER/DEALER) |
-| Serialização | Protocol Buffers (binário) — contrato em `proto/chat.proto` |
-| Persistência | Arquivos de texto por servidor (`logins.tsv` e `channels.txt`) em um volume próprio |
-| Containers | Docker + Docker Compose |
+- Linguagens: C++, Java e Node.js
+- Mensagens: ZeroMQ (REQ/REP com broker ROUTER/DEALER)
+- Serialização: Protocol Buffers (binário) — contrato em `proto/chat.proto` 
+- Persistência: Arquivos de texto por servidor (`logins.tsv` e `channels.txt`) em um volume próprio
+- Containers: Docker + Docker Compose 
 
 ### Mensagens
-Toda mensagem trafega em um `Envelope` que contém `timestamp_ms`, `sender` e um
+Toda mensagem trafega em um Envelope que contém `timestamp_ms`, `sender` e um
 `oneof body` com uma das mensagens: `LoginRequest/Response`, `CreateChannelRequest/Response`,
 `ListChannelsRequest/Response`.
 
