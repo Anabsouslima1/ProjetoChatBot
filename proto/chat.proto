@@ -1,0 +1,58 @@
+// Contrato de mensagens do projeto (compartilhado por TODAS as linguagens do grupo).
+// Qualquer alteração aqui deve ser combinada com o grupo.
+syntax = "proto3";
+
+package chat;
+
+option java_package = "chat.proto";
+option java_multiple_files = true;
+
+enum ErrorCode {
+  ERROR_NONE = 0;
+  ERROR_INVALID_USERNAME = 1;      // vazio, muito longo ou com caracteres inválidos
+  ERROR_INVALID_CHANNEL_NAME = 2;  // idem para canais
+  ERROR_CHANNEL_EXISTS = 3;        // canal duplicado
+  ERROR_UNKNOWN_REQUEST = 4;       // mensagem não reconhecida
+  ERROR_INTERNAL = 5;              // falha interna (ex.: disco)
+}
+
+message LoginRequest {
+  string username = 1;
+}
+
+message LoginResponse {
+  bool success = 1;
+  ErrorCode error = 2;
+  string error_message = 3;
+}
+
+message CreateChannelRequest {
+  string channel_name = 1;
+}
+
+message CreateChannelResponse {
+  bool success = 1;
+  ErrorCode error = 2;
+  string error_message = 3;
+}
+
+message ListChannelsRequest {}
+
+message ListChannelsResponse {
+  repeated string channels = 1;
+}
+
+// Todo mensagem trafega dentro de um Envelope, que garante o timestamp
+// obrigatório do envio. Serialização: Protocol Buffers (binário).
+message Envelope {
+  int64 timestamp_ms = 1;  // epoch em milissegundos (UTC) do momento do envio
+  string sender = 2;       // nome do bot ou do servidor que enviou
+  oneof body {
+    LoginRequest login_request = 10;
+    LoginResponse login_response = 11;
+    CreateChannelRequest create_channel_request = 12;
+    CreateChannelResponse create_channel_response = 13;
+    ListChannelsRequest list_channels_request = 14;
+    ListChannelsResponse list_channels_response = 15;
+  }
+}

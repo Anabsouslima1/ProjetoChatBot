@@ -1,0 +1,56 @@
+# Parte C++ do projeto. O grupo deve juntar aqui os serviços de Java e Node.js
+# (2 servidores e 2 clientes por integrante), todos apontando para o mesmo broker.
+
+x-cpp: &cpp
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: chat-cpp
+
+services:
+  broker:
+    <<: *cpp
+    command: ["/app/broker"]
+    # Clientes -> 5555, servidores -> 5556 (rede interna do compose)
+
+  server_cpp_1:
+    <<: *cpp
+    command: ["/app/server"]
+    environment:
+      SERVER_NAME: server_cpp_1
+      BROKER_BACKEND: tcp://broker:5556
+      DATA_DIR: /data
+    volumes:
+      - server_cpp_1_data:/data
+    depends_on: [broker]
+
+  server_cpp_2:
+    <<: *cpp
+    command: ["/app/server"]
+    environment:
+      SERVER_NAME: server_cpp_2
+      BROKER_BACKEND: tcp://broker:5556
+      DATA_DIR: /data
+    volumes:
+      - server_cpp_2_data:/data
+    depends_on: [broker]
+
+  client_cpp_1:
+    <<: *cpp
+    command: ["/app/client"]
+    environment:
+      BOT_NAME: bot_cpp_1
+      BROKER_FRONTEND: tcp://broker:5555
+    depends_on: [broker, server_cpp_1, server_cpp_2]
+
+  client_cpp_2:
+    <<: *cpp
+    command: ["/app/client"]
+    environment:
+      BOT_NAME: bot_cpp_2
+      BROKER_FRONTEND: tcp://broker:5555
+    depends_on: [broker, server_cpp_1, server_cpp_2]
+
+volumes:
+  server_cpp_1_data:
+  server_cpp_2_data:
