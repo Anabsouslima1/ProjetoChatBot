@@ -3,7 +3,7 @@ package chat.java;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
-import chat.proto.Chat.*;
+import chat.proto.*;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
@@ -26,54 +26,68 @@ public class Server {
             System.out.println("[" + name + "] Conectado ao broker em " + backend);
 
             while (!Thread.currentThread().isInterrupted()) {
-                byte[] reqBytes = socket.recv(0);
-                if (reqBytes == null) continue;
+                try {
+                    // Recebe os bytes (bloqueia até chegar uma mensagem do broker)
+                    byte[] reqBytes = socket.recv(0);
+                    if (reqBytes == null) continue;
+                    
+                    System.out.println("[" + name + "] Recebeu " + reqBytes.length + " bytes do broker.");
 
-                Envelope req = Envelope.parseFrom(reqBytes);
-                Envelope.Builder repBuilder = Envelope.newBuilder().setSender(name);
+                    // Converte os bytes binários para o objeto Protobuf
+                    Envelope req = Envelope.parseFrom(reqBytes);
+                    Envelope.Builder repBuilder = Envelope.newBuilder().setSender(name);
 
-                System.out.println("RECEBIDO | de=" + req.getSender() + " | " + req.getBodyCase());
+                    System.out.println("[" + name + "] RECEBIDO | de=" + req.getSender() + " | " + req.getBodyCase());
 
-                switch (req.getBodyCase()) {
-                    case LOGIN_REQUEST:
-                        String user = req.getLoginRequest().getUsername();
-                        if (user.isEmpty() || user.length() > 32) {
+                    // Trata a mensagem de acordo com a ação solicitada
+                    switch (req.getBodyCase()) {
+                        case LOGIN_REQUEST:
+                            String user = req.getLoginRequest().getUsername();
+                            // Validação simples do nome de utilizador
+                            if (user.isEmpty() || user.length() > 32) {
+                                repBuilder.setLoginResponse(LoginResponse.newBuilder()
+                                        .setSuccess(false)
+                                        .setError(ErrorCode.ERROR_INVALID_USERNAME)
+                                        .setErrorMessage("Nome inválido"));
+                            } else {
+                                salvarLogin(user, req.getTimestampMs());
+                                repBuilder.setLoginResponse(LoginResponse.newBuilder()
+                                        .setSuccess(true).setError(ErrorCode.ERROR_NONE));
+                            }
+                            break;
+
+                        case CREATE_CHANNEL_REQUEST:
+                            String canal = req.getCreateChannelRequest().getChannelName();
+                            if (canais.contains(canal)) {
+                                repBuilder.setCreateChannelResponse(CreateChannelResponse.newBuilder()
+                                        .setSuccess(false).setError(ErrorCode.ERROR_CHANNEL_EXISTS));
+                            } else {
+                                canais.add(canal);
+                                salvarCanal(canal);
+                                repBuilder.setCreateChannelResponse(CreateChannelResponse.newBuilder()
+                                        .setSuccess(true).setError(ErrorCode.ERROR_NONE));
+                            }
+                            break;
+
+                        case LIST_CHANNELS_REQUEST:
+                            repBuilder.setListChannelsResponse(ListChannelsResponse.newBuilder()
+                                    .addAllChannels(canais));
+                            break;
+
+                        default:
                             repBuilder.setLoginResponse(LoginResponse.newBuilder()
-                                    .setSuccess(false)
-                                    .setError(ErrorCode.ERROR_INVALID_USERNAME)
-                                    .setErrorMessage("Nome inválido"));
-                        } else {
-                            salvarLogin(user, req.getTimestampMs());
-                            repBuilder.setLoginResponse(LoginResponse.newBuilder()
-                                    .setSuccess(true).setError(ErrorCode.ERROR_NONE));
-                        }
-                        break;
+                                    .setSuccess(false).setError(ErrorCode.ERROR_UNKNOWN_REQUEST));
+                    }
 
-                    case CREATE_CHANNEL_REQUEST:
-                        String canal = req.getCreateChannelRequest().getChannelName();
-                        if (canais.contains(canal)) {
-                            repBuilder.setCreateChannelResponse(CreateChannelResponse.newBuilder()
-                                    .setSuccess(false).setError(ErrorCode.ERROR_CHANNEL_EXISTS));
-                        } else {
-                            canais.add(canal);
-                            salvarCanal(canal);
-                            repBuilder.setCreateChannelResponse(CreateChannelResponse.newBuilder()
-                                    .setSuccess(true).setError(ErrorCode.ERROR_NONE));
-                        }
-                        break;
+                    // Adiciona o timestamp obrigatório e envia a resposta
+                    repBuilder.setTimestampMs(System.currentTimeMillis());
+                    socket.send(repBuilder.build().toByteArray(), 0);
+                    System.out.println("[" + name + "] ENVIADO a resposta para " + req.getSender());
 
-                    case LIST_CHANNELS_REQUEST:
-                        repBuilder.setListChannelsResponse(ListChannelsResponse.newBuilder()
-                                .addAllChannels(canais));
-                        break;
-
-                    default:
-                        repBuilder.setLoginResponse(LoginResponse.newBuilder()
-                                .setSuccess(false).setError(ErrorCode.ERROR_UNKNOWN_REQUEST));
+                } catch (Exception e) {
+                    System.err.println("[" + name + "] ERRO ao processar mensagem: " + e.getMessage());
+                    e.printStackTrace();
                 }
-
-                repBuilder.setTimestampMs(System.currentTimeMillis());
-                socket.send(repBuilder.build().toByteArray(), 0);
             }
         }
     }

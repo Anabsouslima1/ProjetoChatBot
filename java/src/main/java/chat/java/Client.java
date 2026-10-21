@@ -3,7 +3,7 @@ package chat.java;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
-import chat.proto.Chat.*;
+import chat.proto.*;
 
 public class Client {
     public static void main(String[] args) throws Exception {
@@ -12,8 +12,7 @@ public class Client {
         String ownChannel = System.getenv().getOrDefault("BOT_CHANNEL", "canal-" + name);
 
         try (ZContext context = new ZContext()) {
-            ZMQ.Socket socket = context.createSocket(SocketType.REQ);
-            socket.connect(endpoint);
+            ZMQ.Socket socket = conectar(context, endpoint);
 
             // 1. Loop de Login
             while (true) {
@@ -23,44 +22,39 @@ public class Client {
                         .setLoginRequest(LoginRequest.newBuilder().setUsername(name))
                         .build();
 
+                System.out.println(name + " | ENVIADO | de=" + name + " | login_request");
                 socket.send(req.toByteArray(), 0);
-                Envelope rep = Envelope.parseFrom(socket.recv(0));
+                
+                byte[] repBytes = socket.recv(0);
+                if (repBytes == null) {
+                    System.out.println(name + " | sem resposta válida, recriando socket...");
+                    context.destroySocket(socket);
+                    socket = conectar(context, endpoint);
+                    Thread.sleep(2000);
+                    continue; // Tenta fazer login novamente
+                }
 
+                Envelope rep = Envelope.parseFrom(repBytes);
                 if (rep.hasLoginResponse() && rep.getLoginResponse().getSuccess()) {
-                    System.out.println(name + " | Login realizado com sucesso");
+                    System.out.println(name + " | login realizado com sucesso");
                     break;
                 }
-                System.out.println(name + " | Falha no login, tentando novamente...");
+                System.out.println(name + " | login falhou, tentando novamente em 2s");
                 Thread.sleep(2000);
             }
 
-            // 2. Listar Canais e Criar
-            while (true) {
-                Envelope reqList = Envelope.newBuilder()
-                        .setTimestampMs(System.currentTimeMillis())
-                        .setSender(name)
-                        .setListChannelsRequest(ListChannelsRequest.newBuilder())
-                        .build();
-
-                socket.send(reqList.toByteArray(), 0);
-                Envelope repList = Envelope.parseFrom(socket.recv(0));
-
-                if (repList.hasListChannelsResponse()) {
-                    java.util.List<String> canais = repList.getListChannelsResponse().getChannelsList();
-                    if (!canais.contains(ownChannel)) {
-                        Envelope reqCreate = Envelope.newBuilder()
-                                .setTimestampMs(System.currentTimeMillis())
-                                .setSender(name)
-                                .setCreateChannelRequest(CreateChannelRequest.newBuilder().setChannelName(ownChannel))
-                                .build();
-                        
-                        socket.send(reqCreate.toByteArray(), 0);
-                        socket.recv(0); // Aguarda resposta
-                        System.out.println(name + " | Pedido de criação do canal " + ownChannel + " enviado.");
-                    }
-                }
-                Thread.sleep(5000);
-            }
+            // O código para criar canais (Parte 2) entrará aqui depois que o login funcionar!
+            System.out.println(name + " | Bot ativo e logado!");
+            while(true) { Thread.sleep(10000); }
         }
+    }
+
+    // Função auxiliar para criar o socket com Timeout (Lazy Pirate Pattern)
+    private static ZMQ.Socket conectar(ZContext context, String endpoint) {
+        ZMQ.Socket socket = context.createSocket(SocketType.REQ);
+        socket.setLinger(0);
+        socket.setReceiveTimeOut(5000); // 5 segundos de espera máxima
+        socket.connect(endpoint);
+        return socket;
     }
 }

@@ -28,3 +28,23 @@ services:
     network_mode: host
     environment:
       BROKER_FRONTEND: tcp://127.0.0.1:5555
+
+  server_java_1:
+    network_mode: host
+    environment:
+      BROKER_BACKEND: tcp://127.0.0.1:5556
+
+  server_java_2:
+    network_mode: host
+    environment:
+      BROKER_BACKEND: tcp://127.0.0.1:5556
+
+  client_java_1:
+    network_mode: host
+    environment:
+      BROKER_FRONTEND: tcp://127.0.0.1:5555
+
+  client_java_2:
+    network_mode: host
+    environment:
+      BROKER_FRONTEND: tcp://127.0.0.1:5555
