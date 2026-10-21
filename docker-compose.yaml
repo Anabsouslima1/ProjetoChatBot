@@ -7,12 +7,19 @@ x-cpp: &cpp
     dockerfile: Dockerfile
   image: chat-cpp
 
+x-java: &java
+  build:
+    context: .
+    dockerfile: java/Dockerfile
+  image: chat-java
+
 services:
   broker:
     <<: *cpp
     command: ["/app/broker"]
     # Clientes -> 5555, servidores -> 5556 (rede interna do compose)
 
+  # ---------------- SERVIDORES C++ ----------------
   server_cpp_1:
     <<: *cpp
     command: ["/app/server"]
@@ -35,6 +42,7 @@ services:
       - server_cpp_2_data:/data
     depends_on: [broker]
 
+  # ---------------- CLIENTES C++ ----------------
   client_cpp_1:
     <<: *cpp
     command: ["/app/client"]
@@ -51,16 +59,7 @@ services:
       BROKER_FRONTEND: tcp://broker:5555
     depends_on: [broker, server_cpp_1, server_cpp_2]
 
-volumes:
-  server_cpp_1_data:
-  server_cpp_2_data:
-  x-java: &java
-  build:
-    context: .
-    dockerfile: java/Dockerfile
-  image: chat-java
-
-# Dentro de 'services:' adicione:
+  # ---------------- SERVIDORES JAVA ----------------
   server_java_1:
     <<: *java
     command: ["java", "-cp", "app.jar", "chat.java.Server"]
@@ -72,13 +71,36 @@ volumes:
       - server_java_1_data:/data
     depends_on: [broker]
 
+  server_java_2:
+    <<: *java
+    command: ["java", "-cp", "app.jar", "chat.java.Server"]
+    environment:
+      SERVER_NAME: server_java_2
+      BROKER_BACKEND: tcp://broker:5556
+      DATA_DIR: /data
+    volumes:
+      - server_java_2_data:/data
+    depends_on: [broker]
+
+  # ---------------- CLIENTES JAVA ----------------
   client_java_1:
     <<: *java
     command: ["java", "-cp", "app.jar", "chat.java.Client"]
     environment:
       BOT_NAME: bot_java_1
       BROKER_FRONTEND: tcp://broker:5555
-    depends_on: [broker, server_java_1, server_cpp_1]
+    depends_on: [broker, server_java_1, server_java_2]
 
-# Adicione em 'volumes:' no final do arquivo
+  client_java_2:
+    <<: *java
+    command: ["java", "-cp", "app.jar", "chat.java.Client"]
+    environment:
+      BOT_NAME: bot_java_2
+      BROKER_FRONTEND: tcp://broker:5555
+    depends_on: [broker, server_java_1, server_java_2]
+
+volumes:
+  server_cpp_1_data:
+  server_cpp_2_data:
   server_java_1_data:
+  server_java_2_data:
