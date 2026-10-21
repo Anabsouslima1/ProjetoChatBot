@@ -54,3 +54,31 @@ services:
 volumes:
   server_cpp_1_data:
   server_cpp_2_data:
+  x-java: &java
+  build:
+    context: .
+    dockerfile: java/Dockerfile
+  image: chat-java
+
+# Dentro de 'services:' adicione:
+  server_java_1:
+    <<: *java
+    command: ["java", "-cp", "app.jar", "chat.java.Server"]
+    environment:
+      SERVER_NAME: server_java_1
+      BROKER_BACKEND: tcp://broker:5556
+      DATA_DIR: /data
+    volumes:
+      - server_java_1_data:/data
+    depends_on: [broker]
+
+  client_java_1:
+    <<: *java
+    command: ["java", "-cp", "app.jar", "chat.java.Client"]
+    environment:
+      BOT_NAME: bot_java_1
+      BROKER_FRONTEND: tcp://broker:5555
+    depends_on: [broker, server_java_1, server_cpp_1]
+
+# Adicione em 'volumes:' no final do arquivo
+  server_java_1_data:
