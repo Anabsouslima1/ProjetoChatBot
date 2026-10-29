@@ -78,7 +78,7 @@ services:
       PROXY_XSUB: tcp://proxy_pubsub:5557
       DATA_DIR: /data
     volumes:
-      - server_java_1_data:/data
+      - ./data/java1:/data
     depends_on: [broker, proxy_pubsub]
 
   server_java_2:
@@ -91,7 +91,7 @@ services:
       PROXY_XSUB: tcp://proxy_pubsub:5557
       DATA_DIR: /data
     volumes:
-      - server_java_2_data:/data
+      - ./data/java2:/data
     depends_on: [broker, proxy_pubsub]
 
   # ---------------- CLIENTES JAVA ----------------

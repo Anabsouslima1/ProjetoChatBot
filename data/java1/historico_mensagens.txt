@@ -1,0 +1,16 @@
+[1793315818095] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 1 enviada por bot_java_2
+[1793315820145] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 3 enviada por bot_java_2
+[1793315822158] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 5 enviada por bot_java_2
+[1793315845253] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 4 enviada por bot_java_2
+[1793315847269] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 6 enviada por bot_java_2
+[1793315850282] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 9 enviada por bot_java_2
+[1793315856300] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 3 enviada por bot_java_2
+[1793315859309] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 6 enviada por bot_java_2
+[1793315861316] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 8 enviada por bot_java_2
+[1793315904472] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 3 enviada por bot_java_2
+[1793315906486] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 5 enviada por bot_java_2
+[1793315909498] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 8 enviada por bot_java_2
+[1793315911505] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 10 enviada por bot_java_2
+[1793315916518] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 3 enviada por bot_java_2
+[1793315919527] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 6 enviada por bot_java_2
+[1793315921534] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 8 enviada por bot_java_2

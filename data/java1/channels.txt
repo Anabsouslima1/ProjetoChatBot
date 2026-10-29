@@ -1,0 +1,5 @@
+canal-bot_cpp_1
+canal-bot_cpp_2
+canal_aleatorio_715
+geral
+canal_aleatorio_434

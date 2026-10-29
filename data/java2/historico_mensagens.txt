@@ -1,0 +1,1 @@
+[1793315890421] bot_java_2 no canal 'canal_aleatorio_337': Mensagem de teste 1 enviada por bot_java_2
