@@ -14,7 +14,11 @@ enum ErrorCode {
   ERROR_CHANNEL_EXISTS = 3;        // canal duplicado
   ERROR_UNKNOWN_REQUEST = 4;       // mensagem não reconhecida
   ERROR_INTERNAL = 5;              // falha interna (ex.: disco)
+  ERROR_CHANNEL_NOT_FOUND = 6;     // canal inexistente (publicação)
+  ERROR_INVALID_MESSAGE = 7;       // texto da publicação vazio ou inválido
 }
+
+// ---- Parte 1: login e canais ----
 
 message LoginRequest {
   string username = 1;
@@ -42,6 +46,28 @@ message ListChannelsResponse {
   repeated string channels = 1;
 }
 
+// ---- Parte 2: publicação em canais (Pub/Sub) ----
+
+// Bot -> Servidor (REQ/REP)
+message PublishRequest {
+  string channel = 1;
+  string message = 2;
+}
+
+message PublishResponse {
+  bool success = 1;
+  ErrorCode error = 2;
+  string error_message = 3;
+}
+
+// Servidor -> Canal (PUB/SUB). Vai no segundo frame; o primeiro frame é o
+// nome do canal (tópico). O timestamp de envio está no Envelope.
+message Publication {
+  string channel = 1;
+  string message = 2;
+  string author = 3;   // bot que pediu a publicação
+}
+
 // Todo mensagem trafega dentro de um Envelope, que garante o timestamp
 // obrigatório do envio. Serialização: Protocol Buffers (binário).
 message Envelope {
@@ -54,5 +80,8 @@ message Envelope {
     CreateChannelResponse create_channel_response = 13;
     ListChannelsRequest list_channels_request = 14;
     ListChannelsResponse list_channels_response = 15;
+    PublishRequest publish_request = 16;
+    PublishResponse publish_response = 17;
+    Publication publication = 18;
   }
 }
