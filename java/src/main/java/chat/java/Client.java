@@ -5,6 +5,8 @@ import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 import chat.proto.*;
 
+import java.util.List;
+
 public class Client {
     public static void main(String[] args) throws Exception {
         String name = System.getenv().getOrDefault("BOT_NAME", "bot_java");
@@ -31,7 +33,7 @@ public class Client {
                     context.destroySocket(socket);
                     socket = conectar(context, endpoint);
                     Thread.sleep(2000);
-                    continue; // Tenta fazer login novamente
+                    continue;
                 }
 
                 Envelope rep = Envelope.parseFrom(repBytes);
@@ -43,9 +45,61 @@ public class Client {
                 Thread.sleep(2000);
             }
 
-            // O código para criar canais (Parte 2) entrará aqui depois que o login funcionar!
-            System.out.println(name + " | Bot ativo e logado!");
-            while(true) { Thread.sleep(10000); }
+            // 2. Listar Canais e Criar os que faltam
+            String[] canaisDesejados = {"geral", ownChannel};
+            
+            while (true) {
+                Envelope reqList = Envelope.newBuilder()
+                        .setTimestampMs(System.currentTimeMillis())
+                        .setSender(name)
+                        .setListChannelsRequest(ListChannelsRequest.newBuilder())
+                        .build();
+
+                System.out.println(name + " | ENVIADO | de=" + name + " | list_channels_request");
+                socket.send(reqList.toByteArray(), 0);
+                
+                byte[] repBytes = socket.recv(0);
+                if (repBytes == null) {
+                    System.out.println(name + " | sem resposta válida (list_channels), recriando socket...");
+                    context.destroySocket(socket);
+                    socket = conectar(context, endpoint);
+                    Thread.sleep(2000);
+                    continue;
+                }
+
+                Envelope repList = Envelope.parseFrom(repBytes);
+                if (repList.hasListChannelsResponse()) {
+                    List<String> canaisExistentes = repList.getListChannelsResponse().getChannelsList();
+                    
+                    for (String canalDesejado : canaisDesejados) {
+                        if (!canaisExistentes.contains(canalDesejado)) {
+                            Envelope reqCreate = Envelope.newBuilder()
+                                    .setTimestampMs(System.currentTimeMillis())
+                                    .setSender(name)
+                                    .setCreateChannelRequest(CreateChannelRequest.newBuilder().setChannelName(canalDesejado))
+                                    .build();
+                            
+                            System.out.println(name + " | ENVIADO | de=" + name + " | create_channel_request{channel_name=" + canalDesejado + "}");
+                            socket.send(reqCreate.toByteArray(), 0);
+                            
+                            byte[] createRepBytes = socket.recv(0);
+                            if (createRepBytes == null) {
+                                 System.out.println(name + " | sem resposta válida ao criar canal, recriando socket...");
+                                 context.destroySocket(socket);
+                                 socket = conectar(context, endpoint);
+                                 break; // Recria e tenta listar/criar de novo no próximo loop
+                            } else {
+                                 Envelope createRep = Envelope.parseFrom(createRepBytes);
+                                 boolean sucesso = createRep.getCreateChannelResponse().getSuccess();
+                                 System.out.println(name + " | RECEBIDO | de=" + createRep.getSender() + " | create_channel_response{success=" + sucesso + "}");
+                            }
+                        }
+                    }
+                }
+                
+                // Repete o processo a cada 5 segundos para espelhar o comportamento do bot C++
+                Thread.sleep(5000); 
+            }
         }
     }
 
