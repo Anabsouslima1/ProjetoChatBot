@@ -9,6 +9,12 @@ services:
   broker:
     network_mode: host
 
+  # ========================================================================
+  # INCLUSÃO PARTE 2: Serviço do Proxy Pub/Sub
+  # ========================================================================
+  proxy_pubsub:
+    network_mode: host
+
   server_cpp_1:
     network_mode: host
     environment:
@@ -33,18 +39,26 @@ services:
     network_mode: host
     environment:
       BROKER_BACKEND: tcp://127.0.0.1:5556
+      # INCLUSÃO PARTE 2
+      PROXY_XSUB: tcp://127.0.0.1:5557
 
   server_java_2:
     network_mode: host
     environment:
       BROKER_BACKEND: tcp://127.0.0.1:5556
+      # INCLUSÃO PARTE 2
+      PROXY_XSUB: tcp://127.0.0.1:5557
 
   client_java_1:
     network_mode: host
     environment:
       BROKER_FRONTEND: tcp://127.0.0.1:5555
+      # INCLUSÃO PARTE 2
+      PROXY_XPUB: tcp://127.0.0.1:5558
 
   client_java_2:
     network_mode: host
     environment:
       BROKER_FRONTEND: tcp://127.0.0.1:5555
+      # INCLUSÃO PARTE 2
+      PROXY_XPUB: tcp://127.0.0.1:5558

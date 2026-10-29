@@ -56,3 +56,27 @@ message Envelope {
     ListChannelsResponse list_channels_response = 15;
   }
 }
+// ... (manter o que já existe no chat.proto)
+
+message PublishRequest {
+  string channel_name = 1;
+  string message_text = 2;
+}
+
+message PublishResponse {
+  bool success = 1;
+  ErrorCode error = 2;
+  string error_message = 3;
+}
+
+// Mensagem que o Servidor envia para o Proxy (PUB), e que os Bots recebem (SUB)
+message ChannelMessage {
+  int64 timestamp_ms = 1;      // Timestamp de quando o servidor publicou
+  string sender = 2;           // Quem enviou originalmente
+  string channel_name = 3;     // O canal
+  string message_text = 4;     // O conteúdo da mensagem
+}
+
+// IMPORTANTE: Adicionar as novas requisições no 'oneof body' do Envelope:
+//   PublishRequest publish_request = 16;
+//   PublishResponse publish_response = 17;

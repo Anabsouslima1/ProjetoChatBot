@@ -19,6 +19,14 @@ services:
     command: ["/app/broker"]
     # Clientes -> 5555, servidores -> 5556 (rede interna do compose)
 
+  # ========================================================================
+  # INCLUSÃO PARTE 2: Serviço do Proxy Pub/Sub
+  # Criado em Java. Escuta servidores na 5557 (XSUB) e distribui para bots na 5558 (XPUB)
+  # ========================================================================
+  proxy_pubsub:
+    <<: *java
+    command: ["java", "-cp", "app.jar", "chat.java.ProxyPubSub"]
+
   # ---------------- SERVIDORES C++ ----------------
   server_cpp_1:
     <<: *cpp
@@ -66,10 +74,12 @@ services:
     environment:
       SERVER_NAME: server_java_1
       BROKER_BACKEND: tcp://broker:5556
+      # INCLUSÃO PARTE 2
+      PROXY_XSUB: tcp://proxy_pubsub:5557
       DATA_DIR: /data
     volumes:
       - server_java_1_data:/data
-    depends_on: [broker]
+    depends_on: [broker, proxy_pubsub]
 
   server_java_2:
     <<: *java
@@ -77,10 +87,12 @@ services:
     environment:
       SERVER_NAME: server_java_2
       BROKER_BACKEND: tcp://broker:5556
+      # INCLUSÃO PARTE 2
+      PROXY_XSUB: tcp://proxy_pubsub:5557
       DATA_DIR: /data
     volumes:
       - server_java_2_data:/data
-    depends_on: [broker]
+    depends_on: [broker, proxy_pubsub]
 
   # ---------------- CLIENTES JAVA ----------------
   client_java_1:
@@ -89,7 +101,9 @@ services:
     environment:
       BOT_NAME: bot_java_1
       BROKER_FRONTEND: tcp://broker:5555
-    depends_on: [broker, server_java_1, server_java_2]
+      # INCLUSÃO PARTE 2
+      PROXY_XPUB: tcp://proxy_pubsub:5558
+    depends_on: [broker, proxy_pubsub, server_java_1, server_java_2]
 
   client_java_2:
     <<: *java
@@ -97,7 +111,9 @@ services:
     environment:
       BOT_NAME: bot_java_2
       BROKER_FRONTEND: tcp://broker:5555
-    depends_on: [broker, server_java_1, server_java_2]
+      # INCLUSÃO PARTE 2
+      PROXY_XPUB: tcp://proxy_pubsub:5558
+    depends_on: [broker, proxy_pubsub, server_java_1, server_java_2]
 
 volumes:
   server_cpp_1_data:
