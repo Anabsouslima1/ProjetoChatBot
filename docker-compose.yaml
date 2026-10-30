@@ -1,5 +1,7 @@
-# Parte C++ do projeto. O grupo deve juntar aqui os serviços de Java e Node.js
-# (2 servidores e 2 clientes por integrante), todos apontando para o mesmo broker.
+# Portas (rede interna do compose):
+# broker  5555 = clientes (REQ -> ROUTER)      5556 = servidores (REP <- DEALER)
+# proxy   5557 = XSUB (servidores publicam)     5558 = XPUB (bots assinam)
+# Existe UM proxy Pub/Sub só, usado por todos os serviços (C++, Java e, depois, Node.js).
 
 x-cpp: &cpp
   build:
@@ -17,27 +19,23 @@ services:
   broker:
     <<: *cpp
     command: ["/app/broker"]
-    # Clientes -> 5555, servidores -> 5556 (rede interna do compose)
 
-  # ========================================================================
-  # INCLUSÃO PARTE 2: Serviço do Proxy Pub/Sub
-  # Criado em Java. Escuta servidores na 5557 (XSUB) e distribui para bots na 5558 (XPUB)
-  # ========================================================================
-  proxy_pubsub:
-    <<: *java
-    command: ["java", "-cp", "app.jar", "chat.java.ProxyPubSub"]
+  proxy:
+    <<: *cpp
+    command: ["/app/proxy"]
 
-  # ---------------- SERVIDORES C++ ----------------
+  # SERVIDORES C++
   server_cpp_1:
     <<: *cpp
     command: ["/app/server"]
     environment:
       SERVER_NAME: server_cpp_1
       BROKER_BACKEND: tcp://broker:5556
+      PROXY_XSUB: tcp://proxy:5557
       DATA_DIR: /data
     volumes:
       - server_cpp_1_data:/data
-    depends_on: [broker]
+    depends_on: [broker, proxy]
 
   server_cpp_2:
     <<: *cpp
@@ -45,19 +43,21 @@ services:
     environment:
       SERVER_NAME: server_cpp_2
       BROKER_BACKEND: tcp://broker:5556
+      PROXY_XSUB: tcp://proxy:5557
       DATA_DIR: /data
     volumes:
       - server_cpp_2_data:/data
-    depends_on: [broker]
+    depends_on: [broker, proxy]
 
-  # ---------------- CLIENTES C++ ----------------
+  # CLIENTES C++
   client_cpp_1:
     <<: *cpp
     command: ["/app/client"]
     environment:
       BOT_NAME: bot_cpp_1
       BROKER_FRONTEND: tcp://broker:5555
-    depends_on: [broker, server_cpp_1, server_cpp_2]
+      PROXY_XPUB: tcp://proxy:5558
+    depends_on: [broker, proxy, server_cpp_1, server_cpp_2]
 
   client_cpp_2:
     <<: *cpp
@@ -65,21 +65,21 @@ services:
     environment:
       BOT_NAME: bot_cpp_2
       BROKER_FRONTEND: tcp://broker:5555
-    depends_on: [broker, server_cpp_1, server_cpp_2]
+      PROXY_XPUB: tcp://proxy:5558
+    depends_on: [broker, proxy, server_cpp_1, server_cpp_2]
 
-  # ---------------- SERVIDORES JAVA ----------------
+  # SERVIDORES JAVA
   server_java_1:
     <<: *java
     command: ["java", "-cp", "app.jar", "chat.java.Server"]
     environment:
       SERVER_NAME: server_java_1
       BROKER_BACKEND: tcp://broker:5556
-      # INCLUSÃO PARTE 2
-      PROXY_XSUB: tcp://proxy_pubsub:5557
+      PROXY_XSUB: tcp://proxy:5557
       DATA_DIR: /data
     volumes:
       - ./data/java1:/data
-    depends_on: [broker, proxy_pubsub]
+    depends_on: [broker, proxy]
 
   server_java_2:
     <<: *java
@@ -87,23 +87,21 @@ services:
     environment:
       SERVER_NAME: server_java_2
       BROKER_BACKEND: tcp://broker:5556
-      # INCLUSÃO PARTE 2
-      PROXY_XSUB: tcp://proxy_pubsub:5557
+      PROXY_XSUB: tcp://proxy:5557
       DATA_DIR: /data
     volumes:
       - ./data/java2:/data
-    depends_on: [broker, proxy_pubsub]
+    depends_on: [broker, proxy]
 
-  # ---------------- CLIENTES JAVA ----------------
+  # CLIENTES JAVA
   client_java_1:
     <<: *java
     command: ["java", "-cp", "app.jar", "chat.java.Client"]
     environment:
       BOT_NAME: bot_java_1
       BROKER_FRONTEND: tcp://broker:5555
-      # INCLUSÃO PARTE 2
-      PROXY_XPUB: tcp://proxy_pubsub:5558
-    depends_on: [broker, proxy_pubsub, server_java_1, server_java_2]
+      PROXY_XPUB: tcp://proxy:5558
+    depends_on: [broker, proxy, server_java_1, server_java_2]
 
   client_java_2:
     <<: *java
@@ -111,12 +109,9 @@ services:
     environment:
       BOT_NAME: bot_java_2
       BROKER_FRONTEND: tcp://broker:5555
-      # INCLUSÃO PARTE 2
-      PROXY_XPUB: tcp://proxy_pubsub:5558
-    depends_on: [broker, proxy_pubsub, server_java_1, server_java_2]
+      PROXY_XPUB: tcp://proxy:5558
+    depends_on: [broker, proxy, server_java_1, server_java_2]
 
 volumes:
   server_cpp_1_data:
   server_cpp_2_data:
-  server_java_1_data:
-  server_java_2_data:

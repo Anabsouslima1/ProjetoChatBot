@@ -13,7 +13,7 @@ COPY cpp ./cpp
 RUN cmake -S cpp -B build -DCMAKE_BUILD_TYPE=Release \
     && cmake --build build -j"$(nproc)" \
     && mkdir -p /app /data \
-    && cp build/broker build/server build/client /app/
+    && cp build/broker build/proxy build/server build/client /app/
 
 WORKDIR /app
 # O comando (broker, server ou client) é definido no docker-compose.yaml

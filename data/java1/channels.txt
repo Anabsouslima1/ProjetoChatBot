@@ -3,3 +3,6 @@ canal-bot_cpp_2
 canal_aleatorio_715
 geral
 canal_aleatorio_434
+canal_aleatorio_379
+canal_aleatorio_273
+canal_aleatorio_889
