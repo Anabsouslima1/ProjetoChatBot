@@ -49,12 +49,8 @@ message ListChannelsResponse {
 message PublishRequest {
   string channel_name = 1;
   string message_text = 2;
-// ---- Parte 2: publicação em canais (Pub/Sub) ----
-
-// Bot -> Servidor (REQ/REP)
-message PublishRequest {
-  string channel = 1;
-  string message = 2;
+  string channel = 3;
+  string message = 4;
 }
 
 message PublishResponse {
@@ -69,6 +65,14 @@ message Publication {
   string channel = 1;
   string message = 2;
   string author = 3;   // bot que pediu a publicação
+}
+
+// Mensagem usada pelo Java no Pub/Sub
+message ChannelMessage {
+  int64 timestamp_ms = 1;
+  string sender = 2;
+  string channel_name = 3;
+  string message_text = 4;
 }
 
 // Todo mensagem trafega dentro de um Envelope, que garante o timestamp
@@ -88,5 +92,4 @@ message Envelope {
     PublishResponse publish_response = 17;
     Publication publication = 18;
   }
-}
 }

@@ -1,1 +1,11 @@
 [1793315890421] bot_java_2 no canal 'canal_aleatorio_337': Mensagem de teste 1 enviada por bot_java_2
+[1793318680065] bot_java_1 no canal 'canal_aleatorio_337': Mensagem de teste 6 enviada por bot_java_1
+[1793318699134] bot_java_1 no canal 'canal_aleatorio_337': Mensagem de teste 1 enviada por bot_java_1
+[1793318701143] bot_java_1 no canal 'canal_aleatorio_337': Mensagem de teste 3 enviada por bot_java_1
+[1793318703158] bot_java_1 no canal 'canal_aleatorio_337': Mensagem de teste 5 enviada por bot_java_1
+[1793318706169] bot_java_1 no canal 'canal_aleatorio_337': Mensagem de teste 8 enviada por bot_java_1
+[1793318708178] bot_java_1 no canal 'canal_aleatorio_337': Mensagem de teste 10 enviada por bot_java_1
+[1793318724243] bot_java_1 no canal 'canal_aleatorio_337': Mensagem de teste 2 enviada por bot_java_1
+[1793318726258] bot_java_1 no canal 'canal_aleatorio_337': Mensagem de teste 4 enviada por bot_java_1
+[1793318728267] bot_java_1 no canal 'canal_aleatorio_337': Mensagem de teste 6 enviada por bot_java_1
+[1793318731281] bot_java_1 no canal 'canal_aleatorio_337': Mensagem de teste 9 enviada por bot_java_1
