@@ -1,5 +1,5 @@
-# Parte C++ do projeto. O grupo deve juntar aqui os serviços de Java e Node.js
-# (2 servidores e 2 clientes por integrante), todos apontando para o mesmo broker.
+# Projeto completo: C++, Java e Node.js (2 servidores e 2 clientes por integrante),
+# todos apontando para o mesmo broker (C++).
 
 x-cpp: &cpp
   build:
@@ -12,6 +12,12 @@ x-java: &java
     context: .
     dockerfile: java/Dockerfile
   image: chat-java
+
+x-node: &node
+  build:
+    context: .
+    dockerfile: node/Dockerfile
+  image: chat-node
 
 services:
   broker:
@@ -99,8 +105,50 @@ services:
       BROKER_FRONTEND: tcp://broker:5555
     depends_on: [broker, server_java_1, server_java_2]
 
+  # ---------------- SERVIDORES NODE ----------------
+  server_node_1:
+    <<: *node
+    command: ["npx", "tsx", "src/server.ts"]
+    environment:
+      SERVER_NAME: server_node_1
+      BROKER_BACKEND: tcp://broker:5556
+      DATA_DIR: /data
+    volumes:
+      - server_node_1_data:/data
+    depends_on: [broker]
+
+  server_node_2:
+    <<: *node
+    command: ["npx", "tsx", "src/server.ts"]
+    environment:
+      SERVER_NAME: server_node_2
+      BROKER_BACKEND: tcp://broker:5556
+      DATA_DIR: /data
+    volumes:
+      - server_node_2_data:/data
+    depends_on: [broker]
+
+  # ---------------- CLIENTES NODE ----------------
+  client_node_1:
+    <<: *node
+    command: ["npx", "tsx", "src/client.ts"]
+    environment:
+      BOT_NAME: bot_node_1
+      BROKER_FRONTEND: tcp://broker:5555
+    depends_on: [broker, server_node_1, server_node_2]
+
+  client_node_2:
+    <<: *node
+    command: ["npx", "tsx", "src/client.ts"]
+    environment:
+      BOT_NAME: bot_node_2
+      BROKER_FRONTEND: tcp://broker:5555
+    depends_on: [broker, server_node_1, server_node_2]
+
 volumes:
   server_cpp_1_data:
   server_cpp_2_data:
   server_java_1_data:
   server_java_2_data:
+  server_node_1_data:
+  server_node_2_data:
