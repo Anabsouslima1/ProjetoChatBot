@@ -1,7 +1,7 @@
 # Portas (rede interna do compose):
 # broker  5555 = clientes (REQ -> ROUTER)      5556 = servidores (REP <- DEALER)
 # proxy   5557 = XSUB (servidores publicam)     5558 = XPUB (bots assinam)
-# Existe UM proxy Pub/Sub só, usado por todos os serviços (C++, Java e, depois, Node.js).
+# Existe UM proxy Pub/Sub só, usado por todos os serviços (C++, Java e Node.js).
 
 x-cpp: &cpp
   build:
@@ -14,6 +14,12 @@ x-java: &java
     context: .
     dockerfile: java/Dockerfile
   image: chat-java
+
+x-node: &node
+  build:
+    context: .
+    dockerfile: node/Dockerfile
+  image: chat-node
 
 services:
   broker:
@@ -112,6 +118,52 @@ services:
       PROXY_XPUB: tcp://proxy:5558
     depends_on: [broker, proxy, server_java_1, server_java_2]
 
+  # SERVIDORES NODE
+  server_node_1:
+    <<: *node
+    command: ["npx", "tsx", "src/server.ts"]
+    environment:
+      SERVER_NAME: server_node_1
+      BROKER_BACKEND: tcp://broker:5556
+      PROXY_XSUB: tcp://proxy:5557
+      DATA_DIR: /data
+    volumes:
+      - server_node_1_data:/data
+    depends_on: [broker, proxy]
+
+  server_node_2:
+    <<: *node
+    command: ["npx", "tsx", "src/server.ts"]
+    environment:
+      SERVER_NAME: server_node_2
+      BROKER_BACKEND: tcp://broker:5556
+      PROXY_XSUB: tcp://proxy:5557
+      DATA_DIR: /data
+    volumes:
+      - server_node_2_data:/data
+    depends_on: [broker, proxy]
+
+  # CLIENTES NODE
+  client_node_1:
+    <<: *node
+    command: ["npx", "tsx", "src/client.ts"]
+    environment:
+      BOT_NAME: bot_node_1
+      BROKER_FRONTEND: tcp://broker:5555
+      PROXY_XPUB: tcp://proxy:5558
+    depends_on: [broker, proxy, server_node_1, server_node_2]
+
+  client_node_2:
+    <<: *node
+    command: ["npx", "tsx", "src/client.ts"]
+    environment:
+      BOT_NAME: bot_node_2
+      BROKER_FRONTEND: tcp://broker:5555
+      PROXY_XPUB: tcp://proxy:5558
+    depends_on: [broker, proxy, server_node_1, server_node_2]
+
 volumes:
   server_cpp_1_data:
   server_cpp_2_data:
+  server_node_1_data:
+  server_node_2_data:

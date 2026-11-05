@@ -59,3 +59,27 @@ services:
     environment:
       BROKER_FRONTEND: tcp://127.0.0.1:5555
       PROXY_XPUB: tcp://127.0.0.1:5558
+
+  server_node_1:
+    network_mode: host
+    environment:
+      BROKER_BACKEND: tcp://127.0.0.1:5556
+      PROXY_XSUB: tcp://127.0.0.1:5557
+
+  server_node_2:
+    network_mode: host
+    environment:
+      BROKER_BACKEND: tcp://127.0.0.1:5556
+      PROXY_XSUB: tcp://127.0.0.1:5557
+
+  client_node_1:
+    network_mode: host
+    environment:
+      BROKER_FRONTEND: tcp://127.0.0.1:5555
+      PROXY_XPUB: tcp://127.0.0.1:5558
+
+  client_node_2:
+    network_mode: host
+    environment:
+      BROKER_FRONTEND: tcp://127.0.0.1:5555
+      PROXY_XPUB: tcp://127.0.0.1:5558

@@ -11,3 +11,8 @@ canal-bot_cpp_2-8023
 canal_aleatorio_646
 canal-bot_cpp_1-6735
 canal-bot_cpp_2-2466
+canal-bot_java_2-1283
+canal-bot_node_1-2636
+canal-bot_node_2-8868
+canal-bot_cpp_1-8305
+canal-bot_node_1-8116
