@@ -94,10 +94,17 @@ services:
       SERVER_NAME: server_java_2
       BROKER_BACKEND: tcp://broker:5556
       PROXY_XSUB: tcp://proxy:5557
+      REFERENCE_ADDR: tcp://reference:5559
       DATA_DIR: /data
     volumes:
       - ./data/java2:/data
     depends_on: [broker, proxy]
+
+  reference:
+    <<: *java
+    command: ["java", "-cp", "app.jar", "chat.java.Reference"]
+    environment:
+      REFERENCE_BIND: tcp://*:5559
 
   # CLIENTES JAVA
   client_java_1:

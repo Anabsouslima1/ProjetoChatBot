@@ -68,11 +68,46 @@ message Publication {
   string author = 3;   // bot que pediu a publicação
 }
 
+// ---- Parte 3: relógios e heartbeat (serviço de referência) ----
+
+// Servidor -> Referência (REQ/REP): pede o rank. Resposta: RankResponse.
+message RankRequest {
+  string name = 1;          // nome do servidor
+}
+
+message RankResponse {
+  int32 rank = 1;
+}
+
+// Servidor -> Referência (REQ/REP): lista os servidores disponíveis.
+message ListServersRequest {}
+
+message ServerInfo {
+  string name = 1;
+  int32 rank = 2;
+}
+
+message ListServersResponse {
+  repeated ServerInfo servers = 1;
+}
+
+// Servidor -> Referência (REQ/REP): heartbeat + pedido da hora correta.
+// A resposta traz "OK" (success) e a hora da referência em time_ms (epoch ms, UTC).
+message HeartbeatRequest {
+  string name = 1;
+}
+
+message HeartbeatResponse {
+  bool success = 1;         // true = "OK" (servidor mantido na lista)
+  int64 time_ms = 2;        // hora correta, segundo a referência
+}
+
 // Todo mensagem trafega dentro de um Envelope, que garante o timestamp
 // obrigatório do envio. Serialização: Protocol Buffers (binário).
 message Envelope {
   int64 timestamp_ms = 1;  // epoch em milissegundos (UTC) do momento do envio
   string sender = 2;       // nome do bot ou do servidor que enviou
+  int64 logical_clock = 3; // relógio lógico de quem envia (Parte 3)
 
   oneof body {
     LoginRequest login_request = 10;
@@ -84,5 +119,11 @@ message Envelope {
     PublishRequest publish_request = 16;
     PublishResponse publish_response = 17;
     Publication publication = 18;
+    RankRequest rank_request = 19;
+    RankResponse rank_response = 20;
+    ListServersRequest list_servers_request = 21;
+    ListServersResponse list_servers_response = 22;
+    HeartbeatRequest heartbeat_request = 23;
+    HeartbeatResponse heartbeat_response = 24;
   }
 }

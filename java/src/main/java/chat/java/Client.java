@@ -14,11 +14,14 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicLong;
 
 // Cliente (bot). Ao conectar: login -> loop infinito de rodadas. Em cada rodada o bot:
 //   1. lista os canais; se houver menos de 5, cria um novo;
 //   2. se estiver inscrito em menos de 3 canais, se inscreve em mais um (escolhido ao acaso);
 //   3. escolhe um canal da lista e publica 10 mensagens aleatórias com 1 s de intervalo.
+// Parte 3 - relógio lógico: um contador que começa em 0, é incrementado antes de cada envio
+// (e vai no Envelope) e, ao receber qualquer mensagem, vira o máximo entre o valor local e o recebido.
 // Uma thread própria recebe (SUB) e exibe tudo que chega nos canais em que o bot está inscrito.
 public class Client {
     private static final String[] FRASES = {
@@ -26,6 +29,20 @@ public class Client {
         "sistemas distribuidos", "zeromq e protobuf", "bom dia, canal!", "publicando de novo",
         "ping", "tudo certo por aqui"
     };
+
+    // Relógio lógico do bot. É usado pela thread principal (REQ) e pela thread do SUB,
+    // por isso é atômico.
+    private static final AtomicLong relogioLogico = new AtomicLong(0);
+
+    // Regra 1: incrementa antes de enviar e devolve o valor para ir na mensagem
+    private static long proximoRelogio() {
+        return relogioLogico.incrementAndGet();
+    }
+
+    // Regra 2: ao receber, usa o máximo entre o valor local e o recebido
+    private static void atualizarRelogio(long recebido) {
+        relogioLogico.accumulateAndGet(recebido, Math::max);
+    }
 
     public static void main(String[] args) throws Exception {
         String name = System.getenv().getOrDefault("BOT_NAME", "bot_java");
@@ -130,7 +147,7 @@ public class Client {
 
     private static void log(String who, String dir, Envelope e) {
         System.out.println(Instant.ofEpochMilli(e.getTimestampMs()) + " | " + who + " | " + dir
-                + " | de=" + e.getSender() + " | " + flat(e));
+                + " | de=" + e.getSender() + " | relogio=" + e.getLogicalClock() + " | " + flat(e));
     }
 
     // REQ com timeout: se o servidor não responder, o socket REQ fica travado,
@@ -157,7 +174,8 @@ public class Client {
         }
 
         Envelope call(Envelope.Builder builder) {
-            Envelope req = builder.build();
+            // O contador é incrementado imediatamente antes do envio
+            Envelope req = builder.setLogicalClock(proximoRelogio()).build();
             log(who, "ENVIADO", req);
             sock.send(req.toByteArray(), 0);
             byte[] bytes = sock.recv(0);
@@ -168,6 +186,7 @@ public class Client {
             }
             try {
                 Envelope rep = Envelope.parseFrom(bytes);
+                atualizarRelogio(rep.getLogicalClock());
                 log(who, "RECEBIDO", rep);
                 return rep;
             } catch (Exception e) {
@@ -232,9 +251,12 @@ public class Client {
 
                     try {
                         Envelope e = Envelope.parseFrom(corpo);
+                        atualizarRelogio(e.getLogicalClock());
                         if (!e.hasPublication()) continue;
                         System.out.println(Instant.ofEpochMilli(recebidoEm) + " | " + who
                                 + " | MENSAGEM | canal=" + topico
+                                + " | relogio_msg=" + e.getLogicalClock()
+                                + " | relogio_local=" + relogioLogico.get()
                                 + " | de=" + e.getPublication().getAuthor()
                                 + " | enviada_em=" + Instant.ofEpochMilli(e.getTimestampMs())
                                 + " | recebida_em=" + Instant.ofEpochMilli(recebidoEm)
