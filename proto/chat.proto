@@ -14,8 +14,8 @@ enum ErrorCode {
   ERROR_CHANNEL_EXISTS = 3;        // canal duplicado
   ERROR_UNKNOWN_REQUEST = 4;       // mensagem não reconhecida
   ERROR_INTERNAL = 5;              // falha interna (ex.: disco)
-  ERROR_CHANNEL_NOT_FOUND = 6;     // canal inexistente (publicação)
-  ERROR_INVALID_MESSAGE = 7;       // texto da publicação vazio ou inválido
+  ERROR_CHANNEL_NOT_FOUND = 6;     // canal inexistente (reservado: os servidores aceitam qualquer nome válido)
+  ERROR_INVALID_MESSAGE = 7;       // texto da publicação vazio ou com mais de 1000 bytes
 }
 
 // ---- Parte 1: login e canais ----
@@ -46,11 +46,12 @@ message ListChannelsResponse {
   repeated string channels = 1;
 }
 
+// ---- Parte 2: publicação em canais ----
+
+// Bot -> Servidor (REQ/REP)
 message PublishRequest {
-  string channel_name = 1;
-  string message_text = 2;
-  string channel = 3;
-  string message = 4;
+  string channel = 1;
+  string message = 2;
 }
 
 message PublishResponse {
@@ -67,20 +68,12 @@ message Publication {
   string author = 3;   // bot que pediu a publicação
 }
 
-// Mensagem usada pelo Java no Pub/Sub
-message ChannelMessage {
-  int64 timestamp_ms = 1;
-  string sender = 2;
-  string channel_name = 3;
-  string message_text = 4;
-}
-
 // Todo mensagem trafega dentro de um Envelope, que garante o timestamp
 // obrigatório do envio. Serialização: Protocol Buffers (binário).
 message Envelope {
   int64 timestamp_ms = 1;  // epoch em milissegundos (UTC) do momento do envio
   string sender = 2;       // nome do bot ou do servidor que enviou
-  
+
   oneof body {
     LoginRequest login_request = 10;
     LoginResponse login_response = 11;

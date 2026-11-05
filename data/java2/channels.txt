@@ -1,1 +1,5 @@
 canal_aleatorio_337
+canal_aleatorio_534
+canal-bot_java_2-2866
+canal-bot_cpp_1-3328
+canal-bot_cpp_1-2007

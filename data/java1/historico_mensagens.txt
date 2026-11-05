@@ -46,3 +46,6 @@
 [1793381022856] bot_java_2 no canal 'canal-bot_cpp_1': Mensagem de teste 4 enviada por bot_java_2
 [1793381094059] bot_java_2 no canal 'canal-bot_cpp_1': Mensagem de teste 3 enviada por bot_java_2
 [1793381095065] bot_java_2 no canal 'canal-bot_cpp_1': Mensagem de teste 4 enviada por bot_java_2
+[1793913893941] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 2 enviada por bot_java_2
+[1793913894971] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 3 enviada por bot_java_2
+[1793913895982] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 4 enviada por bot_java_2
