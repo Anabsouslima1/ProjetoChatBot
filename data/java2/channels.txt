@@ -3,3 +3,6 @@ canal_aleatorio_534
 canal-bot_java_2-2866
 canal-bot_cpp_1-3328
 canal-bot_cpp_1-2007
+canal-bot_node_1-9175
+canal_aleatorio_344
+canal-bot_java_1-8748

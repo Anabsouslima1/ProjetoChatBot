@@ -49,3 +49,9 @@
 [1793913893941] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 2 enviada por bot_java_2
 [1793913894971] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 3 enviada por bot_java_2
 [1793913895982] bot_java_2 no canal 'canal_aleatorio_715': Mensagem de teste 4 enviada por bot_java_2
+[1793917676830] bot_cpp_2 no canal 'geral': alguem por ai? (#1 de bot_cpp_2)
+[1793917677847] bot_cpp_2 no canal 'geral': testando o canal (#2 de bot_cpp_2)
+[1793917678851] bot_cpp_2 no canal 'geral': ola pessoal! (#3 de bot_cpp_2)
+[1793917681861] bot_cpp_2 no canal 'geral': alguem por ai? (#6 de bot_cpp_2)
+[1793917685611] bot_node_2 no canal 'canal-bot_cpp_2': publicando de novo (#7 de bot_node_2)
+[1793917686618] bot_node_2 no canal 'canal-bot_cpp_2': publicando de novo (#8 de bot_node_2)
