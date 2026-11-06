@@ -23,6 +23,12 @@ import java.util.regex.Pattern;
 //   channels.txt      -> um canal por linha
 //   publications.bin  -> cada publicação: 4 bytes (big-endian) com o tamanho + Envelope serializado
 //                        (mesmo formato dos servidores C++ e Node)
+// Parte 3:
+//   - relógio lógico (contador): incrementado antes de cada envio e enviado no Envelope;
+//     ao receber, vira o máximo entre o valor local e o recebido.
+//   - serviço de referência (REQ/REP, REFERENCE_ADDR): o servidor pede seu rank ao iniciar e,
+//     a cada 10 mensagens de clientes, envia um heartbeat que também pede a hora correta
+//     (o relógio físico do servidor é ajustado por um deslocamento, método de Cristian).
 // Para listar publications.bin:  java -cp app.jar chat.java.Server --dump /data/publications.bin
 public class Server {
     private static final Pattern NOME_VALIDO = Pattern.compile("[A-Za-z0-9_-]{1,32}");
@@ -30,6 +36,13 @@ public class Server {
 
     private static Set<String> canais = new HashSet<>();
     private static String dataDir;
+
+    private static final int HEARTBEAT_A_CADA = 10; // mensagens de clientes
+
+    // Relógio lógico (o servidor é single-thread no laço principal)
+    private static long relogioLogico = 0;
+    // Deslocamento do relógio físico em relação à referência (ms)
+    private static long offsetMs = 0;
 
     public static void main(String[] args) throws Exception {
         if (args.length == 2 && args[0].equals("--dump")) {
@@ -39,12 +52,32 @@ public class Server {
         String name = System.getenv().getOrDefault("SERVER_NAME", "server_java");
         String backend = System.getenv().getOrDefault("BROKER_BACKEND", "tcp://broker:5556");
         String proxyXsub = System.getenv().getOrDefault("PROXY_XSUB", "tcp://proxy:5557");
+        String refAddr = System.getenv().getOrDefault("REFERENCE_ADDR", "tcp://reference:5559");
         dataDir = System.getenv().getOrDefault("DATA_DIR", "/data");
 
         Files.createDirectories(Paths.get(dataDir));
         carregarCanais();
 
         try (ZContext context = new ZContext()) {
+            // Primeiro o servidor se registra na referência (rank). Só depois conecta ao broker,
+            // para o broker não mandar requisições de bots a um servidor que ainda não está pronto.
+            // REQ: serviço de referência (rank, heartbeat e hora)
+            Referencia ref = new Referencia(context, refAddr, name);
+            Integer rank = null;
+            while (rank == null) {
+                Envelope r = ref.call(Envelope.newBuilder()
+                        .setRankRequest(RankRequest.newBuilder().setName(name)));
+                if (r != null && r.hasRankResponse()) {
+                    rank = r.getRankResponse().getRank();
+                } else {
+                    System.out.println("[" + name + "] sem resposta da referência, tentando novamente em 2s");
+                    Thread.sleep(2000);
+                }
+            }
+            System.out.println("[" + name + "] rank recebido da referência: " + rank);
+
+            long msgsClientes = 0;
+
             // REP: requisições dos bots (via broker)
             ZMQ.Socket socket = context.createSocket(SocketType.REP);
             socket.connect(backend);
@@ -54,13 +87,16 @@ public class Server {
             System.out.println("[" + name + "] conectado ao broker em " + backend + " e ao proxy Pub/Sub em "
                     + proxyXsub + " | dados em " + dataDir + " | canais carregados: " + canais.size());
 
+
             while (!Thread.currentThread().isInterrupted()) {
                 byte[] reqBytes = socket.recv(0);
                 if (reqBytes == null) continue;
+                msgsClientes++;
 
                 Envelope.Builder repBuilder = Envelope.newBuilder().setSender(name);
                 try {
                     Envelope req = Envelope.parseFrom(reqBytes);
+                    atualizarRelogioLogico(req.getLogicalClock());
                     log(name, "RECEBIDO", req);
 
                     switch (req.getBodyCase()) {
@@ -72,7 +108,7 @@ public class Server {
                                         .setError(ErrorCode.ERROR_INVALID_USERNAME)
                                         .setErrorMessage("usuário deve ter 1-32 caracteres [A-Za-z0-9_-]"));
                             } else {
-                                guardarLogin(user, System.currentTimeMillis());
+                                guardarLogin(user, agora());
                                 repBuilder.setLoginResponse(LoginResponse.newBuilder()
                                         .setSuccess(true).setError(ErrorCode.ERROR_NONE));
                             }
@@ -125,7 +161,8 @@ public class Server {
                             } else {
                                 // O que vai para o tópico é um Envelope com Publication (igual C++ e Node)
                                 Envelope pubMsg = Envelope.newBuilder()
-                                        .setTimestampMs(System.currentTimeMillis())
+                                        .setTimestampMs(agora())
+                                        .setLogicalClock(proximoRelogioLogico())
                                         .setSender(name)
                                         .setPublication(Publication.newBuilder()
                                                 .setChannel(canal)
@@ -173,10 +210,15 @@ public class Server {
                 }
 
                 // REP precisa sempre responder, senão o socket trava
-                repBuilder.setTimestampMs(System.currentTimeMillis());
+                repBuilder.setTimestampMs(agora()).setLogicalClock(proximoRelogioLogico());
                 Envelope rep = repBuilder.build();
                 socket.send(rep.toByteArray(), 0);
                 log(name, "ENVIADO", rep);
+
+                // Heartbeat a cada 10 mensagens de clientes (depois de responder ao bot)
+                if (msgsClientes % HEARTBEAT_A_CADA == 0) {
+                    heartbeat(ref, name);
+                }
             }
         }
     }
@@ -197,7 +239,115 @@ public class Server {
 
     private static void log(String who, String dir, Envelope e) {
         System.out.println(Instant.ofEpochMilli(e.getTimestampMs()) + " | " + who + " | " + dir
-                + " | de=" + e.getSender() + " | " + flat(e));
+                + " | de=" + e.getSender() + " | relogio=" + e.getLogicalClock() + " | " + flat(e));
+    }
+
+    // ---- Relógio físico (corrigido pela referência) e relógio lógico ----
+
+    // Hora atual do servidor já corrigida pelo deslocamento obtido da referência
+    private static long agora() {
+        return System.currentTimeMillis() + offsetMs;
+    }
+
+    // Regra 1: incrementa antes de enviar e devolve o valor para ir na mensagem
+    private static long proximoRelogioLogico() {
+        return ++relogioLogico;
+    }
+
+    // Regra 2: ao receber, usa o máximo entre o valor local e o recebido
+    private static void atualizarRelogioLogico(long recebido) {
+        relogioLogico = Math.max(relogioLogico, recebido);
+    }
+
+    // Heartbeat: avisa a referência que o servidor está vivo e pede a hora correta.
+    // Ajuste de Cristian: hora da referência + metade do tempo de ida e volta.
+    private static void heartbeat(Referencia ref, String name) {
+        long t0 = System.currentTimeMillis();
+        Envelope rep = ref.call(Envelope.newBuilder()
+                .setHeartbeatRequest(HeartbeatRequest.newBuilder().setName(name)));
+        long t1 = System.currentTimeMillis();
+        if (rep == null || !rep.hasHeartbeatResponse()) {
+            System.out.println("[" + name + "] heartbeat sem resposta da referência");
+            return;
+        }
+        HeartbeatResponse h = rep.getHeartbeatResponse();
+        if (!h.getSuccess()) {
+            System.out.println("[" + name + "] heartbeat não confirmado pela referência");
+        }
+        if (h.getTimeMs() > 0) {
+            long horaEstimada = h.getTimeMs() + (t1 - t0) / 2;
+            long novoOffset = horaEstimada - t1;
+            System.out.println("[" + name + "] relógio sincronizado: deslocamento " + offsetMs
+                    + " ms -> " + novoOffset + " ms (ida e volta: " + (t1 - t0) + " ms)");
+            offsetMs = novoOffset;
+        }
+    }
+
+    // REQ com timeout para o serviço de referência. Se ela não responder, o socket REQ
+    // fica travado, então ele é recriado (padrão "lazy pirate").
+    private static class Referencia {
+        private final ZContext context;
+        private final String endpoint;
+        private final String who;
+        private ZMQ.Socket sock;
+
+        Referencia(ZContext context, String endpoint, String who) {
+            this.context = context;
+            this.endpoint = endpoint;
+            this.who = who;
+            reset();
+        }
+
+        // Cria o socket REQ. Se o endereço não puder ser resolvido (ex.: o serviço de referência
+        // ainda não existe/subiu), não derruba o servidor: sock fica null e a próxima chamada tenta de novo.
+        private void reset() {
+            if (sock != null) {
+                context.destroySocket(sock);
+                sock = null;
+            }
+            ZMQ.Socket novo = context.createSocket(SocketType.REQ);
+            try {
+                novo.setLinger(0);
+                novo.setSendTimeOut(3000);
+                novo.setReceiveTimeOut(3000);
+                novo.connect(endpoint);
+                sock = novo;
+            } catch (Exception e) {
+                System.out.println("[" + who + "] não foi possível conectar à referência em "
+                        + endpoint + ": " + e.getMessage());
+                context.destroySocket(novo);
+            }
+        }
+
+        Envelope call(Envelope.Builder builder) {
+            if (sock == null) {
+                reset();
+                if (sock == null) return null;
+            }
+            Envelope req = builder.setSender(who)
+                    .setTimestampMs(agora())
+                    .setLogicalClock(proximoRelogioLogico())
+                    .build();
+            log(who, "ENVIADO", req);
+            if (!sock.send(req.toByteArray(), 0)) {
+                reset();
+                return null;
+            }
+            byte[] bytes = sock.recv(0);
+            if (bytes == null) {
+                reset();
+                return null;
+            }
+            try {
+                Envelope rep = Envelope.parseFrom(bytes);
+                atualizarRelogioLogico(rep.getLogicalClock());
+                log(who, "RECEBIDO", rep);
+                return rep;
+            } catch (Exception e) {
+                reset();
+                return null;
+            }
+        }
     }
 
     private static void carregarCanais() throws IOException {

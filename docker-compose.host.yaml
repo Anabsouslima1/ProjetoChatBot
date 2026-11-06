@@ -41,12 +41,14 @@ services:
     environment:
       BROKER_BACKEND: tcp://127.0.0.1:5556
       PROXY_XSUB: tcp://127.0.0.1:5557
+      REFERENCE_ADDR: tcp://127.0.0.1:5559
 
   server_java_2:
     network_mode: host
     environment:
       BROKER_BACKEND: tcp://127.0.0.1:5556
       PROXY_XSUB: tcp://127.0.0.1:5557
+      REFERENCE_ADDR: tcp://127.0.0.1:5559
 
   client_java_1:
     network_mode: host
@@ -60,6 +62,12 @@ services:
       BROKER_FRONTEND: tcp://127.0.0.1:5555
       PROXY_XPUB: tcp://127.0.0.1:5558
 
+  
+  reference:
+    network_mode: host
+    environment:
+      REFERENCE_BIND: tcp://*:5559
+      
   server_node_1:
     network_mode: host
     environment:
