@@ -1,6 +1,6 @@
 # Projeto ChatBot Distribuído
 
-Sistema de chat distribuído baseado em microsserviços, desenvolvido com **ZeroMQ**, **Protocol Buffers (Protobuf)** e persistência de dados em ambiente Docker, com suporte a comunicação multi-linguagem (Java e C++).
+Sistema de chat distribuído baseado em microsserviços, desenvolvido com **ZeroMQ**, **Protocol Buffers (Protobuf)** e persistência de dados em ambiente Docker, com suporte a comunicação multi-linguagem.
 
 ## 🚀 Arquitetura do Sistema
 
@@ -91,8 +91,7 @@ O `proxy` é um container separado do broker (`cpp/src/proxy.cpp`): servidores c
   Cada publicação tem **2 frames**: `[nome do canal (tópico)]` e `[Envelope serializado]`.
 - O `timestamp_ms` do `Envelope` é o horário de envio (do pedido e da publicação). O bot
   mede o horário de recebimento no próprio relógio e exibe os dois.
-- Novos erros: `ERROR_CHANNEL_NOT_FOUND` (reservado) e `ERROR_INVALID_MESSAGE` (vazia ou
-  com mais de 1000 bytes).
+- Erros: `ERROR_CHANNEL_NOT_FOUND` (reservado) e `ERROR_INVALID_MESSAGE` (vazia ou com mais de 1000 bytes).
 
 ### Inscrição em canais
 A inscrição é feita só no cliente: um único `SUB` pode assinar vários tópicos. Como a inscrição do ZeroMQ casa por **prefixo** (`geral` também receberia `geral2`), o bot descarta o que não for exatamente de um canal em que se inscreveu. A tela mostra o canal, o autor, a mensagem, o horário de envio e o de recebimento. O `SUB` roda em uma thread própria (um socket ZeroMQ não pode ser usado por duas threads).
@@ -114,6 +113,17 @@ informações e permite recuperar tudo, e o próprio servidor lê o arquivo:
 ```bash
 docker compose exec server_cpp_1 /app/server --dump /data/publications.bin
 ```
+
+### Relógios e heartbeat
+Cada processo (bot e servidor) tem um contador protegido por mutex. Antes de enviar qualquer mensagem o contador é incrementado e seu valor vai em ```Envelope.logical_clock```; ao receber (resposta ou publicação) ```contador = max(contador, recebido)```. Todo log mostra ```relogio=N```; as mensagens recebidas pelo bot mostram ```relogio_msg``` e ```relogio_local```.
+
+- Na partida envia e guarda o rank (até 5 tentativas; se a referência não estiver no ar, o servidor atende os bots sem rank e tenta de novo nos próximos heartbeats);
+- A cada 10 mensagens de clientes ```(HEARTBEAT_EVERY)``` envia ```HeartbeatRequest{name}```; se a referência responder success=false (não conhece o servidor), ele se cadastra de novo;
+- Depois de um heartbeat bem-sucedido, pede e imprime a lista.
+
+Sincronização do relógio físico (Cristian) — a resposta do heartbeat traz ```time_ms```. O servidor mede o RTT apenas entre o envio e o recebimento, estima e calcula o deslocamento a partir do relógio bruto da máquina e o aplica (descarta se RTT > 500 ms). Os timestamps nunca retrocedem.
+
+Compose: o serviços precisam de ```REFERENCE_ENDPOINT``` e ```depends_on ```apontando para o serviço ```reference``` do grupo.
 
 ### Limitações conhecidas
 - Cada servidor conhece só os canais criados nele. Por isso o servidor aceita publicar em
