@@ -18,21 +18,21 @@
 
 #include "common.hpp"
 
-// REQ com timeout: se o servidor não responder, o socket REQ fica travado, então
-// ele é recriado (padrão "lazy pirate").
+// REQ com timeout: se o servidor não responder, o socket REQ fica travado, então ele é recriado (padrão "lazy pirate").
 class Rpc {
  public:
   Rpc(std::string endpoint, std::string who) : ctx_(1), ep_(std::move(endpoint)), who_(std::move(who)) {
     reset();
   }
 
-  bool call(const chat::Envelope& req, chat::Envelope& rep) {
+  bool call(chat::Envelope req, chat::Envelope& rep) {
+    stamp(req);  // hora + relógio lógico incrementado, imediatamente antes de enviar
     log_msg(who_, "ENVIADO", req);
     if (!send_envelope(*sock_, req)) {
       reset();
       return false;
     }
-    int r = recv_envelope(*sock_, rep);
+    int r = recv_envelope(*sock_, rep);  // atualiza o relógio lógico: max(local, recebido)
     if (r != 1) {
       println_locked(who_ + " | sem resposta válida (r=" + std::to_string(r) + "), recriando socket");
       reset();
@@ -112,7 +112,12 @@ class Subscriber {
       chat::Envelope e;
       if (!e.ParseFromArray(body.data(), static_cast<int>(body.size())) || !e.has_publication()) continue;
 
+      // Relógio lógico: contador = max(contador, valor da mensagem). Retorna o valor já atualizado.
+      const int64_t local_clock = g_clock.observe(e.logical_clock());
+
       println_locked(fmt_ts(received_at) + " | " + who_ + " | MENSAGEM | canal=" + channel +
+                     " | relogio_msg=" + std::to_string(e.logical_clock()) +
+                     " | relogio_local=" + std::to_string(local_clock) +
                      " | de=" + e.publication().author() + " | enviada_em=" + fmt_ts(e.timestamp_ms()) +
                      " | recebida_em=" + fmt_ts(received_at) + " | \"" + e.publication().message() + "\"");
     }

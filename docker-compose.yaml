@@ -38,10 +38,11 @@ services:
       SERVER_NAME: server_cpp_1
       BROKER_BACKEND: tcp://broker:5556
       PROXY_XSUB: tcp://proxy:5557
+      REFERENCE_ADDR: tcp://reference:5559
       DATA_DIR: /data
     volumes:
       - server_cpp_1_data:/data
-    depends_on: [broker, proxy]
+    depends_on: [broker, proxy, reference]
 
   server_cpp_2:
     <<: *cpp
@@ -50,10 +51,11 @@ services:
       SERVER_NAME: server_cpp_2
       BROKER_BACKEND: tcp://broker:5556
       PROXY_XSUB: tcp://proxy:5557
+      REFERENCE_ADDR: tcp://reference:5559
       DATA_DIR: /data
     volumes:
       - server_cpp_2_data:/data
-    depends_on: [broker, proxy]
+    depends_on: [broker, proxy, reference]
 
   # CLIENTES C++
   client_cpp_1:
