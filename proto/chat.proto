@@ -99,7 +99,32 @@ message HeartbeatRequest {
 
 message HeartbeatResponse {
   bool success = 1;         // true = "OK" (servidor mantido na lista)
-  int64 time_ms = 2;        // hora correta, segundo a referência
+  int64 time_ms = 2;        // Parte 3: hora da referência. A partir da Parte 4 NÃO é mais preenchido (0)
+}
+
+// ---- Parte 4: coordenador, eleição (bully) e sincronização de relógio ----
+
+// Servidor -> Coordenador (REQ/REP): pede a hora correta.
+message ClockRequest {}
+
+message ClockResponse {
+  int64 time_ms = 1;        // hora do coordenador (epoch ms, UTC) no momento da resposta
+}
+
+// Servidor -> Servidor de rank maior (REQ/REP): pede eleição. Resposta "OK" (ok=true)
+// quando o servidor consultado tem rank maior e vai assumir a eleição.
+message ElectionRequest {
+  string name = 1;
+  int32 rank = 2;
+}
+
+message ElectionResponse {
+  bool ok = 1;
+}
+
+// Servidor eleito -> todos (PUB/SUB). Primeiro frame = tópico "servers"; segundo = Envelope.
+message CoordinatorAnnouncement {
+  string name = 1;          // nome do coordenador
 }
 
 // Todo mensagem trafega dentro de um Envelope, que garante o timestamp
@@ -125,5 +150,10 @@ message Envelope {
     ListServersResponse list_servers_response = 22;
     HeartbeatRequest heartbeat_request = 23;
     HeartbeatResponse heartbeat_response = 24;
+    ClockRequest clock_request = 25;
+    ClockResponse clock_response = 26;
+    ElectionRequest election_request = 27;
+    ElectionResponse election_response = 28;
+    CoordinatorAnnouncement coordinator_announcement = 29;
   }
 }

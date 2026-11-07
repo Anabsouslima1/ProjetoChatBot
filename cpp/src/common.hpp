@@ -30,7 +30,12 @@ inline int64_t now_ms() {
   return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
-inline std::atomic<int64_t> g_clock_offset_ms{0};
+// CLOCK_SKEW_MS: só para testes (simula uma máquina com o relógio adiantado/atrasado).
+inline int64_t initial_skew_ms() {
+  const char* v = std::getenv("CLOCK_SKEW_MS");
+  return (v && *v) ? std::atoll(v) : 0;
+}
+inline std::atomic<int64_t> g_clock_offset_ms{initial_skew_ms()};
 
 inline int64_t clock_ms() {
   static std::mutex m;
@@ -202,6 +207,21 @@ inline std::string describe(const chat::Envelope& e) {
     case chat::Envelope::kHeartbeatResponse:
       o << "heartbeat_response{success=" << (e.heartbeat_response().success() ? "true" : "false")
         << ", time_ms=" << e.heartbeat_response().time_ms() << "}";
+      break;
+    case chat::Envelope::kClockRequest:
+      o << "clock_request{}";
+      break;
+    case chat::Envelope::kClockResponse:
+      o << "clock_response{time_ms=" << e.clock_response().time_ms() << "}";
+      break;
+    case chat::Envelope::kElectionRequest:
+      o << "election_request{name=" << e.election_request().name() << ", rank=" << e.election_request().rank() << "}";
+      break;
+    case chat::Envelope::kElectionResponse:
+      o << "election_response{ok=" << (e.election_response().ok() ? "true" : "false") << "}";
+      break;
+    case chat::Envelope::kCoordinatorAnnouncement:
+      o << "coordinator_announcement{name=" << e.coordinator_announcement().name() << "}";
       break;
     default:
       o << "(mensagem vazia/desconhecida)";

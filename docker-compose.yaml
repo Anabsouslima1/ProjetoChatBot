@@ -38,6 +38,7 @@ services:
       SERVER_NAME: server_cpp_1
       BROKER_BACKEND: tcp://broker:5556
       PROXY_XSUB: tcp://proxy:5557
+      PROXY_XPUB: tcp://proxy:5558
       REFERENCE_ADDR: tcp://reference:5559
       DATA_DIR: /data
     volumes:
@@ -51,6 +52,7 @@ services:
       SERVER_NAME: server_cpp_2
       BROKER_BACKEND: tcp://broker:5556
       PROXY_XSUB: tcp://proxy:5557
+      PROXY_XPUB: tcp://proxy:5558
       REFERENCE_ADDR: tcp://reference:5559
       DATA_DIR: /data
     volumes:
