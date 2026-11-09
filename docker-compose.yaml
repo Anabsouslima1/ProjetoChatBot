@@ -86,10 +86,12 @@ services:
       SERVER_NAME: server_java_1
       BROKER_BACKEND: tcp://broker:5556
       PROXY_XSUB: tcp://proxy:5557
+      PROXY_XPUB: tcp://proxy:5558
+      REFERENCE_ADDR: tcp://reference:5559
       DATA_DIR: /data
     volumes:
       - ./data/java1:/data
-    depends_on: [broker, proxy]
+    depends_on: [broker, proxy, reference]
 
   server_java_2:
     <<: *java
@@ -98,11 +100,12 @@ services:
       SERVER_NAME: server_java_2
       BROKER_BACKEND: tcp://broker:5556
       PROXY_XSUB: tcp://proxy:5557
+      PROXY_XPUB: tcp://proxy:5558
       REFERENCE_ADDR: tcp://reference:5559
       DATA_DIR: /data
     volumes:
-      - ./data/java2:/data
-    depends_on: [broker, proxy]
+      - ./data/java1:/data
+    depends_on: [broker, proxy, reference]
 
   reference:
     <<: *java

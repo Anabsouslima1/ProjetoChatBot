@@ -14,14 +14,13 @@ import java.util.Map;
 // Socket REP em REFERENCE_BIND (padrão tcp://*:5559). Atende:
 //   RankRequest        -> RankResponse   (rank sequencial a partir de 1; o mesmo nome mantém o mesmo rank)
 //   ListServersRequest -> ListServersResponse (nome e rank dos servidores disponíveis)
-//   HeartbeatRequest   -> HeartbeatResponse   (success=true e a hora correta em time_ms)
+//   HeartbeatRequest   -> HeartbeatResponse   (success=true; Parte 4: SEM a hora, time_ms = 0)
 // Servidores que ficam sem enviar heartbeat por HEARTBEAT_TIMEOUT_MS (padrão 30 s) saem da lista.
-// REFERENCE_SKEW_MS (padrão 0) soma um desvio à hora devolvida, para ver o ajuste do relógio
-// físico dos servidores funcionando (ex.: REFERENCE_SKEW_MS=5000).
+// Parte 4: a hora correta agora vem do servidor coordenador (eleito entre os servidores),
+// não mais da referência.
 // Também mantém um relógio lógico (incrementa antes de enviar, máximo ao receber).
 public class Reference {
     private static long relogioLogico = 0;
-    private static long skewMs = 0;
 
     private static final Map<String, Integer> ranks = new LinkedHashMap<>();       // todos os nomes já vistos
     private static final Map<String, Long> ultimoSinal = new LinkedHashMap<>();    // servidores disponíveis
@@ -31,14 +30,13 @@ public class Reference {
         String name = System.getenv().getOrDefault("REFERENCE_NAME", "reference");
         String bind = System.getenv().getOrDefault("REFERENCE_BIND", "tcp://*:5559");
         long timeoutMs = longEnv("HEARTBEAT_TIMEOUT_MS", 30000);
-        skewMs = longEnv("REFERENCE_SKEW_MS", 0);
 
         try (ZContext context = new ZContext()) {
             ZMQ.Socket socket = context.createSocket(SocketType.REP);
             socket.setReceiveTimeOut(1000); // acorda a cada 1 s para remover servidores inativos
             socket.bind(bind);
             System.out.println("[" + name + "] referência ouvindo em " + bind
-                    + " | timeout do heartbeat: " + timeoutMs + " ms | desvio da hora: " + skewMs + " ms");
+                    + " | timeout do heartbeat: " + timeoutMs + " ms");
 
             while (!Thread.currentThread().isInterrupted()) {
                 byte[] bytes = socket.recv(0);
@@ -67,9 +65,8 @@ public class Reference {
                         }
                         case HEARTBEAT_REQUEST: {
                             registrar(nomeDe(req, req.getHeartbeatRequest().getName()));
-                            rep.setHeartbeatResponse(HeartbeatResponse.newBuilder()
-                                    .setSuccess(true)
-                                    .setTimeMs(horaCorreta()));
+                            // Parte 4: só o "OK"; a hora (time_ms) não é mais preenchida
+                            rep.setHeartbeatResponse(HeartbeatResponse.newBuilder().setSuccess(true));
                             break;
                         }
                         default: {
@@ -81,7 +78,7 @@ public class Reference {
                     rep.setHeartbeatResponse(HeartbeatResponse.newBuilder().setSuccess(false));
                 }
 
-                rep.setTimestampMs(horaCorreta()).setLogicalClock(++relogioLogico);
+                rep.setTimestampMs(System.currentTimeMillis()).setLogicalClock(++relogioLogico);
                 Envelope resposta = rep.build();
                 socket.send(resposta.toByteArray(), 0);
                 log(name, "ENVIADO", resposta);
@@ -117,10 +114,6 @@ public class Reference {
         }
     }
 
-    private static long horaCorreta() {
-        return System.currentTimeMillis() + skewMs;
-    }
-
     private static long longEnv(String key, long padrao) {
         try {
             return Long.parseLong(System.getenv().getOrDefault(key, String.valueOf(padrao)));
@@ -129,12 +122,8 @@ public class Reference {
         }
     }
 
-    private static String flat(Envelope e) {
-        return String.valueOf(e).replace('\n', ' ').trim();
-    }
-
     private static void log(String who, String dir, Envelope e) {
         System.out.println(Instant.ofEpochMilli(e.getTimestampMs()) + " | " + who + " | " + dir
-                + " | de=" + e.getSender() + " | relogio=" + e.getLogicalClock() + " | " + flat(e));
+                + " | de=" + e.getSender() + " | relogio=" + e.getLogicalClock() + " | " + Descricao.de(e));
     }
 }
