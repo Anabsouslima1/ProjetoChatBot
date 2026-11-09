@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 //   - ao subir, pede o rank à referência (isso cadastra o servidor);
 //     a cada HEARTBEAT_EVERY (10) mensagens de clientes, envia heartbeat à referência.
 //
-// Parte 4 (a hora deixa de vir da referência; segue o servidor C++ da Ana):
+// Parte 4 (a hora deixa de vir da referência; 
 //   - um servidor é o coordenador (eleição pelo algoritmo do valentão/bully: vence o maior rank);
 //   - a cada CLOCK_SYNC_EVERY (15) mensagens de clientes, o servidor pede a hora ao coordenador
 //     (REQ clock_request / REP clock_response) e ajusta o relógio físico;
@@ -170,7 +170,6 @@ public class Server {
                             String texto = req.getPublishRequest().getMessage();
 
                             // Cada servidor conhece só os canais criados nele (dados separados), então
-                            // NÃO exigimos que o canal exista aqui: basta o nome ser válido.
                             if (!nomeValido(canal)) {
                                 repBuilder.setPublishResponse(PublishResponse.newBuilder()
                                         .setSuccess(false)
@@ -182,7 +181,7 @@ public class Server {
                                         .setError(ErrorCode.ERROR_INVALID_MESSAGE)
                                         .setErrorMessage("mensagem deve ter 1-" + MAX_MENSAGEM + " bytes"));
                             } else {
-                                // O que vai para o tópico é um Envelope com Publication (igual C++ e Node)
+                               
                                 Envelope pubMsg = Envelope.newBuilder()
                                         .setTimestampMs(agora())
                                         .setLogicalClock(proximoRelogioLogico())
@@ -672,9 +671,7 @@ public class Server {
         }
     }
 
-    // Algoritmo de Cristian: a hora de quem respondeu chegou depois de ~metade do tempo de ida e volta,
-    // então a hora correta agora é (hora remota + rtt/2). O deslocamento é calculado sobre a hora ORIGINAL
-    // da máquina, nunca sobre a já corrigida, para não acumular erro.
+
     private static void aplicarSincronizacao(String who, String de, long horaRemota, double rttMs, long localAoReceber) {
         final double maxRttMs = 500.0;
         if (rttMs > maxRttMs) {

@@ -2,9 +2,7 @@ package chat.java;
 
 import chat.proto.*;
 
-// Texto legível do conteúdo de uma mensagem para os logs, no MESMO formato do C++
 // (cpp/src/common.hpp, função describe), para que o scripts/check_parte4.py leia os logs
-// de todas as linguagens. Ex.: coordinator_announcement{name=server_cpp_2}
 final class Descricao {
     private Descricao() {
     }

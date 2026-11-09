@@ -266,7 +266,7 @@ public class Client {
                     }
                 }
             } catch (Exception e) {
-                // contexto fechado: encerra a thread
+               
             }
         }
     }
