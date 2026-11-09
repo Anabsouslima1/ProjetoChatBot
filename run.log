@@ -4031,3 +4031,636 @@ client_java_2-1  | 2026-11-07T23:21:19.952Z | bot_java_2 | ENVIADO | de=bot_java
 client_java_2-1  | 2026-11-07T23:21:19.958Z | bot_java_2 | RECEBIDO | de=server_java_1 | relogio=399 | timestamp_ms: 1794093679958 sender: "server_java_1" logical_clock: 399 publish_response {   success: true }
 client_java_2-1  | 2026-11-07T23:21:20.964Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=400 | timestamp_ms: 1794093680964 sender: "bot_java_2" logical_clock: 400 publish_request {   channel: "canal-bot_cpp_2-2466"   message: "testando o canal (#4 de bot_java_2)" }
 client_java_2-1  | 2026-11-07T23:21:20.967Z | bot_java_2 | RECEBIDO | de=server_node_1 | relogio=0 | timestamp_ms: 1794093680967 sender: "server_node_1" publish_response {   success: true }
+server_cpp_2-1  | [server_cpp_2] conectado ao broker em tcp://127.0.0.1:5556 e ao proxy Pub/Sub em tcp://127.0.0.1:5557 | referência em tcp://127.0.0.1:5559 | dados em /data | canais carregados: 3
+server_cpp_2-1   | 2026-11-09 21:19:56.894Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=1 | rank_request{name=server_cpp_2}
+server_cpp_2-1   | [server_cpp_2] referência sem resposta em tcp://127.0.0.1:5559, recriando socket
+server_cpp_2-1   | 2026-11-09 21:19:58.898Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=2 | rank_request{name=server_cpp_2}
+server_cpp_2-1   | [server_cpp_2] referência sem resposta em tcp://127.0.0.1:5559, recriando socket
+server_cpp_2-1   | 2026-11-09 21:20:00.899Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=3 | rank_request{name=server_cpp_2}
+server_cpp_2-1   | [server_cpp_2] referência sem resposta em tcp://127.0.0.1:5559, recriando socket
+server_cpp_2-1   | 2026-11-09 21:20:02.906Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=4 | rank_request{name=server_cpp_2}
+server_cpp_2-1   | [server_cpp_2] referência sem resposta em tcp://127.0.0.1:5559, recriando socket
+server_cpp_2-1   | 2026-11-09 21:20:04.911Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=5 | rank_request{name=server_cpp_2}
+server_cpp_2-1   | 2026-11-09 21:20:04.982Z | server_cpp_2 | RECEBIDO | de=reference | relogio=12 | rank_response{rank=2}
+server_cpp_2-1   | [server_cpp_2] rank recebido da referência: 2
+server_cpp_2-1   | 2026-11-09 21:20:04.988Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=13 | list_servers_request{}
+server_cpp_2-1   | 2026-11-09 21:20:05.002Z | server_cpp_2 | RECEBIDO | de=reference | relogio=14 | list_servers_response{servers=[server_cpp_1:1, server_cpp_2:2, server_java_1:3, server_java_2:4]}
+server_cpp_2-1   | 2026-11-09 21:19:56.891Z | server_cpp_2 | RECEBIDO | de=bot_cpp_2 | relogio=1 | login_request{username=bot_cpp_2}
+server_cpp_2-1   | 2026-11-09 21:20:05.030Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=15 | login_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:03.897Z | server_cpp_2 | RECEBIDO | de=bot_cpp_2 | relogio=2 | login_request{username=bot_cpp_2}
+server_cpp_2-1   | 2026-11-09 21:20:05.030Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=16 | login_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:03.646Z | server_cpp_2 | RECEBIDO | de=bot_java_1 | relogio=1 | login_request{username=bot_java_1}
+server_cpp_2-1   | 2026-11-09 21:20:05.030Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=17 | login_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:04.958Z | server_cpp_2 | RECEBIDO | de=bot_cpp_1 | relogio=14 | list_channels_request{}
+server_cpp_2-1   | 2026-11-09 21:20:05.032Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=18 | list_channels_response{channels=[canal-bot_cpp_1-1797, canal-bot_cpp_2, canal-bot_java_2]}
+server_cpp_2-1   | 2026-11-09 21:20:05.097Z | server_cpp_2 | RECEBIDO | de=bot_java_1 | relogio=18 | list_channels_request{}
+server_cpp_2-1   | 2026-11-09 21:20:05.129Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=19 | list_channels_response{channels=[canal-bot_cpp_1-1797, canal-bot_cpp_2, canal-bot_java_2]}
+server_cpp_2-1   | 2026-11-09 21:20:05.565Z | server_cpp_2 | RECEBIDO | de=bot_cpp_2 | relogio=19 | publish_request{channel=canal-bot_node_2-8868, message="alguem por ai? (#1 de bot_cpp_2)"}
+server_cpp_2-1   | 2026-11-09 21:20:05.567Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=20 | publication{channel=canal-bot_node_2-8868, author=bot_cpp_2, message="alguem por ai? (#1 de bot_cpp_2)"}
+server_cpp_2-1   | 2026-11-09 21:20:05.660Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=21 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:06.632Z | server_cpp_2 | RECEBIDO | de=bot_java_1 | relogio=27 | publish_request{channel=canal-bot_cpp_1-1797, message="mensagem aleatoria (#2 de bot_java_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:06.661Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=28 | publication{channel=canal-bot_cpp_1-1797, author=bot_java_1, message="mensagem aleatoria (#2 de bot_java_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:06.661Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=29 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:07.677Z | server_cpp_2 | RECEBIDO | de=bot_cpp_2 | relogio=26 | publish_request{channel=canal-bot_node_2-8868, message="alguem por ai? (#3 de bot_cpp_2)"}
+server_cpp_2-1   | 2026-11-09 21:20:07.680Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=30 | publication{channel=canal-bot_node_2-8868, author=bot_cpp_2, message="alguem por ai? (#3 de bot_cpp_2)"}
+server_cpp_2-1   | 2026-11-09 21:20:07.680Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=31 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:08.719Z | server_cpp_2 | RECEBIDO | de=bot_java_2 | relogio=31 | publish_request{channel=canal-bot_cpp_2-7971, message="bom dia, canal! (#4 de bot_java_2)"}
+server_cpp_2-1   | 2026-11-09 21:20:08.738Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=32 | publication{channel=canal-bot_cpp_2-7971, author=bot_java_2, message="bom dia, canal! (#4 de bot_java_2)"}
+server_cpp_2-1   | 2026-11-09 21:20:08.738Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=33 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:09.749Z | server_cpp_2 | RECEBIDO | de=bot_java_2 | relogio=34 | publish_request{channel=canal-bot_cpp_2-7971, message="alguem por ai? (#5 de bot_java_2)"}
+server_cpp_2-1   | 2026-11-09 21:20:09.758Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=35 | publication{channel=canal-bot_cpp_2-7971, author=bot_java_2, message="alguem por ai? (#5 de bot_java_2)"}
+server_cpp_2-1   | 2026-11-09 21:20:09.758Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=36 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:09.758Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=37 | heartbeat_request{name=server_cpp_2}
+server_cpp_2-1   | 2026-11-09 21:20:09.791Z | server_cpp_2 | RECEBIDO | de=reference | relogio=38 | heartbeat_response{success=true, time_ms=1794259209791}
+server_cpp_2-1   | [server_cpp_2] relógio sincronizado: deslocamento 0 ms -> 9 ms (ida e volta: 46.3 ms)
+server_cpp_2-1   | 2026-11-09 21:20:09.814Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=39 | list_servers_request{}
+server_cpp_2-1   | 2026-11-09 21:20:09.838Z | server_cpp_2 | RECEBIDO | de=reference | relogio=46 | list_servers_response{servers=[server_cpp_1:1, server_cpp_2:2, server_java_1:3, server_java_2:4]}
+server_cpp_2-1   | 2026-11-09 21:20:10.774Z | server_cpp_2 | RECEBIDO | de=bot_java_2 | relogio=37 | publish_request{channel=canal-bot_cpp_2-7971, message="publicando de novo (#6 de bot_java_2)"}
+server_cpp_2-1   | 2026-11-09 21:20:10.787Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=47 | publication{channel=canal-bot_cpp_2-7971, author=bot_java_2, message="publicando de novo (#6 de bot_java_2)"}
+server_cpp_2-1   | 2026-11-09 21:20:10.787Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=48 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:11.720Z | server_cpp_2 | RECEBIDO | de=bot_node_1 | relogio=45 | list_channels_request{}
+server_cpp_2-1   | 2026-11-09 21:20:11.741Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=49 | list_channels_response{channels=[canal-bot_cpp_1-1797, canal-bot_cpp_2, canal-bot_java_2]}
+server_cpp_2-1   | 2026-11-09 21:20:12.088Z | server_cpp_2 | RECEBIDO | de=bot_node_1 | relogio=52 | publish_request{channel=canal-bot_cpp_2, message="sistemas distribuidos (#1 de bot_node_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:12.099Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=53 | publication{channel=canal-bot_cpp_2, author=bot_node_1, message="sistemas distribuidos (#1 de bot_node_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:12.099Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=54 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:13.093Z | server_cpp_2 | RECEBIDO | de=bot_node_1 | relogio=55 | publish_request{channel=canal-bot_cpp_2, message="alguem por ai? (#2 de bot_node_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:13.103Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=56 | publication{channel=canal-bot_cpp_2, author=bot_node_1, message="alguem por ai? (#2 de bot_node_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:13.103Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=57 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:14.100Z | server_cpp_2 | RECEBIDO | de=bot_node_1 | relogio=58 | publish_request{channel=canal-bot_cpp_2, message="zeromq e protobuf (#3 de bot_node_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:14.111Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=59 | publication{channel=canal-bot_cpp_2, author=bot_node_1, message="zeromq e protobuf (#3 de bot_node_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:14.111Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=60 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:15.104Z | server_cpp_2 | RECEBIDO | de=bot_node_1 | relogio=61 | publish_request{channel=canal-bot_cpp_2, message="zeromq e protobuf (#4 de bot_node_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:15.114Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=62 | publication{channel=canal-bot_cpp_2, author=bot_node_1, message="zeromq e protobuf (#4 de bot_node_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:15.114Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=63 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:16.031Z | server_cpp_2 | RECEBIDO | de=bot_cpp_1 | relogio=67 | publish_request{channel=canal-bot_cpp_1-9871, message="testando o canal (#1 de bot_cpp_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:16.041Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=68 | publication{channel=canal-bot_cpp_1-9871, author=bot_cpp_1, message="testando o canal (#1 de bot_cpp_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:16.041Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=69 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:17.038Z | server_cpp_2 | RECEBIDO | de=bot_cpp_1 | relogio=70 | publish_request{channel=canal-bot_cpp_1-9871, message="mensagem aleatoria (#2 de bot_cpp_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:17.047Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=71 | publication{channel=canal-bot_cpp_1-9871, author=bot_cpp_1, message="mensagem aleatoria (#2 de bot_cpp_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:17.047Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=72 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:18.039Z | server_cpp_2 | RECEBIDO | de=bot_cpp_1 | relogio=73 | publish_request{channel=canal-bot_cpp_1-9871, message="sistemas distribuidos (#3 de bot_cpp_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:18.050Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=74 | publication{channel=canal-bot_cpp_1-9871, author=bot_cpp_1, message="sistemas distribuidos (#3 de bot_cpp_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:18.050Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=75 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:19.041Z | server_cpp_2 | RECEBIDO | de=bot_cpp_1 | relogio=76 | publish_request{channel=canal-bot_cpp_1-9871, message="alguem por ai? (#4 de bot_cpp_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:19.051Z | server_cpp_2 | PUBLICADO | de=server_cpp_2 | relogio=77 | publication{channel=canal-bot_cpp_1-9871, author=bot_cpp_1, message="alguem por ai? (#4 de bot_cpp_1)"}
+server_cpp_2-1   | 2026-11-09 21:20:19.051Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=78 | publish_response{success=true}
+server_cpp_2-1   | 2026-11-09 21:20:19.051Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=79 | heartbeat_request{name=server_cpp_2}
+server_cpp_2-1   | 2026-11-09 21:20:19.045Z | server_cpp_2 | RECEBIDO | de=reference | relogio=80 | heartbeat_response{success=true, time_ms=1794259219045}
+server_cpp_2-1   | [server_cpp_2] relógio sincronizado: deslocamento 9 ms -> 1 ms (ida e volta: 4.0 ms)
+server_cpp_2-1   | 2026-11-09 21:20:19.051Z | server_cpp_2 | ENVIADO | de=server_cpp_2 | relogio=81 | list_servers_request{}
+server_cpp_2-1   | 2026-11-09 21:20:19.049Z | server_cpp_2 | RECEBIDO | de=reference | relogio=82 | list_servers_response{servers=[server_cpp_1:1, server_cpp_2:2, server_java_1:3, server_java_2:4, server_node_1:5, server_node_2:6]}
+server_java_2-1  | 2026-11-09T21:20:03.534Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=1 | timestamp_ms: 1794259203534 sender: "server_java_2" logical_clock: 1 rank_request {   name: "server_java_2" }
+server_java_2-1  | 2026-11-09T21:20:04.796Z | server_java_2 | RECEBIDO | de=reference | relogio=8 | timestamp_ms: 1794259204796 sender: "reference" logical_clock: 8 rank_response {   rank: 4 }
+server_java_2-1  | [server_java_2] rank recebido da referência: 4
+server_java_2-1  | [server_java_2] conectado ao broker em tcp://127.0.0.1:5556 e ao proxy Pub/Sub em tcp://127.0.0.1:5557 | dados em /data | canais carregados: 8
+server_java_2-1  | 2026-11-09T21:20:05.038Z | server_java_2 | RECEBIDO | de=bot_cpp_1 | relogio=19 | timestamp_ms: 1794259205038 sender: "bot_cpp_1" logical_clock: 19 create_channel_request {   channel_name: "canal-bot_cpp_1-9124" }
+server_java_2-1  | 2026-11-09T21:20:05.189Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=20 | timestamp_ms: 1794259205189 sender: "server_java_2" logical_clock: 20 create_channel_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:05.554Z | server_java_2 | RECEBIDO | de=bot_java_1 | relogio=23 | timestamp_ms: 1794259205554 sender: "bot_java_1" logical_clock: 23 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "zeromq e protobuf (#1 de bot_java_1)" }
+server_java_2-1  | 2026-11-09T21:20:05.572Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=24 | timestamp_ms: 1794259205572 sender: "server_java_2" logical_clock: 24 publication {   channel: "canal-bot_cpp_1-1797"   message: "zeromq e protobuf (#1 de bot_java_1)"   author: "bot_java_1" }
+server_java_2-1  | 2026-11-09T21:20:05.588Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=25 | timestamp_ms: 1794259205588 sender: "server_java_2" logical_clock: 25 publish_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:06.598Z | server_java_2 | RECEBIDO | de=bot_java_2 | relogio=24 | timestamp_ms: 1794259206598 sender: "bot_java_2" logical_clock: 24 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "zeromq e protobuf (#2 de bot_java_2)" }
+server_java_2-1  | 2026-11-09T21:20:06.626Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=26 | timestamp_ms: 1794259206626 sender: "server_java_2" logical_clock: 26 publication {   channel: "canal-bot_cpp_2-7971"   message: "zeromq e protobuf (#2 de bot_java_2)"   author: "bot_java_2" }
+server_java_2-1  | 2026-11-09T21:20:06.629Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=27 | timestamp_ms: 1794259206629 sender: "server_java_2" logical_clock: 27 publish_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:07.651Z | server_java_2 | RECEBIDO | de=bot_java_2 | relogio=28 | timestamp_ms: 1794259207651 sender: "bot_java_2" logical_clock: 28 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "mensagem aleatoria (#3 de bot_java_2)" }
+server_java_2-1  | 2026-11-09T21:20:07.670Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=29 | timestamp_ms: 1794259207670 sender: "server_java_2" logical_clock: 29 publication {   channel: "canal-bot_cpp_2-7971"   message: "mensagem aleatoria (#3 de bot_java_2)"   author: "bot_java_2" }
+server_java_2-1  | 2026-11-09T21:20:07.690Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=30 | timestamp_ms: 1794259207690 sender: "server_java_2" logical_clock: 30 publish_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:08.680Z | server_java_2 | RECEBIDO | de=bot_cpp_2 | relogio=32 | timestamp_ms: 1794259208680 sender: "bot_cpp_2" logical_clock: 32 publish_request {   channel: "canal-bot_node_2-8868"   message: "bom dia, canal! (#4 de bot_cpp_2)" }
+server_java_2-1  | 2026-11-09T21:20:08.686Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=33 | timestamp_ms: 1794259208686 sender: "server_java_2" logical_clock: 33 publication {   channel: "canal-bot_node_2-8868"   message: "bom dia, canal! (#4 de bot_cpp_2)"   author: "bot_cpp_2" }
+server_java_2-1  | 2026-11-09T21:20:08.689Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=34 | timestamp_ms: 1794259208689 sender: "server_java_2" logical_clock: 34 publish_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:09.695Z | server_java_2 | RECEBIDO | de=bot_cpp_2 | relogio=35 | timestamp_ms: 1794259209695 sender: "bot_cpp_2" logical_clock: 35 publish_request {   channel: "canal-bot_node_2-8868"   message: "mensagem aleatoria (#5 de bot_cpp_2)" }
+server_java_2-1  | 2026-11-09T21:20:09.698Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=36 | timestamp_ms: 1794259209698 sender: "server_java_2" logical_clock: 36 publication {   channel: "canal-bot_node_2-8868"   message: "mensagem aleatoria (#5 de bot_cpp_2)"   author: "bot_cpp_2" }
+server_java_2-1  | 2026-11-09T21:20:09.701Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=37 | timestamp_ms: 1794259209701 sender: "server_java_2" logical_clock: 37 publish_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:10.703Z | server_java_2 | RECEBIDO | de=bot_cpp_2 | relogio=38 | timestamp_ms: 1794259210703 sender: "bot_cpp_2" logical_clock: 38 publish_request {   channel: "canal-bot_node_2-8868"   message: "sistemas distribuidos (#6 de bot_cpp_2)" }
+server_java_2-1  | 2026-11-09T21:20:10.704Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=39 | timestamp_ms: 1794259210704 sender: "server_java_2" logical_clock: 39 publication {   channel: "canal-bot_node_2-8868"   message: "sistemas distribuidos (#6 de bot_cpp_2)"   author: "bot_cpp_2" }
+server_java_2-1  | 2026-11-09T21:20:10.706Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=40 | timestamp_ms: 1794259210706 sender: "server_java_2" logical_clock: 40 publish_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:11.607Z | server_java_2 | RECEBIDO | de=bot_node_2 | relogio=1 | timestamp_ms: 1794259211607 sender: "bot_node_2" logical_clock: 1 login_request {   username: "bot_node_2" }
+server_java_2-1  | 2026-11-09T21:20:11.713Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=41 | timestamp_ms: 1794259211713 sender: "server_java_2" logical_clock: 41 login_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:11.793Z | server_java_2 | RECEBIDO | de=bot_java_2 | relogio=49 | timestamp_ms: 1794259211793 sender: "bot_java_2" logical_clock: 49 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "publicando de novo (#7 de bot_java_2)" }
+server_java_2-1  | 2026-11-09T21:20:11.806Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=50 | timestamp_ms: 1794259211806 sender: "server_java_2" logical_clock: 50 publication {   channel: "canal-bot_cpp_2-7971"   message: "publicando de novo (#7 de bot_java_2)"   author: "bot_java_2" }
+server_java_2-1  | 2026-11-09T21:20:11.809Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=51 | timestamp_ms: 1794259211809 sender: "server_java_2" logical_clock: 51 publish_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:12.819Z | server_java_2 | RECEBIDO | de=bot_java_2 | relogio=52 | timestamp_ms: 1794259212819 sender: "bot_java_2" logical_clock: 52 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "ping (#8 de bot_java_2)" }
+server_java_2-1  | 2026-11-09T21:20:12.824Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=53 | timestamp_ms: 1794259212824 sender: "server_java_2" logical_clock: 53 publication {   channel: "canal-bot_cpp_2-7971"   message: "ping (#8 de bot_java_2)"   author: "bot_java_2" }
+server_java_2-1  | 2026-11-09T21:20:12.827Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=54 | timestamp_ms: 1794259212827 sender: "server_java_2" logical_clock: 54 publish_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:12.836Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=55 | timestamp_ms: 1794259212836 sender: "server_java_2" logical_clock: 55 heartbeat_request {   name: "server_java_2" }
+server_java_2-1  | 2026-11-09T21:20:12.843Z | server_java_2 | RECEBIDO | de=reference | relogio=60 | timestamp_ms: 1794259212843 sender: "reference" logical_clock: 60 heartbeat_response {   success: true   time_ms: 1794259212843 }
+server_cpp_1-1   | [server_cpp_1] conectado ao broker em tcp://127.0.0.1:5556 e ao proxy Pub/Sub em tcp://127.0.0.1:5557 | referência em tcp://127.0.0.1:5559 | dados em /data | canais carregados: 11
+server_cpp_1-1   | 2026-11-09 21:19:56.890Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=1 | rank_request{name=server_cpp_1}
+server_cpp_1-1   | [server_cpp_1] referência sem resposta em tcp://127.0.0.1:5559, recriando socket
+server_cpp_1-1   | 2026-11-09 21:19:58.895Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=2 | rank_request{name=server_cpp_1}
+server_cpp_1-1   | [server_cpp_1] referência sem resposta em tcp://127.0.0.1:5559, recriando socket
+server_cpp_1-1   | 2026-11-09 21:20:00.896Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=3 | rank_request{name=server_cpp_1}
+server_cpp_1-1   | [server_cpp_1] referência sem resposta em tcp://127.0.0.1:5559, recriando socket
+server_cpp_1-1   | 2026-11-09 21:20:02.903Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=4 | rank_request{name=server_cpp_1}
+server_cpp_1-1   | [server_cpp_1] referência sem resposta em tcp://127.0.0.1:5559, recriando socket
+server_cpp_1-1   | 2026-11-09 21:20:04.911Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=5 | rank_request{name=server_cpp_1}
+server_cpp_1-1   | 2026-11-09 21:20:04.913Z | server_cpp_1 | RECEBIDO | de=reference | relogio=9 | rank_response{rank=1}
+server_cpp_1-1   | [server_cpp_1] rank recebido da referência: 1
+server_cpp_1-1   | 2026-11-09 21:20:04.914Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=10 | list_servers_request{}
+server_cpp_1-1   | 2026-11-09 21:20:04.928Z | server_cpp_1 | RECEBIDO | de=reference | relogio=11 | list_servers_response{servers=[server_cpp_1:1, server_cpp_2:2, server_java_1:3, server_java_2:4]}
+server_cpp_1-1   | 2026-11-09 21:19:57.049Z | server_cpp_1 | RECEBIDO | de=bot_cpp_1 | relogio=1 | login_request{username=bot_cpp_1}
+server_cpp_1-1   | 2026-11-09 21:20:04.937Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=12 | login_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:04.054Z | server_cpp_1 | RECEBIDO | de=bot_cpp_1 | relogio=2 | login_request{username=bot_cpp_1}
+server_cpp_1-1   | 2026-11-09 21:20:04.938Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=13 | login_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:03.485Z | server_cpp_1 | RECEBIDO | de=bot_java_2 | relogio=1 | login_request{username=bot_java_2}
+server_cpp_1-1   | 2026-11-09 21:20:04.938Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=14 | login_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:04.999Z | server_cpp_1 | RECEBIDO | de=bot_java_2 | relogio=15 | list_channels_request{}
+server_cpp_1-1   | 2026-11-09 21:20:05.029Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=16 | list_channels_response{channels=[canal-bot_cpp_1, canal-bot_cpp_1-9302, canal-bot_cpp_1-9871, canal-bot_cpp_2-7971, canal-bot_java_1-4843, canal-bot_java_1-7634, canal-bot_java_2-2551, canal-bot_java_2-2747, canal-bot_node_1-8921, canal-bot_node_2-3140, geral]}
+server_cpp_1-1   | 2026-11-09 21:20:05.175Z | server_cpp_1 | RECEBIDO | de=bot_java_1 | relogio=20 | create_channel_request{channel_name=canal-bot_java_1-3043}
+server_cpp_1-1   | 2026-11-09 21:20:05.194Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=21 | create_channel_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:05.574Z | server_cpp_1 | RECEBIDO | de=bot_java_2 | relogio=17 | publish_request{channel=canal-bot_cpp_2-7971, message="alguem por ai? (#1 de bot_java_2)"}
+server_cpp_1-1   | 2026-11-09 21:20:05.579Z | server_cpp_1 | PUBLICADO | de=server_cpp_1 | relogio=22 | publication{channel=canal-bot_cpp_2-7971, author=bot_java_2, message="alguem por ai? (#1 de bot_java_2)"}
+server_cpp_1-1   | 2026-11-09 21:20:05.585Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=23 | publish_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:06.662Z | server_cpp_1 | RECEBIDO | de=bot_cpp_2 | relogio=22 | publish_request{channel=canal-bot_node_2-8868, message="publicando de novo (#2 de bot_cpp_2)"}
+server_cpp_1-1   | 2026-11-09 21:20:06.665Z | server_cpp_1 | PUBLICADO | de=server_cpp_1 | relogio=24 | publication{channel=canal-bot_node_2-8868, author=bot_cpp_2, message="publicando de novo (#2 de bot_cpp_2)"}
+server_cpp_1-1   | 2026-11-09 21:20:06.665Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=25 | publish_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:07.692Z | server_cpp_1 | RECEBIDO | de=bot_java_1 | relogio=31 | publish_request{channel=canal-bot_cpp_1-1797, message="ping (#3 de bot_java_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:07.716Z | server_cpp_1 | PUBLICADO | de=server_cpp_1 | relogio=32 | publication{channel=canal-bot_cpp_1-1797, author=bot_java_1, message="ping (#3 de bot_java_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:07.717Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=33 | publish_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:08.739Z | server_cpp_1 | RECEBIDO | de=bot_java_1 | relogio=35 | publish_request{channel=canal-bot_cpp_1-1797, message="publicando de novo (#4 de bot_java_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:08.764Z | server_cpp_1 | PUBLICADO | de=server_cpp_1 | relogio=36 | publication{channel=canal-bot_cpp_1-1797, author=bot_java_1, message="publicando de novo (#4 de bot_java_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:08.765Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=37 | publish_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:09.790Z | server_cpp_1 | RECEBIDO | de=bot_java_1 | relogio=39 | publish_request{channel=canal-bot_cpp_1-1797, message="sistemas distribuidos (#5 de bot_java_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:09.796Z | server_cpp_1 | PUBLICADO | de=server_cpp_1 | relogio=40 | publication{channel=canal-bot_cpp_1-1797, author=bot_java_1, message="sistemas distribuidos (#5 de bot_java_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:09.797Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=41 | publish_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:09.797Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=42 | heartbeat_request{name=server_cpp_1}
+server_cpp_1-1   | 2026-11-09 21:20:09.819Z | server_cpp_1 | RECEBIDO | de=reference | relogio=43 | heartbeat_response{success=true, time_ms=1794259209819}
+server_cpp_1-1   | [server_cpp_1] relógio sincronizado: deslocamento 0 ms -> 10 ms (ida e volta: 23.6 ms)
+server_cpp_1-1   | 2026-11-09 21:20:09.831Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=44 | list_servers_request{}
+server_cpp_1-1   | 2026-11-09 21:20:09.828Z | server_cpp_1 | RECEBIDO | de=reference | relogio=45 | list_servers_response{servers=[server_cpp_1:1, server_cpp_2:2, server_java_1:3, server_java_2:4]}
+server_cpp_1-1   | 2026-11-09 21:20:10.816Z | server_cpp_1 | RECEBIDO | de=bot_java_1 | relogio=43 | publish_request{channel=canal-bot_cpp_1-1797, message="testando o canal (#6 de bot_java_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:10.838Z | server_cpp_1 | PUBLICADO | de=server_cpp_1 | relogio=46 | publication{channel=canal-bot_cpp_1-1797, author=bot_java_1, message="testando o canal (#6 de bot_java_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:10.838Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=47 | publish_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:11.730Z | server_cpp_1 | RECEBIDO | de=bot_node_2 | relogio=42 | list_channels_request{}
+server_cpp_1-1   | 2026-11-09 21:20:11.743Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=48 | list_channels_response{channels=[canal-bot_cpp_1, canal-bot_cpp_1-9302, canal-bot_cpp_1-9871, canal-bot_cpp_2-7971, canal-bot_java_1-3043, canal-bot_java_1-4843, canal-bot_java_1-7634, canal-bot_java_2-2551, canal-bot_java_2-2747, canal-bot_node_1-8921, canal-bot_node_2-3140, geral]}
+server_cpp_1-1   | 2026-11-09 21:20:12.722Z | server_cpp_1 | RECEBIDO | de=bot_cpp_1 | relogio=53 | publish_request{channel=canal-bot_cpp_1-1797, message="bom dia, canal! (#8 de bot_cpp_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:12.733Z | server_cpp_1 | PUBLICADO | de=server_cpp_1 | relogio=54 | publication{channel=canal-bot_cpp_1-1797, author=bot_cpp_1, message="bom dia, canal! (#8 de bot_cpp_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:12.734Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=55 | publish_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:13.726Z | server_cpp_1 | RECEBIDO | de=bot_cpp_1 | relogio=57 | publish_request{channel=canal-bot_cpp_1-1797, message="bom dia, canal! (#9 de bot_cpp_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:13.737Z | server_cpp_1 | PUBLICADO | de=server_cpp_1 | relogio=58 | publication{channel=canal-bot_cpp_1-1797, author=bot_cpp_1, message="bom dia, canal! (#9 de bot_cpp_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:13.737Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=59 | publish_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:14.728Z | server_cpp_1 | RECEBIDO | de=bot_cpp_1 | relogio=61 | publish_request{channel=canal-bot_cpp_1-1797, message="tudo certo por aqui (#10 de bot_cpp_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:14.738Z | server_cpp_1 | PUBLICADO | de=server_cpp_1 | relogio=62 | publication{channel=canal-bot_cpp_1-1797, author=bot_cpp_1, message="tudo certo por aqui (#10 de bot_cpp_1)"}
+server_cpp_1-1   | 2026-11-09 21:20:14.739Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=63 | publish_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:15.730Z | server_cpp_1 | RECEBIDO | de=bot_cpp_1 | relogio=65 | list_channels_request{}
+server_cpp_1-1   | 2026-11-09 21:20:15.740Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=66 | list_channels_response{channels=[canal-bot_cpp_1, canal-bot_cpp_1-9302, canal-bot_cpp_1-9871, canal-bot_cpp_2-7971, canal-bot_java_1-3043, canal-bot_java_1-4843, canal-bot_java_1-7634, canal-bot_java_2-2551, canal-bot_java_2-2747, canal-bot_node_1-8921, canal-bot_node_2-3140, geral]}
+server_cpp_1-1   | 2026-11-09 21:20:16.076Z | server_cpp_1 | RECEBIDO | de=bot_cpp_2 | relogio=67 | publish_request{channel=canal_aleatorio_889, message="sistemas distribuidos (#1 de bot_cpp_2)"}
+server_cpp_1-1   | 2026-11-09 21:20:16.087Z | server_cpp_1 | PUBLICADO | de=server_cpp_1 | relogio=68 | publication{channel=canal_aleatorio_889, author=bot_cpp_2, message="sistemas distribuidos (#1 de bot_cpp_2)"}
+server_cpp_1-1   | 2026-11-09 21:20:16.087Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=69 | publish_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:17.077Z | server_cpp_1 | RECEBIDO | de=bot_cpp_2 | relogio=70 | publish_request{channel=canal_aleatorio_889, message="alguem por ai? (#2 de bot_cpp_2)"}
+server_cpp_1-1   | 2026-11-09 21:20:17.088Z | server_cpp_1 | PUBLICADO | de=server_cpp_1 | relogio=71 | publication{channel=canal_aleatorio_889, author=bot_cpp_2, message="alguem por ai? (#2 de bot_cpp_2)"}
+server_cpp_1-1   | 2026-11-09 21:20:17.088Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=72 | publish_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:18.080Z | server_cpp_1 | RECEBIDO | de=bot_cpp_2 | relogio=73 | publish_request{channel=canal_aleatorio_889, message="ping (#3 de bot_cpp_2)"}
+server_cpp_1-1   | 2026-11-09 21:20:18.094Z | server_cpp_1 | PUBLICADO | de=server_cpp_1 | relogio=74 | publication{channel=canal_aleatorio_889, author=bot_cpp_2, message="ping (#3 de bot_cpp_2)"}
+server_cpp_1-1   | 2026-11-09 21:20:18.094Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=75 | publish_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:19.085Z | server_cpp_1 | RECEBIDO | de=bot_cpp_2 | relogio=76 | publish_request{channel=canal_aleatorio_889, message="ola pessoal! (#4 de bot_cpp_2)"}
+server_cpp_1-1   | 2026-11-09 21:20:19.096Z | server_cpp_1 | PUBLICADO | de=server_cpp_1 | relogio=77 | publication{channel=canal_aleatorio_889, author=bot_cpp_2, message="ola pessoal! (#4 de bot_cpp_2)"}
+server_cpp_1-1   | 2026-11-09 21:20:19.096Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=78 | publish_response{success=true}
+server_cpp_1-1   | 2026-11-09 21:20:19.096Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=79 | heartbeat_request{name=server_cpp_1}
+server_cpp_1-1   | 2026-11-09 21:20:19.090Z | server_cpp_1 | RECEBIDO | de=reference | relogio=83 | heartbeat_response{success=true, time_ms=1794259219090}
+server_cpp_1-1   | [server_cpp_1] relógio sincronizado: deslocamento 10 ms -> 0 ms (ida e volta: 8.5 ms)
+server_cpp_1-1   | 2026-11-09 21:20:19.096Z | server_cpp_1 | ENVIADO | de=server_cpp_1 | relogio=84 | list_servers_request{}
+server_cpp_1-1   | 2026-11-09 21:20:19.099Z | server_cpp_1 | RECEBIDO | de=reference | relogio=85 | list_servers_response{servers=[server_cpp_1:1, server_cpp_2:2, server_java_1:3, server_java_2:4, server_node_1:5, server_node_2:6]}
+server_node_1-1  | [server_node_1] conectado ao broker em tcp://127.0.0.1:5556 e ao proxy Pub/Sub em tcp://127.0.0.1:5557 | referência em tcp://127.0.0.1:5559 | dados em /data | canais carregados: 0
+server_node_1-1  | 2026-11-09T21:20:11.546Z | server_node_1 | ENVIADO | de=server_node_1 | relogio=1 | rank_request{name=server_node_1}
+server_node_1-1  | 2026-11-09T21:20:11.594Z | server_node_1 | RECEBIDO | de=reference | relogio=47 | rank_response{rank=5}
+server_node_1-1  | [server_node_1] rank recebido da referência: 5
+server_node_1-1  | 2026-11-09T21:20:11.617Z | server_node_1 | ENVIADO | de=server_node_1 | relogio=48 | list_servers_request{}
+server_node_1-1  | 2026-11-09T21:20:11.662Z | server_node_1 | RECEBIDO | de=reference | relogio=49 | list_servers_response{servers=[server_cpp_1:1, server_cpp_2:2, server_java_1:3, server_java_2:4, server_node_1:5]}
+server_node_1-1  | 2026-11-09T21:20:11.691Z | server_node_1 | RECEBIDO | de=bot_cpp_1 | relogio=47 | publish_request{channel=canal-bot_cpp_1-1797, message="testando o canal (#7 de bot_cpp_1)"}
+server_node_1-1  | 2026-11-09T21:20:11.697Z | server_node_1 | PUBLICADO | de=server_node_1 | relogio=50 | publication{channel=canal-bot_cpp_1-1797, author=bot_cpp_1, message="testando o canal (#7 de bot_cpp_1)"}
+server_node_1-1  | 2026-11-09T21:20:11.706Z | server_node_1 | ENVIADO | de=server_node_1 | relogio=51 | publish_response{success=true}
+server_node_1-1  | 2026-11-09T21:20:11.865Z | server_node_1 | RECEBIDO | de=bot_java_1 | relogio=51 | publish_request{channel=canal-bot_cpp_1-1797, message="testando o canal (#7 de bot_java_1)"}
+server_node_1-1  | 2026-11-09T21:20:11.868Z | server_node_1 | PUBLICADO | de=server_node_1 | relogio=52 | publication{channel=canal-bot_cpp_1-1797, author=bot_java_1, message="testando o canal (#7 de bot_java_1)"}
+server_node_1-1  | 2026-11-09T21:20:11.868Z | server_node_1 | ENVIADO | de=server_node_1 | relogio=53 | publish_response{success=true}
+server_node_1-1  | 2026-11-09T21:20:12.872Z | server_node_1 | RECEBIDO | de=bot_java_1 | relogio=55 | publish_request{channel=canal-bot_cpp_1-1797, message="ping (#8 de bot_java_1)"}
+server_node_1-1  | 2026-11-09T21:20:12.877Z | server_node_1 | PUBLICADO | de=server_node_1 | relogio=56 | publication{channel=canal-bot_cpp_1-1797, author=bot_java_1, message="ping (#8 de bot_java_1)"}
+server_node_1-1  | 2026-11-09T21:20:12.877Z | server_node_1 | ENVIADO | de=server_node_1 | relogio=57 | publish_response{success=true}
+server_node_1-1  | 2026-11-09T21:20:13.884Z | server_node_1 | RECEBIDO | de=bot_java_1 | relogio=59 | publish_request{channel=canal-bot_cpp_1-1797, message="publicando de novo (#9 de bot_java_1)"}
+server_node_1-1  | 2026-11-09T21:20:13.888Z | server_node_1 | PUBLICADO | de=server_node_1 | relogio=60 | publication{channel=canal-bot_cpp_1-1797, author=bot_java_1, message="publicando de novo (#9 de bot_java_1)"}
+server_node_1-1  | 2026-11-09T21:20:13.892Z | server_node_1 | ENVIADO | de=server_node_1 | relogio=61 | publish_response{success=true}
+server_node_1-1  | 2026-11-09T21:20:14.900Z | server_node_1 | RECEBIDO | de=bot_java_1 | relogio=63 | publish_request{channel=canal-bot_cpp_1-1797, message="ping (#10 de bot_java_1)"}
+server_node_1-1  | 2026-11-09T21:20:14.903Z | server_node_1 | PUBLICADO | de=server_node_1 | relogio=64 | publication{channel=canal-bot_cpp_1-1797, author=bot_java_1, message="ping (#10 de bot_java_1)"}
+server_node_1-1  | 2026-11-09T21:20:14.904Z | server_node_1 | ENVIADO | de=server_node_1 | relogio=65 | publish_response{success=true}
+server_node_1-1  | 2026-11-09T21:20:15.908Z | server_node_1 | RECEBIDO | de=bot_java_1 | relogio=66 | list_channels_request{}
+server_node_1-1  | 2026-11-09T21:20:15.911Z | server_node_1 | ENVIADO | de=server_node_1 | relogio=67 | list_channels_response{channels=[]}
+server_node_1-1  | 2026-11-09T21:20:16.174Z | server_node_1 | RECEBIDO | de=bot_java_2 | relogio=68 | publish_request{channel=canal-bot_node_1-9175, message="tudo certo por aqui (#1 de bot_java_2)"}
+server_node_1-1  | 2026-11-09T21:20:16.177Z | server_node_1 | PUBLICADO | de=server_node_1 | relogio=69 | publication{channel=canal-bot_node_1-9175, author=bot_java_2, message="tudo certo por aqui (#1 de bot_java_2)"}
+server_node_1-1  | 2026-11-09T21:20:16.178Z | server_node_1 | ENVIADO | de=server_node_1 | relogio=70 | publish_response{success=true}
+server_node_1-1  | 2026-11-09T21:20:17.181Z | server_node_1 | RECEBIDO | de=bot_java_2 | relogio=71 | publish_request{channel=canal-bot_node_1-9175, message="alguem por ai? (#2 de bot_java_2)"}
+server_node_1-1  | 2026-11-09T21:20:17.183Z | server_node_1 | PUBLICADO | de=server_node_1 | relogio=72 | publication{channel=canal-bot_node_1-9175, author=bot_java_2, message="alguem por ai? (#2 de bot_java_2)"}
+server_node_1-1  | 2026-11-09T21:20:17.184Z | server_node_1 | ENVIADO | de=server_node_1 | relogio=73 | publish_response{success=true}
+server_node_1-1  | 2026-11-09T21:20:18.186Z | server_node_1 | RECEBIDO | de=bot_java_2 | relogio=74 | publish_request{channel=canal-bot_node_1-9175, message="ola pessoal! (#3 de bot_java_2)"}
+server_node_1-1  | 2026-11-09T21:20:18.192Z | server_node_1 | PUBLICADO | de=server_node_1 | relogio=75 | publication{channel=canal-bot_node_1-9175, author=bot_java_2, message="ola pessoal! (#3 de bot_java_2)"}
+server_node_1-1  | 2026-11-09T21:20:18.194Z | server_node_1 | ENVIADO | de=server_node_1 | relogio=76 | publish_response{success=true}
+client_java_2-1  | 2026-11-09T21:20:03.485Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=1 | timestamp_ms: 1794259203485 sender: "bot_java_2" logical_clock: 1 login_request {   username: "bot_java_2" }
+client_java_2-1  | 2026-11-09T21:20:04.938Z | bot_java_2 | RECEBIDO | de=server_cpp_1 | relogio=14 | timestamp_ms: 1794259204938 sender: "server_cpp_1" logical_clock: 14 login_response {   success: true }
+client_java_2-1  | bot_java_2 | login realizado com sucesso
+client_java_2-1  | 2026-11-09T21:20:04.999Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=15 | timestamp_ms: 1794259204999 sender: "bot_java_2" logical_clock: 15 list_channels_request { }
+client_java_2-1  | 2026-11-09T21:20:05.029Z | bot_java_2 | RECEBIDO | de=server_cpp_1 | relogio=16 | timestamp_ms: 1794259205029 sender: "server_cpp_1" logical_clock: 16 list_channels_response {   channels: "canal-bot_cpp_1"   channels: "canal-bot_cpp_1-9302"   channels: "canal-bot_cpp_1-9871"   channels: "canal-bot_cpp_2-7971"   channels: "canal-bot_java_1-4843"   channels: "canal-bot_java_1-7634"   channels: "canal-bot_java_2-2551"   channels: "canal-bot_java_2-2747"   channels: "canal-bot_node_1-8921"   channels: "canal-bot_node_2-3140"   channels: "geral" }
+client_java_2-1  | bot_java_2 | inscrito no canal canal-bot_java_2-2551 (total de inscrições: 1)
+client_java_2-1  | 2026-11-09T21:20:05.574Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=17 | timestamp_ms: 1794259205574 sender: "bot_java_2" logical_clock: 17 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "alguem por ai? (#1 de bot_java_2)" }
+client_java_2-1  | 2026-11-09T21:20:05.585Z | bot_java_2 | RECEBIDO | de=server_cpp_1 | relogio=23 | timestamp_ms: 1794259205585 sender: "server_cpp_1" logical_clock: 23 publish_response {   success: true }
+client_java_2-1  | 2026-11-09T21:20:06.598Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=24 | timestamp_ms: 1794259206598 sender: "bot_java_2" logical_clock: 24 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "zeromq e protobuf (#2 de bot_java_2)" }
+client_java_2-1  | 2026-11-09T21:20:06.629Z | bot_java_2 | RECEBIDO | de=server_java_2 | relogio=27 | timestamp_ms: 1794259206629 sender: "server_java_2" logical_clock: 27 publish_response {   success: true }
+client_java_2-1  | 2026-11-09T21:20:07.651Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=28 | timestamp_ms: 1794259207651 sender: "bot_java_2" logical_clock: 28 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "mensagem aleatoria (#3 de bot_java_2)" }
+client_java_2-1  | 2026-11-09T21:20:07.690Z | bot_java_2 | RECEBIDO | de=server_java_2 | relogio=30 | timestamp_ms: 1794259207690 sender: "server_java_2" logical_clock: 30 publish_response {   success: true }
+client_java_2-1  | 2026-11-09T21:20:08.719Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=31 | timestamp_ms: 1794259208719 sender: "bot_java_2" logical_clock: 31 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "bom dia, canal! (#4 de bot_java_2)" }
+client_java_2-1  | 2026-11-09T21:20:08.738Z | bot_java_2 | RECEBIDO | de=server_cpp_2 | relogio=33 | timestamp_ms: 1794259208738 sender: "server_cpp_2" logical_clock: 33 publish_response {   success: true }
+client_java_2-1  | 2026-11-09T21:20:09.749Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=34 | timestamp_ms: 1794259209749 sender: "bot_java_2" logical_clock: 34 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "alguem por ai? (#5 de bot_java_2)" }
+client_java_2-1  | 2026-11-09T21:20:09.758Z | bot_java_2 | RECEBIDO | de=server_cpp_2 | relogio=36 | timestamp_ms: 1794259209758 sender: "server_cpp_2" logical_clock: 36 publish_response {   success: true }
+client_java_2-1  | 2026-11-09T21:20:10.774Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=37 | timestamp_ms: 1794259210774 sender: "bot_java_2" logical_clock: 37 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "publicando de novo (#6 de bot_java_2)" }
+client_java_2-1  | 2026-11-09T21:20:10.787Z | bot_java_2 | RECEBIDO | de=server_cpp_2 | relogio=48 | timestamp_ms: 1794259210787 sender: "server_cpp_2" logical_clock: 48 publish_response {   success: true }
+client_java_2-1  | 2026-11-09T21:20:11.793Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=49 | timestamp_ms: 1794259211793 sender: "bot_java_2" logical_clock: 49 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "publicando de novo (#7 de bot_java_2)" }
+client_java_2-1  | 2026-11-09T21:20:11.809Z | bot_java_2 | RECEBIDO | de=server_java_2 | relogio=51 | timestamp_ms: 1794259211809 sender: "server_java_2" logical_clock: 51 publish_response {   success: true }
+client_java_2-1  | 2026-11-09T21:20:12.819Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=52 | timestamp_ms: 1794259212819 sender: "bot_java_2" logical_clock: 52 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "ping (#8 de bot_java_2)" }
+client_java_2-1  | 2026-11-09T21:20:12.827Z | bot_java_2 | RECEBIDO | de=server_java_2 | relogio=54 | timestamp_ms: 1794259212827 sender: "server_java_2" logical_clock: 54 publish_response {   success: true }
+client_java_2-1  | 2026-11-09T21:20:13.836Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=55 | timestamp_ms: 1794259213836 sender: "bot_java_2" logical_clock: 55 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "ola pessoal! (#9 de bot_java_2)" }
+client_java_2-1  | 2026-11-09T21:20:13.846Z | bot_java_2 | RECEBIDO | de=server_java_2 | relogio=62 | timestamp_ms: 1794259213846 sender: "server_java_2" logical_clock: 62 publish_response {   success: true }
+client_java_2-1  | 2026-11-09T21:20:14.849Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=63 | timestamp_ms: 1794259214849 sender: "bot_java_2" logical_clock: 63 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "testando o canal (#10 de bot_java_2)" }
+client_java_2-1  | 2026-11-09T21:20:14.856Z | bot_java_2 | RECEBIDO | de=server_java_2 | relogio=65 | timestamp_ms: 1794259214856 sender: "server_java_2" logical_clock: 65 publish_response {   success: true }
+client_java_2-1  | 2026-11-09T21:20:15.859Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=66 | timestamp_ms: 1794259215859 sender: "bot_java_2" logical_clock: 66 list_channels_request { }
+client_java_2-1  | 2026-11-09T21:20:15.869Z | bot_java_2 | RECEBIDO | de=server_java_2 | relogio=67 | timestamp_ms: 1794259215869 sender: "server_java_2" logical_clock: 67 list_channels_response {   channels: "canal-bot_cpp_1-9124"   channels: "canal-bot_cpp_1-3328"   channels: "canal_aleatorio_344"   channels: "canal_aleatorio_534"   channels: "canal-bot_java_2-2866"   channels: "canal_aleatorio_337"   channels: "canal-bot_node_1-9175"   channels: "canal-bot_cpp_1-2007"   channels: "canal-bot_java_1-8748" }
+client_java_2-1  | bot_java_2 | inscrito no canal canal-bot_java_2-2866 (total de inscrições: 2)
+client_java_2-1  | 2026-11-09T21:20:16.174Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=68 | timestamp_ms: 1794259216174 sender: "bot_java_2" logical_clock: 68 publish_request {   channel: "canal-bot_node_1-9175"   message: "tudo certo por aqui (#1 de bot_java_2)" }
+client_java_2-1  | 2026-11-09T21:20:16.178Z | bot_java_2 | RECEBIDO | de=server_node_1 | relogio=70 | timestamp_ms: 1794259216178 sender: "server_node_1" logical_clock: 70 publish_response {   success: true }
+client_java_2-1  | 2026-11-09T21:20:17.181Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=71 | timestamp_ms: 1794259217181 sender: "bot_java_2" logical_clock: 71 publish_request {   channel: "canal-bot_node_1-9175"   message: "alguem por ai? (#2 de bot_java_2)" }
+client_java_2-1  | 2026-11-09T21:20:17.184Z | bot_java_2 | RECEBIDO | de=server_node_1 | relogio=73 | timestamp_ms: 1794259217184 sender: "server_node_1" logical_clock: 73 publish_response {   success: true }
+client_java_2-1  | 2026-11-09T21:20:18.186Z | bot_java_2 | ENVIADO | de=bot_java_2 | relogio=74 | timestamp_ms: 1794259218186 sender: "bot_java_2" logical_clock: 74 publish_request {   channel: "canal-bot_node_1-9175"   message: "ola pessoal! (#3 de bot_java_2)" }
+proxy-1          | [proxy] XSUB (servidores/publicadores) em tcp://*:5557 | XPUB (bots/assinantes) em tcp://*:5558
+server_java_1-1  | 2026-11-09T21:20:03.519Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=1 | timestamp_ms: 1794259203519 sender: "server_java_1" logical_clock: 1 rank_request {   name: "server_java_1" }
+server_java_1-1  | 2026-11-09T21:20:04.795Z | server_java_1 | RECEBIDO | de=reference | relogio=7 | timestamp_ms: 1794259204795 sender: "reference" logical_clock: 7 rank_response {   rank: 3 }
+server_java_1-1  | [server_java_1] rank recebido da referência: 3
+server_java_1-1  | [server_java_1] conectado ao broker em tcp://127.0.0.1:5556 e ao proxy Pub/Sub em tcp://127.0.0.1:5557 | dados em /data | canais carregados: 19
+server_java_1-1  | 2026-11-09T21:20:05.035Z | server_java_1 | RECEBIDO | de=bot_cpp_2 | relogio=17 | timestamp_ms: 1794259205035 sender: "bot_cpp_2" logical_clock: 17 list_channels_request { }
+server_java_1-1  | 2026-11-09T21:20:05.255Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=18 | timestamp_ms: 1794259205255 sender: "server_java_1" logical_clock: 18 list_channels_response {   channels: "geral"   channels: "canal-bot_java_2-1283"   channels: "canal-bot_node_1-8116"   channels: "canal-bot_cpp_2-8023"   channels: "canal-bot_cpp_2-2466"   channels: "canal-bot_node_2-8868"   channels: "canal_aleatorio_273"   channels: "canal-bot_node_1-2636"   channels: "canal_aleatorio_432"   channels: "canal-bot_cpp_1-4247"   channels: "canal_aleatorio_434"   channels: "canal_aleatorio_379"   channels: "canal-bot_cpp_1-6735"   channels: "canal_aleatorio_646"   channels: "canal-bot_cpp_1"   channels: "canal-bot_cpp_2"   channels: "canal_aleatorio_889"   channels: "canal_aleatorio_715"   channels: "canal-bot_cpp_1-8305" }
+server_java_1-1  | 2026-11-09T21:20:05.496Z | server_java_1 | RECEBIDO | de=bot_cpp_1 | relogio=21 | timestamp_ms: 1794259205496 sender: "bot_cpp_1" logical_clock: 21 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "tudo certo por aqui (#1 de bot_cpp_1)" }
+server_java_1-1  | 2026-11-09T21:20:05.504Z | server_java_1 | PUBLICADO | de=server_java_1 | relogio=22 | timestamp_ms: 1794259205504 sender: "server_java_1" logical_clock: 22 publication {   channel: "canal-bot_cpp_1-1797"   message: "tudo certo por aqui (#1 de bot_cpp_1)"   author: "bot_cpp_1" }
+server_java_1-1  | 2026-11-09T21:20:05.519Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=23 | timestamp_ms: 1794259205519 sender: "server_java_1" logical_clock: 23 publish_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:06.530Z | server_java_1 | RECEBIDO | de=bot_cpp_1 | relogio=25 | timestamp_ms: 1794259206530 sender: "bot_cpp_1" logical_clock: 25 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "tudo certo por aqui (#2 de bot_cpp_1)" }
+server_java_1-1  | 2026-11-09T21:20:06.550Z | server_java_1 | PUBLICADO | de=server_java_1 | relogio=26 | timestamp_ms: 1794259206550 sender: "server_java_1" logical_clock: 26 publication {   channel: "canal-bot_cpp_1-1797"   message: "tudo certo por aqui (#2 de bot_cpp_1)"   author: "bot_cpp_1" }
+server_java_1-1  | 2026-11-09T21:20:06.552Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=27 | timestamp_ms: 1794259206552 sender: "server_java_1" logical_clock: 27 publish_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:07.555Z | server_java_1 | RECEBIDO | de=bot_cpp_1 | relogio=29 | timestamp_ms: 1794259207555 sender: "bot_cpp_1" logical_clock: 29 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "testando o canal (#3 de bot_cpp_1)" }
+server_java_1-1  | 2026-11-09T21:20:07.580Z | server_java_1 | PUBLICADO | de=server_java_1 | relogio=30 | timestamp_ms: 1794259207580 sender: "server_java_1" logical_clock: 30 publication {   channel: "canal-bot_cpp_1-1797"   message: "testando o canal (#3 de bot_cpp_1)"   author: "bot_cpp_1" }
+server_java_1-1  | 2026-11-09T21:20:07.603Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=31 | timestamp_ms: 1794259207603 sender: "server_java_1" logical_clock: 31 publish_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:08.621Z | server_java_1 | RECEBIDO | de=bot_cpp_1 | relogio=33 | timestamp_ms: 1794259208621 sender: "bot_cpp_1" logical_clock: 33 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "mensagem aleatoria (#4 de bot_cpp_1)" }
+server_java_1-1  | 2026-11-09T21:20:08.623Z | server_java_1 | PUBLICADO | de=server_java_1 | relogio=34 | timestamp_ms: 1794259208623 sender: "server_java_1" logical_clock: 34 publication {   channel: "canal-bot_cpp_1-1797"   message: "mensagem aleatoria (#4 de bot_cpp_1)"   author: "bot_cpp_1" }
+server_java_1-1  | 2026-11-09T21:20:08.626Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=35 | timestamp_ms: 1794259208626 sender: "server_java_1" logical_clock: 35 publish_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:09.662Z | server_java_1 | RECEBIDO | de=bot_cpp_1 | relogio=37 | timestamp_ms: 1794259209662 sender: "bot_cpp_1" logical_clock: 37 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "ola pessoal! (#5 de bot_cpp_1)" }
+server_java_1-1  | 2026-11-09T21:20:09.669Z | server_java_1 | PUBLICADO | de=server_java_1 | relogio=38 | timestamp_ms: 1794259209669 sender: "server_java_1" logical_clock: 38 publication {   channel: "canal-bot_cpp_1-1797"   message: "ola pessoal! (#5 de bot_cpp_1)"   author: "bot_cpp_1" }
+server_java_1-1  | 2026-11-09T21:20:09.670Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=39 | timestamp_ms: 1794259209670 sender: "server_java_1" logical_clock: 39 publish_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:10.676Z | server_java_1 | RECEBIDO | de=bot_cpp_1 | relogio=41 | timestamp_ms: 1794259210676 sender: "bot_cpp_1" logical_clock: 41 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "bom dia, canal! (#6 de bot_cpp_1)" }
+server_java_1-1  | 2026-11-09T21:20:10.679Z | server_java_1 | PUBLICADO | de=server_java_1 | relogio=42 | timestamp_ms: 1794259210679 sender: "server_java_1" logical_clock: 42 publication {   channel: "canal-bot_cpp_1-1797"   message: "bom dia, canal! (#6 de bot_cpp_1)"   author: "bot_cpp_1" }
+server_java_1-1  | 2026-11-09T21:20:10.681Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=43 | timestamp_ms: 1794259210681 sender: "server_java_1" logical_clock: 43 publish_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:11.614Z | server_java_1 | RECEBIDO | de=bot_node_1 | relogio=1 | timestamp_ms: 1794259211614 sender: "bot_node_1" logical_clock: 1 login_request {   username: "bot_node_1" }
+server_java_1-1  | 2026-11-09T21:20:11.704Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=44 | timestamp_ms: 1794259211704 sender: "server_java_1" logical_clock: 44 login_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:11.739Z | server_java_1 | RECEBIDO | de=bot_node_1 | relogio=50 | timestamp_ms: 1794259211739 sender: "bot_node_1" logical_clock: 50 create_channel_request {   channel_name: "canal-bot_node_1-4206" }
+server_java_1-1  | 2026-11-09T21:20:11.761Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=51 | timestamp_ms: 1794259211761 sender: "server_java_1" logical_clock: 51 create_channel_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:12.745Z | server_java_1 | RECEBIDO | de=bot_cpp_2 | relogio=55 | timestamp_ms: 1794259212745 sender: "bot_cpp_2" logical_clock: 55 publish_request {   channel: "canal-bot_node_2-8868"   message: "bom dia, canal! (#8 de bot_cpp_2)" }
+server_java_1-1  | 2026-11-09T21:20:12.747Z | server_java_1 | PUBLICADO | de=server_java_1 | relogio=56 | timestamp_ms: 1794259212747 sender: "server_java_1" logical_clock: 56 publication {   channel: "canal-bot_node_2-8868"   message: "bom dia, canal! (#8 de bot_cpp_2)"   author: "bot_cpp_2" }
+server_java_1-1  | 2026-11-09T21:20:12.749Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=57 | timestamp_ms: 1794259212749 sender: "server_java_1" logical_clock: 57 publish_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:12.750Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=58 | timestamp_ms: 1794259212750 sender: "server_java_1" logical_clock: 58 heartbeat_request {   name: "server_java_1" }
+server_java_1-1  | 2026-11-09T21:20:12.757Z | server_java_1 | RECEBIDO | de=reference | relogio=59 | timestamp_ms: 1794259212757 sender: "reference" logical_clock: 59 heartbeat_response {   success: true   time_ms: 1794259212757 }
+server_java_1-1  | [server_java_1] relógio sincronizado: deslocamento 0 ms -> 2 ms (ida e volta: 12 ms)
+server_java_1-1  | 2026-11-09T21:20:13.755Z | server_java_1 | RECEBIDO | de=bot_cpp_2 | relogio=58 | timestamp_ms: 1794259213755 sender: "bot_cpp_2" logical_clock: 58 publish_request {   channel: "canal-bot_node_2-8868"   message: "sistemas distribuidos (#9 de bot_cpp_2)" }
+server_java_1-1  | 2026-11-09T21:20:13.760Z | server_java_1 | PUBLICADO | de=server_java_1 | relogio=60 | timestamp_ms: 1794259213760 sender: "server_java_1" logical_clock: 60 publication {   channel: "canal-bot_node_2-8868"   message: "sistemas distribuidos (#9 de bot_cpp_2)"   author: "bot_cpp_2" }
+broker-1         | [broker] frontend (clientes) em tcp://*:5555 | backend (servidores) em tcp://*:5556
+server_java_1-1  | 2026-11-09T21:20:13.765Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=61 | timestamp_ms: 1794259213765 sender: "server_java_1" logical_clock: 61 publish_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:14.766Z | server_java_1 | RECEBIDO | de=bot_cpp_2 | relogio=62 | timestamp_ms: 1794259214766 sender: "bot_cpp_2" logical_clock: 62 publish_request {   channel: "canal-bot_node_2-8868"   message: "zeromq e protobuf (#10 de bot_cpp_2)" }
+server_java_1-1  | 2026-11-09T21:20:14.771Z | server_java_1 | PUBLICADO | de=server_java_1 | relogio=63 | timestamp_ms: 1794259214771 sender: "server_java_1" logical_clock: 63 publication {   channel: "canal-bot_node_2-8868"   message: "zeromq e protobuf (#10 de bot_cpp_2)"   author: "bot_cpp_2" }
+server_java_1-1  | 2026-11-09T21:20:14.772Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=64 | timestamp_ms: 1794259214772 sender: "server_java_1" logical_clock: 64 publish_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:15.772Z | server_java_1 | RECEBIDO | de=bot_cpp_2 | relogio=65 | timestamp_ms: 1794259215772 sender: "bot_cpp_2" logical_clock: 65 list_channels_request { }
+server_java_1-1  | 2026-11-09T21:20:15.775Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=66 | timestamp_ms: 1794259215775 sender: "server_java_1" logical_clock: 66 list_channels_response {   channels: "geral"   channels: "canal-bot_java_2-1283"   channels: "canal-bot_node_1-8116"   channels: "canal-bot_cpp_2-8023"   channels: "canal-bot_cpp_2-2466"   channels: "canal-bot_node_2-8868"   channels: "canal_aleatorio_273"   channels: "canal-bot_node_1-2636"   channels: "canal-bot_node_1-4206"   channels: "canal_aleatorio_432"   channels: "canal-bot_cpp_1-4247"   channels: "canal_aleatorio_434"   channels: "canal_aleatorio_379"   channels: "canal-bot_cpp_1-6735"   channels: "canal_aleatorio_646"   channels: "canal-bot_cpp_1"   channels: "canal-bot_cpp_2"   channels: "canal_aleatorio_889"   channels: "canal_aleatorio_715"   channels: "canal-bot_cpp_1-8305" }
+server_java_1-1  | 2026-11-09T21:20:16.078Z | server_java_1 | RECEBIDO | de=bot_node_2 | relogio=66 | timestamp_ms: 1794259216078 sender: "bot_node_2" logical_clock: 66 publish_request {   channel: "canal-bot_cpp_1"   message: "ola pessoal! (#5 de bot_node_2)" }
+server_java_1-1  | 2026-11-09T21:20:16.083Z | server_java_1 | PUBLICADO | de=server_java_1 | relogio=67 | timestamp_ms: 1794259216083 sender: "server_java_1" logical_clock: 67 publication {   channel: "canal-bot_cpp_1"   message: "ola pessoal! (#5 de bot_node_2)"   author: "bot_node_2" }
+server_java_1-1  | 2026-11-09T21:20:16.084Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=68 | timestamp_ms: 1794259216084 sender: "server_java_1" logical_clock: 68 publish_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:17.088Z | server_java_1 | RECEBIDO | de=bot_node_2 | relogio=69 | timestamp_ms: 1794259217088 sender: "bot_node_2" logical_clock: 69 publish_request {   channel: "canal-bot_cpp_1"   message: "sistemas distribuidos (#6 de bot_node_2)" }
+server_java_1-1  | 2026-11-09T21:20:17.093Z | server_java_1 | PUBLICADO | de=server_java_1 | relogio=70 | timestamp_ms: 1794259217093 sender: "server_java_1" logical_clock: 70 publication {   channel: "canal-bot_cpp_1"   message: "sistemas distribuidos (#6 de bot_node_2)"   author: "bot_node_2" }
+server_java_1-1  | 2026-11-09T21:20:17.093Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=71 | timestamp_ms: 1794259217093 sender: "server_java_1" logical_clock: 71 publish_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:18.103Z | server_java_1 | RECEBIDO | de=bot_node_2 | relogio=72 | timestamp_ms: 1794259218103 sender: "bot_node_2" logical_clock: 72 publish_request {   channel: "canal-bot_cpp_1"   message: "ping (#7 de bot_node_2)" }
+server_java_1-1  | 2026-11-09T21:20:18.120Z | server_java_1 | PUBLICADO | de=server_java_1 | relogio=73 | timestamp_ms: 1794259218120 sender: "server_java_1" logical_clock: 73 publication {   channel: "canal-bot_cpp_1"   message: "ping (#7 de bot_node_2)"   author: "bot_node_2" }
+server_java_1-1  | 2026-11-09T21:20:18.121Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=74 | timestamp_ms: 1794259218121 sender: "server_java_1" logical_clock: 74 publish_response {   success: true }
+server_java_1-1  | 2026-11-09T21:20:19.124Z | server_java_1 | RECEBIDO | de=bot_node_2 | relogio=75 | timestamp_ms: 1794259219124 sender: "bot_node_2" logical_clock: 75 publish_request {   channel: "canal-bot_cpp_1"   message: "alguem por ai? (#8 de bot_node_2)" }
+server_java_1-1  | 2026-11-09T21:20:19.131Z | server_java_1 | PUBLICADO | de=server_java_1 | relogio=76 | timestamp_ms: 1794259219131 sender: "server_java_1" logical_clock: 76 publication {   channel: "canal-bot_cpp_1"   message: "alguem por ai? (#8 de bot_node_2)"   author: "bot_node_2" }
+server_java_1-1  | 2026-11-09T21:20:19.133Z | server_java_1 | ENVIADO | de=server_java_1 | relogio=77 | timestamp_ms: 1794259219133 sender: "server_java_1" logical_clock: 77 publish_response {   success: true }
+client_java_2-1  | 2026-11-09T21:20:18.194Z | bot_java_2 | RECEBIDO | de=server_node_1 | relogio=76 | timestamp_ms: 1794259218194 sender: "server_node_1" logical_clock: 76 publish_response {   success: true }
+client_java_1-1  | 2026-11-09T21:20:03.646Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=1 | timestamp_ms: 1794259203646 sender: "bot_java_1" logical_clock: 1 login_request {   username: "bot_java_1" }
+client_java_1-1  | 2026-11-09T21:20:05.030Z | bot_java_1 | RECEBIDO | de=server_cpp_2 | relogio=17 | timestamp_ms: 1794259205030 sender: "server_cpp_2" logical_clock: 17 login_response {   success: true }
+client_java_1-1  | bot_java_1 | login realizado com sucesso
+client_java_1-1  | 2026-11-09T21:20:05.097Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=18 | timestamp_ms: 1794259205097 sender: "bot_java_1" logical_clock: 18 list_channels_request { }
+client_java_1-1  | 2026-11-09T21:20:05.129Z | bot_java_1 | RECEBIDO | de=server_cpp_2 | relogio=19 | timestamp_ms: 1794259205129 sender: "server_cpp_2" logical_clock: 19 list_channels_response {   channels: "canal-bot_cpp_1-1797"   channels: "canal-bot_cpp_2"   channels: "canal-bot_java_2" }
+client_java_1-1  | 2026-11-09T21:20:05.175Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=20 | timestamp_ms: 1794259205175 sender: "bot_java_1" logical_clock: 20 create_channel_request {   channel_name: "canal-bot_java_1-3043" }
+client_java_1-1  | 2026-11-09T21:20:05.194Z | bot_java_1 | RECEBIDO | de=server_cpp_1 | relogio=21 | timestamp_ms: 1794259205194 sender: "server_cpp_1" logical_clock: 21 create_channel_response {   success: true }
+client_java_1-1  | bot_java_1 | inscrito no canal canal-bot_cpp_1-1797 (total de inscrições: 1)
+client_java_1-1  | 2026-11-09T21:20:05.554Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=23 | timestamp_ms: 1794259205554 sender: "bot_java_1" logical_clock: 23 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "zeromq e protobuf (#1 de bot_java_1)" }
+client_java_1-1  | 2026-11-09T21:20:05.520Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=22 | relogio_local=22 | de=bot_cpp_1 | enviada_em=2026-11-09T21:20:05.504Z | recebida_em=2026-11-09T21:20:05.520Z | "tudo certo por aqui (#1 de bot_cpp_1)"
+client_java_1-1  | 2026-11-09T21:20:05.594Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=24 | relogio_local=24 | de=bot_java_1 | enviada_em=2026-11-09T21:20:05.572Z | recebida_em=2026-11-09T21:20:05.594Z | "zeromq e protobuf (#1 de bot_java_1)"
+client_java_1-1  | 2026-11-09T21:20:05.588Z | bot_java_1 | RECEBIDO | de=server_java_2 | relogio=25 | timestamp_ms: 1794259205588 sender: "server_java_2" logical_clock: 25 publish_response {   success: true }
+client_java_1-1  | 2026-11-09T21:20:06.555Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=26 | relogio_local=26 | de=bot_cpp_1 | enviada_em=2026-11-09T21:20:06.550Z | recebida_em=2026-11-09T21:20:06.555Z | "tudo certo por aqui (#2 de bot_cpp_1)"
+client_java_1-1  | 2026-11-09T21:20:06.632Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=27 | timestamp_ms: 1794259206632 sender: "bot_java_1" logical_clock: 27 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "mensagem aleatoria (#2 de bot_java_1)" }
+client_java_1-1  | 2026-11-09T21:20:06.661Z | bot_java_1 | RECEBIDO | de=server_cpp_2 | relogio=29 | timestamp_ms: 1794259206661 sender: "server_cpp_2" logical_clock: 29 publish_response {   success: true }
+client_java_1-1  | 2026-11-09T21:20:06.688Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=28 | relogio_local=29 | de=bot_java_1 | enviada_em=2026-11-09T21:20:06.661Z | recebida_em=2026-11-09T21:20:06.688Z | "mensagem aleatoria (#2 de bot_java_1)"
+client_java_1-1  | 2026-11-09T21:20:07.624Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=30 | relogio_local=30 | de=bot_cpp_1 | enviada_em=2026-11-09T21:20:07.580Z | recebida_em=2026-11-09T21:20:07.624Z | "testando o canal (#3 de bot_cpp_1)"
+client_java_1-1  | 2026-11-09T21:20:07.692Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=31 | timestamp_ms: 1794259207692 sender: "bot_java_1" logical_clock: 31 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "ping (#3 de bot_java_1)" }
+client_java_1-1  | 2026-11-09T21:20:07.717Z | bot_java_1 | RECEBIDO | de=server_cpp_1 | relogio=33 | timestamp_ms: 1794259207717 sender: "server_cpp_1" logical_clock: 33 publish_response {   success: true }
+client_java_1-1  | 2026-11-09T21:20:07.728Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=32 | relogio_local=32 | de=bot_java_1 | enviada_em=2026-11-09T21:20:07.716Z | recebida_em=2026-11-09T21:20:07.728Z | "ping (#3 de bot_java_1)"
+client_java_1-1  | 2026-11-09T21:20:08.629Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=34 | relogio_local=34 | de=bot_cpp_1 | enviada_em=2026-11-09T21:20:08.623Z | recebida_em=2026-11-09T21:20:08.629Z | "mensagem aleatoria (#4 de bot_cpp_1)"
+client_java_1-1  | 2026-11-09T21:20:08.739Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=35 | timestamp_ms: 1794259208739 sender: "bot_java_1" logical_clock: 35 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "publicando de novo (#4 de bot_java_1)" }
+client_java_1-1  | 2026-11-09T21:20:08.779Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=36 | relogio_local=36 | de=bot_java_1 | enviada_em=2026-11-09T21:20:08.764Z | recebida_em=2026-11-09T21:20:08.779Z | "publicando de novo (#4 de bot_java_1)"
+client_java_1-1  | 2026-11-09T21:20:08.765Z | bot_java_1 | RECEBIDO | de=server_cpp_1 | relogio=37 | timestamp_ms: 1794259208765 sender: "server_cpp_1" logical_clock: 37 publish_response {   success: true }
+client_java_1-1  | 2026-11-09T21:20:09.672Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=38 | relogio_local=38 | de=bot_cpp_1 | enviada_em=2026-11-09T21:20:09.669Z | recebida_em=2026-11-09T21:20:09.672Z | "ola pessoal! (#5 de bot_cpp_1)"
+client_java_1-1  | 2026-11-09T21:20:09.790Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=39 | timestamp_ms: 1794259209790 sender: "bot_java_1" logical_clock: 39 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "sistemas distribuidos (#5 de bot_java_1)" }
+client_java_1-1  | 2026-11-09T21:20:09.804Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=40 | relogio_local=41 | de=bot_java_1 | enviada_em=2026-11-09T21:20:09.796Z | recebida_em=2026-11-09T21:20:09.804Z | "sistemas distribuidos (#5 de bot_java_1)"
+client_java_1-1  | 2026-11-09T21:20:09.797Z | bot_java_1 | RECEBIDO | de=server_cpp_1 | relogio=41 | timestamp_ms: 1794259209797 sender: "server_cpp_1" logical_clock: 41 publish_response {   success: true }
+client_java_1-1  | 2026-11-09T21:20:10.687Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=42 | relogio_local=42 | de=bot_cpp_1 | enviada_em=2026-11-09T21:20:10.679Z | recebida_em=2026-11-09T21:20:10.687Z | "bom dia, canal! (#6 de bot_cpp_1)"
+client_java_1-1  | 2026-11-09T21:20:10.816Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=43 | timestamp_ms: 1794259210816 sender: "bot_java_1" logical_clock: 43 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "testando o canal (#6 de bot_java_1)" }
+client_java_1-1  | 2026-11-09T21:20:10.831Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=46 | relogio_local=46 | de=bot_java_1 | enviada_em=2026-11-09T21:20:10.838Z | recebida_em=2026-11-09T21:20:10.831Z | "testando o canal (#6 de bot_java_1)"
+client_java_1-1  | 2026-11-09T21:20:10.838Z | bot_java_1 | RECEBIDO | de=server_cpp_1 | relogio=47 | timestamp_ms: 1794259210838 sender: "server_cpp_1" logical_clock: 47 publish_response {   success: true }
+client_java_1-1  | 2026-11-09T21:20:11.727Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=50 | relogio_local=50 | de=bot_cpp_1 | enviada_em=2026-11-09T21:20:11.697Z | recebida_em=2026-11-09T21:20:11.727Z | "testando o canal (#7 de bot_cpp_1)"
+client_java_1-1  | 2026-11-09T21:20:11.865Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=51 | timestamp_ms: 1794259211865 sender: "bot_java_1" logical_clock: 51 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "testando o canal (#7 de bot_java_1)" }
+client_java_1-1  | 2026-11-09T21:20:11.868Z | bot_java_1 | RECEBIDO | de=server_node_1 | relogio=53 | timestamp_ms: 1794259211868 sender: "server_node_1" logical_clock: 53 publish_response {   success: true }
+client_java_1-1  | 2026-11-09T21:20:11.872Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=52 | relogio_local=53 | de=bot_java_1 | enviada_em=2026-11-09T21:20:11.868Z | recebida_em=2026-11-09T21:20:11.872Z | "testando o canal (#7 de bot_java_1)"
+client_java_1-1  | 2026-11-09T21:20:12.726Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=54 | relogio_local=54 | de=bot_cpp_1 | enviada_em=2026-11-09T21:20:12.733Z | recebida_em=2026-11-09T21:20:12.726Z | "bom dia, canal! (#8 de bot_cpp_1)"
+client_java_1-1  | 2026-11-09T21:20:12.872Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=55 | timestamp_ms: 1794259212872 sender: "bot_java_1" logical_clock: 55 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "ping (#8 de bot_java_1)" }
+client_java_1-1  | 2026-11-09T21:20:12.877Z | bot_java_1 | RECEBIDO | de=server_node_1 | relogio=57 | timestamp_ms: 1794259212877 sender: "server_node_1" logical_clock: 57 publish_response {   success: true }
+client_java_1-1  | 2026-11-09T21:20:12.886Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=56 | relogio_local=57 | de=bot_java_1 | enviada_em=2026-11-09T21:20:12.877Z | recebida_em=2026-11-09T21:20:12.886Z | "ping (#8 de bot_java_1)"
+client_java_1-1  | 2026-11-09T21:20:13.727Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=58 | relogio_local=58 | de=bot_cpp_1 | enviada_em=2026-11-09T21:20:13.737Z | recebida_em=2026-11-09T21:20:13.727Z | "bom dia, canal! (#9 de bot_cpp_1)"
+client_java_1-1  | 2026-11-09T21:20:13.884Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=59 | timestamp_ms: 1794259213884 sender: "bot_java_1" logical_clock: 59 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "publicando de novo (#9 de bot_java_1)" }
+client_java_1-1  | 2026-11-09T21:20:13.896Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=60 | relogio_local=60 | de=bot_java_1 | enviada_em=2026-11-09T21:20:13.888Z | recebida_em=2026-11-09T21:20:13.896Z | "publicando de novo (#9 de bot_java_1)"
+client_java_1-1  | 2026-11-09T21:20:13.892Z | bot_java_1 | RECEBIDO | de=server_node_1 | relogio=61 | timestamp_ms: 1794259213892 sender: "server_node_1" logical_clock: 61 publish_response {   success: true }
+client_java_1-1  | 2026-11-09T21:20:14.731Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=62 | relogio_local=62 | de=bot_cpp_1 | enviada_em=2026-11-09T21:20:14.738Z | recebida_em=2026-11-09T21:20:14.731Z | "tudo certo por aqui (#10 de bot_cpp_1)"
+client_java_1-1  | 2026-11-09T21:20:14.900Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=63 | timestamp_ms: 1794259214900 sender: "bot_java_1" logical_clock: 63 publish_request {   channel: "canal-bot_cpp_1-1797"   message: "ping (#10 de bot_java_1)" }
+client_java_1-1  | 2026-11-09T21:20:14.906Z | bot_java_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=64 | relogio_local=64 | de=bot_java_1 | enviada_em=2026-11-09T21:20:14.903Z | recebida_em=2026-11-09T21:20:14.906Z | "ping (#10 de bot_java_1)"
+client_java_1-1  | 2026-11-09T21:20:14.904Z | bot_java_1 | RECEBIDO | de=server_node_1 | relogio=65 | timestamp_ms: 1794259214904 sender: "server_node_1" logical_clock: 65 publish_response {   success: true }
+client_java_1-1  | 2026-11-09T21:20:15.908Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=66 | timestamp_ms: 1794259215908 sender: "bot_java_1" logical_clock: 66 list_channels_request { }
+client_java_1-1  | 2026-11-09T21:20:15.911Z | bot_java_1 | RECEBIDO | de=server_node_1 | relogio=67 | timestamp_ms: 1794259215911 sender: "server_node_1" logical_clock: 67 list_channels_response { }
+client_java_1-1  | 2026-11-09T21:20:15.913Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=68 | timestamp_ms: 1794259215913 sender: "bot_java_1" logical_clock: 68 create_channel_request {   channel_name: "canal-bot_java_1-3452" }
+client_java_1-1  | 2026-11-09T21:20:15.920Z | bot_java_1 | RECEBIDO | de=server_node_2 | relogio=69 | timestamp_ms: 1794259215920 sender: "server_node_2" logical_clock: 69 create_channel_response {   success: true }
+client_java_1-1  | bot_java_1 | inscrito no canal canal-bot_java_1-3452 (total de inscrições: 2)
+client_java_1-1  | 2026-11-09T21:20:16.226Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=70 | timestamp_ms: 1794259216226 sender: "bot_java_1" logical_clock: 70 publish_request {   channel: "canal-bot_java_1-3452"   message: "ola pessoal! (#1 de bot_java_1)" }
+client_java_1-1  | 2026-11-09T21:20:16.236Z | bot_java_1 | MENSAGEM | canal=canal-bot_java_1-3452 | relogio_msg=71 | relogio_local=72 | de=bot_java_1 | enviada_em=2026-11-09T21:20:16.230Z | recebida_em=2026-11-09T21:20:16.236Z | "ola pessoal! (#1 de bot_java_1)"
+client_java_1-1  | 2026-11-09T21:20:16.231Z | bot_java_1 | RECEBIDO | de=server_node_2 | relogio=72 | timestamp_ms: 1794259216231 sender: "server_node_2" logical_clock: 72 publish_response {   success: true }
+client_java_1-1  | 2026-11-09T21:20:17.241Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=73 | timestamp_ms: 1794259217241 sender: "bot_java_1" logical_clock: 73 publish_request {   channel: "canal-bot_java_1-3452"   message: "testando o canal (#2 de bot_java_1)" }
+client_java_1-1  | 2026-11-09T21:20:17.262Z | bot_java_1 | MENSAGEM | canal=canal-bot_java_1-3452 | relogio_msg=74 | relogio_local=74 | de=bot_java_1 | enviada_em=2026-11-09T21:20:17.253Z | recebida_em=2026-11-09T21:20:17.262Z | "testando o canal (#2 de bot_java_1)"
+client_java_1-1  | 2026-11-09T21:20:17.256Z | bot_java_1 | RECEBIDO | de=server_node_2 | relogio=75 | timestamp_ms: 1794259217256 sender: "server_node_2" logical_clock: 75 publish_response {   success: true }
+client_java_1-1  | 2026-11-09T21:20:18.272Z | bot_java_1 | ENVIADO | de=bot_java_1 | relogio=76 | timestamp_ms: 1794259218272 sender: "bot_java_1" logical_clock: 76 publish_request {   channel: "canal-bot_java_1-3452"   message: "zeromq e protobuf (#3 de bot_java_1)" }
+client_java_1-1  | 2026-11-09T21:20:18.284Z | bot_java_1 | MENSAGEM | canal=canal-bot_java_1-3452 | relogio_msg=77 | relogio_local=77 | de=bot_java_1 | enviada_em=2026-11-09T21:20:18.277Z | recebida_em=2026-11-09T21:20:18.284Z | "zeromq e protobuf (#3 de bot_java_1)"
+client_java_1-1  | 2026-11-09T21:20:18.277Z | bot_java_1 | RECEBIDO | de=server_node_2 | relogio=78 | timestamp_ms: 1794259218277 sender: "server_node_2" logical_clock: 78 publish_response {   success: true }
+client_cpp_1-1   | 2026-11-09 21:19:57.049Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=1 | login_request{username=bot_cpp_1}
+client_cpp_1-1   | bot_cpp_1 | sem resposta válida (r=0), recriando socket
+client_cpp_1-1   | bot_cpp_1 | login falhou, tentando novamente em 2s
+client_cpp_1-1   | 2026-11-09 21:20:04.054Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=2 | login_request{username=bot_cpp_1}
+client_cpp_1-1   | 2026-11-09 21:20:04.938Z | bot_cpp_1 | RECEBIDO | de=server_cpp_1 | relogio=13 | login_response{success=true}
+client_cpp_1-1   | bot_cpp_1 | login realizado com sucesso
+client_cpp_1-1   | 2026-11-09 21:20:04.958Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=14 | list_channels_request{}
+client_cpp_1-1   | 2026-11-09 21:20:05.032Z | bot_cpp_1 | RECEBIDO | de=server_cpp_2 | relogio=18 | list_channels_response{channels=[canal-bot_cpp_1-1797, canal-bot_cpp_2, canal-bot_java_2]}
+client_cpp_1-1   | 2026-11-09 21:20:05.038Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=19 | create_channel_request{channel_name=canal-bot_cpp_1-9124}
+client_cpp_1-1   | 2026-11-09 21:20:05.189Z | bot_cpp_1 | RECEBIDO | de=server_java_2 | relogio=20 | create_channel_response{success=true}
+client_cpp_1-1   | bot_cpp_1 | inscrito no canal canal-bot_cpp_1-1797 (total de inscrições: 1)
+client_cpp_1-1   | 2026-11-09 21:20:05.496Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=21 | publish_request{channel=canal-bot_cpp_1-1797, message="tudo certo por aqui (#1 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:05.514Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=22 | relogio_local=22 | de=bot_cpp_1 | enviada_em=2026-11-09 21:20:05.504Z | recebida_em=2026-11-09 21:20:05.514Z | "tudo certo por aqui (#1 de bot_cpp_1)"
+client_cpp_1-1   | 2026-11-09 21:20:05.519Z | bot_cpp_1 | RECEBIDO | de=server_java_1 | relogio=23 | publish_response{success=true}
+client_cpp_1-1   | 2026-11-09 21:20:05.593Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=24 | relogio_local=24 | de=bot_java_1 | enviada_em=2026-11-09 21:20:05.572Z | recebida_em=2026-11-09 21:20:05.593Z | "zeromq e protobuf (#1 de bot_java_1)"
+client_cpp_1-1   | 2026-11-09 21:20:06.530Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=25 | publish_request{channel=canal-bot_cpp_1-1797, message="tudo certo por aqui (#2 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:06.553Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=26 | relogio_local=26 | de=bot_cpp_1 | enviada_em=2026-11-09 21:20:06.550Z | recebida_em=2026-11-09 21:20:06.553Z | "tudo certo por aqui (#2 de bot_cpp_1)"
+client_cpp_1-1   | 2026-11-09 21:20:06.552Z | bot_cpp_1 | RECEBIDO | de=server_java_1 | relogio=27 | publish_response{success=true}
+client_cpp_1-1   | 2026-11-09 21:20:06.680Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=28 | relogio_local=28 | de=bot_java_1 | enviada_em=2026-11-09 21:20:06.661Z | recebida_em=2026-11-09 21:20:06.680Z | "mensagem aleatoria (#2 de bot_java_1)"
+client_cpp_1-1   | 2026-11-09 21:20:07.555Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=29 | publish_request{channel=canal-bot_cpp_1-1797, message="testando o canal (#3 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:07.611Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=30 | relogio_local=30 | de=bot_cpp_1 | enviada_em=2026-11-09 21:20:07.580Z | recebida_em=2026-11-09 21:20:07.611Z | "testando o canal (#3 de bot_cpp_1)"
+client_cpp_1-1   | 2026-11-09 21:20:07.603Z | bot_cpp_1 | RECEBIDO | de=server_java_1 | relogio=31 | publish_response{success=true}
+client_cpp_1-1   | 2026-11-09 21:20:07.722Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=32 | relogio_local=32 | de=bot_java_1 | enviada_em=2026-11-09 21:20:07.716Z | recebida_em=2026-11-09 21:20:07.722Z | "ping (#3 de bot_java_1)"
+client_cpp_1-1   | 2026-11-09 21:20:08.621Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=33 | publish_request{channel=canal-bot_cpp_1-1797, message="mensagem aleatoria (#4 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:08.630Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=34 | relogio_local=34 | de=bot_cpp_1 | enviada_em=2026-11-09 21:20:08.623Z | recebida_em=2026-11-09 21:20:08.630Z | "mensagem aleatoria (#4 de bot_cpp_1)"
+client_cpp_1-1   | 2026-11-09 21:20:08.626Z | bot_cpp_1 | RECEBIDO | de=server_java_1 | relogio=35 | publish_response{success=true}
+client_cpp_1-1   | 2026-11-09 21:20:08.766Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=36 | relogio_local=36 | de=bot_java_1 | enviada_em=2026-11-09 21:20:08.764Z | recebida_em=2026-11-09 21:20:08.766Z | "publicando de novo (#4 de bot_java_1)"
+client_cpp_1-1   | 2026-11-09 21:20:09.662Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=37 | publish_request{channel=canal-bot_cpp_1-1797, message="ola pessoal! (#5 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:09.676Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=38 | relogio_local=38 | de=bot_cpp_1 | enviada_em=2026-11-09 21:20:09.669Z | recebida_em=2026-11-09 21:20:09.676Z | "ola pessoal! (#5 de bot_cpp_1)"
+client_cpp_1-1   | 2026-11-09 21:20:09.670Z | bot_cpp_1 | RECEBIDO | de=server_java_1 | relogio=39 | publish_response{success=true}
+client_cpp_1-1   | 2026-11-09 21:20:09.799Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=40 | relogio_local=40 | de=bot_java_1 | enviada_em=2026-11-09 21:20:09.796Z | recebida_em=2026-11-09 21:20:09.799Z | "sistemas distribuidos (#5 de bot_java_1)"
+client_cpp_1-1   | 2026-11-09 21:20:10.676Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=41 | publish_request{channel=canal-bot_cpp_1-1797, message="bom dia, canal! (#6 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:10.680Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=42 | relogio_local=42 | de=bot_cpp_1 | enviada_em=2026-11-09 21:20:10.679Z | recebida_em=2026-11-09 21:20:10.680Z | "bom dia, canal! (#6 de bot_cpp_1)"
+client_cpp_1-1   | 2026-11-09 21:20:10.681Z | bot_cpp_1 | RECEBIDO | de=server_java_1 | relogio=43 | publish_response{success=true}
+client_cpp_1-1   | 2026-11-09 21:20:10.834Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=46 | relogio_local=46 | de=bot_java_1 | enviada_em=2026-11-09 21:20:10.838Z | recebida_em=2026-11-09 21:20:10.834Z | "testando o canal (#6 de bot_java_1)"
+client_cpp_1-1   | 2026-11-09 21:20:11.691Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=47 | publish_request{channel=canal-bot_cpp_1-1797, message="testando o canal (#7 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:11.718Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=50 | relogio_local=50 | de=bot_cpp_1 | enviada_em=2026-11-09 21:20:11.697Z | recebida_em=2026-11-09 21:20:11.718Z | "testando o canal (#7 de bot_cpp_1)"
+client_cpp_1-1   | 2026-11-09 21:20:11.706Z | bot_cpp_1 | RECEBIDO | de=server_node_1 | relogio=51 | publish_response{success=true}
+client_node_1-1  | 2026-11-09T21:20:11.614Z | bot_node_1 | ENVIADO | de=bot_node_1 | relogio=1 | login_request{username=bot_node_1}
+client_node_1-1  | 2026-11-09T21:20:11.704Z | bot_node_1 | RECEBIDO | de=server_java_1 | relogio=44 | login_response{success=true}
+client_node_1-1  | bot_node_1 | login realizado com sucesso
+client_node_1-1  | 2026-11-09T21:20:11.720Z | bot_node_1 | ENVIADO | de=bot_node_1 | relogio=45 | list_channels_request{}
+client_node_1-1  | 2026-11-09T21:20:11.741Z | bot_node_1 | RECEBIDO | de=server_cpp_2 | relogio=49 | list_channels_response{channels=[canal-bot_cpp_1-1797, canal-bot_cpp_2, canal-bot_java_2]}
+client_node_1-1  | 2026-11-09T21:20:11.739Z | bot_node_1 | ENVIADO | de=bot_node_1 | relogio=50 | create_channel_request{channel_name=canal-bot_node_1-4206}
+client_node_1-1  | 2026-11-09T21:20:11.761Z | bot_node_1 | RECEBIDO | de=server_java_1 | relogio=51 | create_channel_response{success=true}
+client_node_1-1  | bot_node_1 | inscrito no canal canal-bot_java_2 (total de inscrições: 1)
+client_node_1-1  | 2026-11-09T21:20:12.088Z | bot_node_1 | ENVIADO | de=bot_node_1 | relogio=52 | publish_request{channel=canal-bot_cpp_2, message="sistemas distribuidos (#1 de bot_node_1)"}
+client_node_1-1  | 2026-11-09T21:20:12.099Z | bot_node_1 | RECEBIDO | de=server_cpp_2 | relogio=54 | publish_response{success=true}
+client_node_1-1  | 2026-11-09T21:20:13.093Z | bot_node_1 | ENVIADO | de=bot_node_1 | relogio=55 | publish_request{channel=canal-bot_cpp_2, message="alguem por ai? (#2 de bot_node_1)"}
+client_node_1-1  | 2026-11-09T21:20:13.103Z | bot_node_1 | RECEBIDO | de=server_cpp_2 | relogio=57 | publish_response{success=true}
+client_node_1-1  | 2026-11-09T21:20:14.100Z | bot_node_1 | ENVIADO | de=bot_node_1 | relogio=58 | publish_request{channel=canal-bot_cpp_2, message="zeromq e protobuf (#3 de bot_node_1)"}
+client_node_1-1  | 2026-11-09T21:20:14.111Z | bot_node_1 | RECEBIDO | de=server_cpp_2 | relogio=60 | publish_response{success=true}
+client_node_1-1  | 2026-11-09T21:20:15.104Z | bot_node_1 | ENVIADO | de=bot_node_1 | relogio=61 | publish_request{channel=canal-bot_cpp_2, message="zeromq e protobuf (#4 de bot_node_1)"}
+client_node_1-1  | 2026-11-09T21:20:15.114Z | bot_node_1 | RECEBIDO | de=server_cpp_2 | relogio=63 | publish_response{success=true}
+client_node_1-1  | 2026-11-09T21:20:16.107Z | bot_node_1 | ENVIADO | de=bot_node_1 | relogio=64 | publish_request{channel=canal-bot_cpp_2, message="zeromq e protobuf (#5 de bot_node_1)"}
+client_node_1-1  | 2026-11-09T21:20:16.117Z | bot_node_1 | RECEBIDO | de=server_java_2 | relogio=69 | publish_response{success=true}
+client_node_1-1  | 2026-11-09T21:20:17.119Z | bot_node_1 | ENVIADO | de=bot_node_1 | relogio=70 | publish_request{channel=canal-bot_cpp_2, message="bom dia, canal! (#6 de bot_node_1)"}
+client_node_1-1  | 2026-11-09T21:20:17.124Z | bot_node_1 | RECEBIDO | de=server_java_2 | relogio=72 | publish_response{success=true}
+client_node_1-1  | 2026-11-09T21:20:18.127Z | bot_node_1 | ENVIADO | de=bot_node_1 | relogio=73 | publish_request{channel=canal-bot_cpp_2, message="sistemas distribuidos (#7 de bot_node_1)"}
+client_node_1-1  | 2026-11-09T21:20:18.141Z | bot_node_1 | RECEBIDO | de=server_java_2 | relogio=75 | publish_response{success=true}
+client_node_1-1  | 2026-11-09T21:20:19.146Z | bot_node_1 | ENVIADO | de=bot_node_1 | relogio=76 | publish_request{channel=canal-bot_cpp_2, message="bom dia, canal! (#8 de bot_node_1)"}
+client_node_1-1  | 2026-11-09T21:20:19.160Z | bot_node_1 | RECEBIDO | de=server_java_2 | relogio=78 | publish_response{success=true}
+client_node_1-1  | npm error path /app
+client_node_1-1  | npm error command failed
+client_node_1-1  | npm error signal SIGTERM
+client_node_1-1  | npm error command sh -c tsx src/client.ts
+client_node_1-1  | npm error A complete log of this run can be found in: /root/.npm/_logs/2026-11-09T21_20_03_589Z-debug-0.log
+client_cpp_2-1   | 2026-11-09 21:19:56.891Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=1 | login_request{username=bot_cpp_2}
+client_cpp_2-1   | bot_cpp_2 | sem resposta válida (r=0), recriando socket
+client_cpp_2-1   | bot_cpp_2 | login falhou, tentando novamente em 2s
+client_cpp_2-1   | 2026-11-09 21:20:03.897Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=2 | login_request{username=bot_cpp_2}
+client_cpp_2-1   | 2026-11-09 21:20:05.030Z | bot_cpp_2 | RECEBIDO | de=server_cpp_2 | relogio=16 | login_response{success=true}
+client_cpp_2-1   | bot_cpp_2 | login realizado com sucesso
+client_cpp_2-1   | 2026-11-09 21:20:05.035Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=17 | list_channels_request{}
+client_cpp_2-1   | 2026-11-09 21:20:05.255Z | bot_cpp_2 | RECEBIDO | de=server_java_1 | relogio=18 | list_channels_response{channels=[geral, canal-bot_java_2-1283, canal-bot_node_1-8116, canal-bot_cpp_2-8023, canal-bot_cpp_2-2466, canal-bot_node_2-8868, canal_aleatorio_273, canal-bot_node_1-2636, canal_aleatorio_432, canal-bot_cpp_1-4247, canal_aleatorio_434, canal_aleatorio_379, canal-bot_cpp_1-6735, canal_aleatorio_646, canal-bot_cpp_1, canal-bot_cpp_2, canal_aleatorio_889, canal_aleatorio_715, canal-bot_cpp_1-8305]}
+client_cpp_2-1   | bot_cpp_2 | inscrito no canal canal-bot_cpp_1-4247 (total de inscrições: 1)
+client_cpp_2-1   | 2026-11-09 21:20:05.565Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=19 | publish_request{channel=canal-bot_node_2-8868, message="alguem por ai? (#1 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:05.660Z | bot_cpp_2 | RECEBIDO | de=server_cpp_2 | relogio=21 | publish_response{success=true}
+client_cpp_2-1   | 2026-11-09 21:20:06.662Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=22 | publish_request{channel=canal-bot_node_2-8868, message="publicando de novo (#2 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:06.665Z | bot_cpp_2 | RECEBIDO | de=server_cpp_1 | relogio=25 | publish_response{success=true}
+client_cpp_2-1   | 2026-11-09 21:20:07.677Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=26 | publish_request{channel=canal-bot_node_2-8868, message="alguem por ai? (#3 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:07.680Z | bot_cpp_2 | RECEBIDO | de=server_cpp_2 | relogio=31 | publish_response{success=true}
+client_cpp_2-1   | 2026-11-09 21:20:08.680Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=32 | publish_request{channel=canal-bot_node_2-8868, message="bom dia, canal! (#4 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:08.689Z | bot_cpp_2 | RECEBIDO | de=server_java_2 | relogio=34 | publish_response{success=true}
+client_cpp_2-1   | 2026-11-09 21:20:09.695Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=35 | publish_request{channel=canal-bot_node_2-8868, message="mensagem aleatoria (#5 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:09.701Z | bot_cpp_2 | RECEBIDO | de=server_java_2 | relogio=37 | publish_response{success=true}
+client_cpp_2-1   | 2026-11-09 21:20:10.703Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=38 | publish_request{channel=canal-bot_node_2-8868, message="sistemas distribuidos (#6 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:10.706Z | bot_cpp_2 | RECEBIDO | de=server_java_2 | relogio=40 | publish_response{success=true}
+client_cpp_2-1   | 2026-11-09 21:20:11.710Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=41 | publish_request{channel=canal-bot_node_2-8868, message="testando o canal (#7 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:11.732Z | bot_cpp_2 | RECEBIDO | de=server_node_2 | relogio=54 | publish_response{success=true}
+client_cpp_2-1   | 2026-11-09 21:20:12.745Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=55 | publish_request{channel=canal-bot_node_2-8868, message="bom dia, canal! (#8 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:12.749Z | bot_cpp_2 | RECEBIDO | de=server_java_1 | relogio=57 | publish_response{success=true}
+client_cpp_2-1   | 2026-11-09 21:20:13.755Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=58 | publish_request{channel=canal-bot_node_2-8868, message="sistemas distribuidos (#9 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:13.765Z | bot_cpp_2 | RECEBIDO | de=server_java_1 | relogio=61 | publish_response{success=true}
+client_node_2-1  | 2026-11-09T21:20:11.607Z | bot_node_2 | ENVIADO | de=bot_node_2 | relogio=1 | login_request{username=bot_node_2}
+client_node_2-1  | 2026-11-09T21:20:11.713Z | bot_node_2 | RECEBIDO | de=server_java_2 | relogio=41 | login_response{success=true}
+client_node_2-1  | bot_node_2 | login realizado com sucesso
+client_node_2-1  | 2026-11-09T21:20:11.730Z | bot_node_2 | ENVIADO | de=bot_node_2 | relogio=42 | list_channels_request{}
+client_node_2-1  | 2026-11-09T21:20:11.743Z | bot_node_2 | RECEBIDO | de=server_cpp_1 | relogio=48 | list_channels_response{channels=[canal-bot_cpp_1, canal-bot_cpp_1-9302, canal-bot_cpp_1-9871, canal-bot_cpp_2-7971, canal-bot_java_1-3043, canal-bot_java_1-4843, canal-bot_java_1-7634, canal-bot_java_2-2551, canal-bot_java_2-2747, canal-bot_node_1-8921, canal-bot_node_2-3140, geral]}
+client_node_2-1  | bot_node_2 | inscrito no canal canal-bot_java_2-2747 (total de inscrições: 1)
+client_node_2-1  | 2026-11-09T21:20:12.050Z | bot_node_2 | ENVIADO | de=bot_node_2 | relogio=49 | publish_request{channel=canal-bot_cpp_1, message="ping (#1 de bot_node_2)"}
+client_node_2-1  | 2026-11-09T21:20:12.055Z | bot_node_2 | RECEBIDO | de=server_node_2 | relogio=56 | publish_response{success=true}
+client_node_2-1  | 2026-11-09T21:20:13.060Z | bot_node_2 | ENVIADO | de=bot_node_2 | relogio=57 | publish_request{channel=canal-bot_cpp_1, message="mensagem aleatoria (#2 de bot_node_2)"}
+client_node_2-1  | 2026-11-09T21:20:13.061Z | bot_node_2 | RECEBIDO | de=server_node_2 | relogio=59 | publish_response{success=true}
+client_node_2-1  | 2026-11-09T21:20:14.063Z | bot_node_2 | ENVIADO | de=bot_node_2 | relogio=60 | publish_request{channel=canal-bot_cpp_1, message="mensagem aleatoria (#3 de bot_node_2)"}
+client_node_2-1  | 2026-11-09T21:20:14.068Z | bot_node_2 | RECEBIDO | de=server_node_2 | relogio=62 | publish_response{success=true}
+client_node_2-1  | 2026-11-09T21:20:15.073Z | bot_node_2 | ENVIADO | de=bot_node_2 | relogio=63 | publish_request{channel=canal-bot_cpp_1, message="bom dia, canal! (#4 de bot_node_2)"}
+client_node_2-1  | 2026-11-09T21:20:15.075Z | bot_node_2 | RECEBIDO | de=server_node_2 | relogio=65 | publish_response{success=true}
+client_node_2-1  | 2026-11-09T21:20:16.078Z | bot_node_2 | ENVIADO | de=bot_node_2 | relogio=66 | publish_request{channel=canal-bot_cpp_1, message="ola pessoal! (#5 de bot_node_2)"}
+client_node_2-1  | 2026-11-09T21:20:16.084Z | bot_node_2 | RECEBIDO | de=server_java_1 | relogio=68 | publish_response{success=true}
+client_node_2-1  | 2026-11-09T21:20:17.088Z | bot_node_2 | ENVIADO | de=bot_node_2 | relogio=69 | publish_request{channel=canal-bot_cpp_1, message="sistemas distribuidos (#6 de bot_node_2)"}
+client_node_2-1  | 2026-11-09T21:20:17.093Z | bot_node_2 | RECEBIDO | de=server_java_1 | relogio=71 | publish_response{success=true}
+client_node_2-1  | 2026-11-09T21:20:18.103Z | bot_node_2 | ENVIADO | de=bot_node_2 | relogio=72 | publish_request{channel=canal-bot_cpp_1, message="ping (#7 de bot_node_2)"}
+client_node_2-1  | 2026-11-09T21:20:18.121Z | bot_node_2 | RECEBIDO | de=server_java_1 | relogio=74 | publish_response{success=true}
+client_node_2-1  | 2026-11-09T21:20:19.124Z | bot_node_2 | ENVIADO | de=bot_node_2 | relogio=75 | publish_request{channel=canal-bot_cpp_1, message="alguem por ai? (#8 de bot_node_2)"}
+client_node_2-1  | 2026-11-09T21:20:19.133Z | bot_node_2 | RECEBIDO | de=server_java_1 | relogio=77 | publish_response{success=true}
+client_node_2-1  | npm error path /app
+client_node_2-1  | npm error command failed
+client_node_2-1  | npm error signal SIGTERM
+client_node_2-1  | npm error command sh -c tsx src/client.ts
+client_node_2-1  | npm error A complete log of this run can be found in: /root/.npm/_logs/2026-11-09T21_20_03_586Z-debug-0.log
+client_cpp_1-1   | 2026-11-09 21:20:11.871Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=52 | relogio_local=52 | de=bot_java_1 | enviada_em=2026-11-09 21:20:11.868Z | recebida_em=2026-11-09 21:20:11.871Z | "testando o canal (#7 de bot_java_1)"
+client_cpp_1-1   | 2026-11-09 21:20:12.722Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=53 | publish_request{channel=canal-bot_cpp_1-1797, message="bom dia, canal! (#8 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:12.725Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=54 | relogio_local=54 | de=bot_cpp_1 | enviada_em=2026-11-09 21:20:12.733Z | recebida_em=2026-11-09 21:20:12.725Z | "bom dia, canal! (#8 de bot_cpp_1)"
+client_cpp_1-1   | 2026-11-09 21:20:12.734Z | bot_cpp_1 | RECEBIDO | de=server_cpp_1 | relogio=55 | publish_response{success=true}
+client_cpp_1-1   | 2026-11-09 21:20:12.880Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=56 | relogio_local=56 | de=bot_java_1 | enviada_em=2026-11-09 21:20:12.877Z | recebida_em=2026-11-09 21:20:12.880Z | "ping (#8 de bot_java_1)"
+client_cpp_1-1   | 2026-11-09 21:20:13.726Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=57 | publish_request{channel=canal-bot_cpp_1-1797, message="bom dia, canal! (#9 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:13.727Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=58 | relogio_local=58 | de=bot_cpp_1 | enviada_em=2026-11-09 21:20:13.737Z | recebida_em=2026-11-09 21:20:13.727Z | "bom dia, canal! (#9 de bot_cpp_1)"
+client_cpp_1-1   | 2026-11-09 21:20:13.737Z | bot_cpp_1 | RECEBIDO | de=server_cpp_1 | relogio=59 | publish_response{success=true}
+client_cpp_1-1   | 2026-11-09 21:20:13.896Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=60 | relogio_local=60 | de=bot_java_1 | enviada_em=2026-11-09 21:20:13.888Z | recebida_em=2026-11-09 21:20:13.896Z | "publicando de novo (#9 de bot_java_1)"
+client_cpp_1-1   | 2026-11-09 21:20:14.728Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=61 | publish_request{channel=canal-bot_cpp_1-1797, message="tudo certo por aqui (#10 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:14.730Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=62 | relogio_local=62 | de=bot_cpp_1 | enviada_em=2026-11-09 21:20:14.738Z | recebida_em=2026-11-09 21:20:14.730Z | "tudo certo por aqui (#10 de bot_cpp_1)"
+client_cpp_1-1   | 2026-11-09 21:20:14.739Z | bot_cpp_1 | RECEBIDO | de=server_cpp_1 | relogio=63 | publish_response{success=true}
+client_cpp_1-1   | 2026-11-09 21:20:14.905Z | bot_cpp_1 | MENSAGEM | canal=canal-bot_cpp_1-1797 | relogio_msg=64 | relogio_local=64 | de=bot_java_1 | enviada_em=2026-11-09 21:20:14.903Z | recebida_em=2026-11-09 21:20:14.905Z | "ping (#10 de bot_java_1)"
+client_cpp_1-1   | 2026-11-09 21:20:15.730Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=65 | list_channels_request{}
+client_cpp_1-1   | 2026-11-09 21:20:15.740Z | bot_cpp_1 | RECEBIDO | de=server_cpp_1 | relogio=66 | list_channels_response{channels=[canal-bot_cpp_1, canal-bot_cpp_1-9302, canal-bot_cpp_1-9871, canal-bot_cpp_2-7971, canal-bot_java_1-3043, canal-bot_java_1-4843, canal-bot_java_1-7634, canal-bot_java_2-2551, canal-bot_java_2-2747, canal-bot_node_1-8921, canal-bot_node_2-3140, geral]}
+client_cpp_1-1   | bot_cpp_1 | inscrito no canal canal-bot_java_1-4843 (total de inscrições: 2)
+client_cpp_1-1   | 2026-11-09 21:20:16.031Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=67 | publish_request{channel=canal-bot_cpp_1-9871, message="testando o canal (#1 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:16.041Z | bot_cpp_1 | RECEBIDO | de=server_cpp_2 | relogio=69 | publish_response{success=true}
+client_cpp_1-1   | 2026-11-09 21:20:17.038Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=70 | publish_request{channel=canal-bot_cpp_1-9871, message="mensagem aleatoria (#2 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:17.047Z | bot_cpp_1 | RECEBIDO | de=server_cpp_2 | relogio=72 | publish_response{success=true}
+client_cpp_1-1   | 2026-11-09 21:20:18.039Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=73 | publish_request{channel=canal-bot_cpp_1-9871, message="sistemas distribuidos (#3 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:18.050Z | bot_cpp_1 | RECEBIDO | de=server_cpp_2 | relogio=75 | publish_response{success=true}
+client_cpp_1-1   | 2026-11-09 21:20:19.041Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=76 | publish_request{channel=canal-bot_cpp_1-9871, message="alguem por ai? (#4 de bot_cpp_1)"}
+client_cpp_1-1   | 2026-11-09 21:20:19.051Z | bot_cpp_1 | RECEBIDO | de=server_cpp_2 | relogio=78 | publish_response{success=true}
+client_cpp_1-1   | 2026-11-09 21:20:20.043Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=79 | publish_request{channel=canal-bot_cpp_1-9871, message="alguem por ai? (#5 de bot_cpp_1)"}
+client_cpp_1-1   | bot_cpp_1 | sem resposta válida (r=0), recriando socket
+client_cpp_1-1   | 2026-11-09 21:20:26.049Z | bot_cpp_1 | ENVIADO | de=bot_cpp_1 | relogio=80 | publish_request{channel=canal-bot_cpp_1-9871, message="bom dia, canal! (#6 de bot_cpp_1)"}
+client_cpp_2-1   | 2026-11-09 21:20:14.766Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=62 | publish_request{channel=canal-bot_node_2-8868, message="zeromq e protobuf (#10 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:14.772Z | bot_cpp_2 | RECEBIDO | de=server_java_1 | relogio=64 | publish_response{success=true}
+client_cpp_2-1   | 2026-11-09 21:20:15.772Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=65 | list_channels_request{}
+client_cpp_2-1   | 2026-11-09 21:20:15.775Z | bot_cpp_2 | RECEBIDO | de=server_java_1 | relogio=66 | list_channels_response{channels=[geral, canal-bot_java_2-1283, canal-bot_node_1-8116, canal-bot_cpp_2-8023, canal-bot_cpp_2-2466, canal-bot_node_2-8868, canal_aleatorio_273, canal-bot_node_1-2636, canal-bot_node_1-4206, canal_aleatorio_432, canal-bot_cpp_1-4247, canal_aleatorio_434, canal_aleatorio_379, canal-bot_cpp_1-6735, canal_aleatorio_646, canal-bot_cpp_1, canal-bot_cpp_2, canal_aleatorio_889, canal_aleatorio_715, canal-bot_cpp_1-8305]}
+client_cpp_2-1   | bot_cpp_2 | inscrito no canal geral (total de inscrições: 2)
+client_cpp_2-1   | 2026-11-09 21:20:16.076Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=67 | publish_request{channel=canal_aleatorio_889, message="sistemas distribuidos (#1 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:16.087Z | bot_cpp_2 | RECEBIDO | de=server_cpp_1 | relogio=69 | publish_response{success=true}
+client_cpp_2-1   | 2026-11-09 21:20:17.077Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=70 | publish_request{channel=canal_aleatorio_889, message="alguem por ai? (#2 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:17.088Z | bot_cpp_2 | RECEBIDO | de=server_cpp_1 | relogio=72 | publish_response{success=true}
+client_cpp_2-1   | 2026-11-09 21:20:18.080Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=73 | publish_request{channel=canal_aleatorio_889, message="ping (#3 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:18.094Z | bot_cpp_2 | RECEBIDO | de=server_cpp_1 | relogio=75 | publish_response{success=true}
+client_cpp_2-1   | 2026-11-09 21:20:19.085Z | bot_cpp_2 | ENVIADO | de=bot_cpp_2 | relogio=76 | publish_request{channel=canal_aleatorio_889, message="ola pessoal! (#4 de bot_cpp_2)"}
+client_cpp_2-1   | 2026-11-09 21:20:19.096Z | bot_cpp_2 | RECEBIDO | de=server_cpp_1 | relogio=78 | publish_response{success=true}
+reference-1      | [reference] referência ouvindo em tcp://*:5559 | timeout do heartbeat: 30000 ms | desvio da hora: 0 ms
+reference-1      | 2026-11-09T21:20:02.903Z | reference | RECEBIDO | de=server_cpp_1 | relogio=4 | timestamp_ms: 1794259202903 sender: "server_cpp_1" logical_clock: 4 rank_request {   name: "server_cpp_1" }
+reference-1      | 2026-11-09T21:20:04.780Z | reference | ENVIADO | de=reference | relogio=5 | timestamp_ms: 1794259204780 sender: "reference" logical_clock: 5 rank_response {   rank: 1 }
+reference-1      | 2026-11-09T21:20:02.906Z | reference | RECEBIDO | de=server_cpp_2 | relogio=4 | timestamp_ms: 1794259202906 sender: "server_cpp_2" logical_clock: 4 rank_request {   name: "server_cpp_2" }
+reference-1      | 2026-11-09T21:20:04.794Z | reference | ENVIADO | de=reference | relogio=6 | timestamp_ms: 1794259204794 sender: "reference" logical_clock: 6 rank_response {   rank: 2 }
+reference-1      | 2026-11-09T21:20:03.519Z | reference | RECEBIDO | de=server_java_1 | relogio=1 | timestamp_ms: 1794259203519 sender: "server_java_1" logical_clock: 1 rank_request {   name: "server_java_1" }
+reference-1      | 2026-11-09T21:20:04.795Z | reference | ENVIADO | de=reference | relogio=7 | timestamp_ms: 1794259204795 sender: "reference" logical_clock: 7 rank_response {   rank: 3 }
+reference-1      | 2026-11-09T21:20:03.534Z | reference | RECEBIDO | de=server_java_2 | relogio=1 | timestamp_ms: 1794259203534 sender: "server_java_2" logical_clock: 1 rank_request {   name: "server_java_2" }
+reference-1      | 2026-11-09T21:20:04.796Z | reference | ENVIADO | de=reference | relogio=8 | timestamp_ms: 1794259204796 sender: "reference" logical_clock: 8 rank_response {   rank: 4 }
+reference-1      | 2026-11-09T21:20:04.911Z | reference | RECEBIDO | de=server_cpp_1 | relogio=5 | timestamp_ms: 1794259204911 sender: "server_cpp_1" logical_clock: 5 rank_request {   name: "server_cpp_1" }
+reference-1      | 2026-11-09T21:20:04.913Z | reference | ENVIADO | de=reference | relogio=9 | timestamp_ms: 1794259204913 sender: "reference" logical_clock: 9 rank_response {   rank: 1 }
+reference-1      | 2026-11-09T21:20:04.914Z | reference | RECEBIDO | de=server_cpp_1 | relogio=10 | timestamp_ms: 1794259204914 sender: "server_cpp_1" logical_clock: 10 list_servers_request { }
+reference-1      | 2026-11-09T21:20:04.928Z | reference | ENVIADO | de=reference | relogio=11 | timestamp_ms: 1794259204928 sender: "reference" logical_clock: 11 list_servers_response {   servers {     name: "server_cpp_1"     rank: 1   }   servers {     name: "server_cpp_2"     rank: 2   }   servers {     name: "server_java_1"     rank: 3   }   servers {     name: "server_java_2"     rank: 4   } }
+reference-1      | 2026-11-09T21:20:04.911Z | reference | RECEBIDO | de=server_cpp_2 | relogio=5 | timestamp_ms: 1794259204911 sender: "server_cpp_2" logical_clock: 5 rank_request {   name: "server_cpp_2" }
+reference-1      | 2026-11-09T21:20:04.982Z | reference | ENVIADO | de=reference | relogio=12 | timestamp_ms: 1794259204982 sender: "reference" logical_clock: 12 rank_response {   rank: 2 }
+reference-1      | 2026-11-09T21:20:04.988Z | reference | RECEBIDO | de=server_cpp_2 | relogio=13 | timestamp_ms: 1794259204988 sender: "server_cpp_2" logical_clock: 13 list_servers_request { }
+reference-1      | 2026-11-09T21:20:05.002Z | reference | ENVIADO | de=reference | relogio=14 | timestamp_ms: 1794259205002 sender: "reference" logical_clock: 14 list_servers_response {   servers {     name: "server_cpp_1"     rank: 1   }   servers {     name: "server_cpp_2"     rank: 2   }   servers {     name: "server_java_1"     rank: 3   }   servers {     name: "server_java_2"     rank: 4   } }
+reference-1      | 2026-11-09T21:20:09.758Z | reference | RECEBIDO | de=server_cpp_2 | relogio=37 | timestamp_ms: 1794259209758 sender: "server_cpp_2" logical_clock: 37 heartbeat_request {   name: "server_cpp_2" }
+reference-1      | 2026-11-09T21:20:09.791Z | reference | ENVIADO | de=reference | relogio=38 | timestamp_ms: 1794259209791 sender: "reference" logical_clock: 38 heartbeat_response {   success: true   time_ms: 1794259209791 }
+reference-1      | 2026-11-09T21:20:09.797Z | reference | RECEBIDO | de=server_cpp_1 | relogio=42 | timestamp_ms: 1794259209797 sender: "server_cpp_1" logical_clock: 42 heartbeat_request {   name: "server_cpp_1" }
+reference-1      | 2026-11-09T21:20:09.819Z | reference | ENVIADO | de=reference | relogio=43 | timestamp_ms: 1794259209819 sender: "reference" logical_clock: 43 heartbeat_response {   success: true   time_ms: 1794259209819 }
+reference-1      | 2026-11-09T21:20:09.831Z | reference | RECEBIDO | de=server_cpp_1 | relogio=44 | timestamp_ms: 1794259209831 sender: "server_cpp_1" logical_clock: 44 list_servers_request { }
+reference-1      | 2026-11-09T21:20:09.828Z | reference | ENVIADO | de=reference | relogio=45 | timestamp_ms: 1794259209828 sender: "reference" logical_clock: 45 list_servers_response {   servers {     name: "server_cpp_1"     rank: 1   }   servers {     name: "server_cpp_2"     rank: 2   }   servers {     name: "server_java_1"     rank: 3   }   servers {     name: "server_java_2"     rank: 4   } }
+reference-1      | 2026-11-09T21:20:09.814Z | reference | RECEBIDO | de=server_cpp_2 | relogio=39 | timestamp_ms: 1794259209814 sender: "server_cpp_2" logical_clock: 39 list_servers_request { }
+reference-1      | 2026-11-09T21:20:09.838Z | reference | ENVIADO | de=reference | relogio=46 | timestamp_ms: 1794259209838 sender: "reference" logical_clock: 46 list_servers_response {   servers {     name: "server_cpp_1"     rank: 1   }   servers {     name: "server_cpp_2"     rank: 2   }   servers {     name: "server_java_1"     rank: 3   }   servers {     name: "server_java_2"     rank: 4   } }
+reference-1      | 2026-11-09T21:20:11.546Z | reference | RECEBIDO | de=server_node_1 | relogio=1 | timestamp_ms: 1794259211546 sender: "server_node_1" logical_clock: 1 rank_request {   name: "server_node_1" }
+reference-1      | 2026-11-09T21:20:11.594Z | reference | ENVIADO | de=reference | relogio=47 | timestamp_ms: 1794259211594 sender: "reference" logical_clock: 47 rank_response {   rank: 5 }
+reference-1      | 2026-11-09T21:20:11.617Z | reference | RECEBIDO | de=server_node_1 | relogio=48 | timestamp_ms: 1794259211617 sender: "server_node_1" logical_clock: 48 list_servers_request { }
+reference-1      | 2026-11-09T21:20:11.662Z | reference | ENVIADO | de=reference | relogio=49 | timestamp_ms: 1794259211662 sender: "reference" logical_clock: 49 list_servers_response {   servers {     name: "server_cpp_1"     rank: 1   }   servers {     name: "server_cpp_2"     rank: 2   }   servers {     name: "server_java_1"     rank: 3   }   servers {     name: "server_java_2"     rank: 4   }   servers {     name: "server_node_1"     rank: 5   } }
+reference-1      | 2026-11-09T21:20:11.620Z | reference | RECEBIDO | de=server_node_2 | relogio=1 | timestamp_ms: 1794259211620 sender: "server_node_2" logical_clock: 1 rank_request {   name: "server_node_2" }
+reference-1      | 2026-11-09T21:20:11.668Z | reference | ENVIADO | de=reference | relogio=50 | timestamp_ms: 1794259211668 sender: "reference" logical_clock: 50 rank_response {   rank: 6 }
+reference-1      | 2026-11-09T21:20:11.673Z | reference | RECEBIDO | de=server_node_2 | relogio=51 | timestamp_ms: 1794259211673 sender: "server_node_2" logical_clock: 51 list_servers_request { }
+reference-1      | 2026-11-09T21:20:11.675Z | reference | ENVIADO | de=reference | relogio=52 | timestamp_ms: 1794259211675 sender: "reference" logical_clock: 52 list_servers_response {   servers {     name: "server_cpp_1"     rank: 1   }   servers {     name: "server_cpp_2"     rank: 2   }   servers {     name: "server_java_1"     rank: 3   }   servers {     name: "server_java_2"     rank: 4   }   servers {     name: "server_node_1"     rank: 5   }   servers {     name: "server_node_2"     rank: 6   } }
+reference-1      | 2026-11-09T21:20:12.750Z | reference | RECEBIDO | de=server_java_1 | relogio=58 | timestamp_ms: 1794259212750 sender: "server_java_1" logical_clock: 58 heartbeat_request {   name: "server_java_1" }
+reference-1      | 2026-11-09T21:20:12.757Z | reference | ENVIADO | de=reference | relogio=59 | timestamp_ms: 1794259212757 sender: "reference" logical_clock: 59 heartbeat_response {   success: true   time_ms: 1794259212757 }
+reference-1      | 2026-11-09T21:20:12.836Z | reference | RECEBIDO | de=server_java_2 | relogio=55 | timestamp_ms: 1794259212836 sender: "server_java_2" logical_clock: 55 heartbeat_request {   name: "server_java_2" }
+reference-1      | 2026-11-09T21:20:12.843Z | reference | ENVIADO | de=reference | relogio=60 | timestamp_ms: 1794259212843 sender: "reference" logical_clock: 60 heartbeat_response {   success: true   time_ms: 1794259212843 }
+reference-1      | 2026-11-09T21:20:19.051Z | reference | RECEBIDO | de=server_cpp_2 | relogio=79 | timestamp_ms: 1794259219051 sender: "server_cpp_2" logical_clock: 79 heartbeat_request {   name: "server_cpp_2" }
+reference-1      | 2026-11-09T21:20:19.045Z | reference | ENVIADO | de=reference | relogio=80 | timestamp_ms: 1794259219045 sender: "reference" logical_clock: 80 heartbeat_response {   success: true   time_ms: 1794259219045 }
+reference-1      | 2026-11-09T21:20:19.051Z | reference | RECEBIDO | de=server_cpp_2 | relogio=81 | timestamp_ms: 1794259219051 sender: "server_cpp_2" logical_clock: 81 list_servers_request { }
+reference-1      | 2026-11-09T21:20:19.049Z | reference | ENVIADO | de=reference | relogio=82 | timestamp_ms: 1794259219049 sender: "reference" logical_clock: 82 list_servers_response {   servers {     name: "server_cpp_1"     rank: 1   }   servers {     name: "server_cpp_2"     rank: 2   }   servers {     name: "server_java_1"     rank: 3   }   servers {     name: "server_java_2"     rank: 4   }   servers {     name: "server_node_1"     rank: 5   }   servers {     name: "server_node_2"     rank: 6   } }
+reference-1      | 2026-11-09T21:20:19.096Z | reference | RECEBIDO | de=server_cpp_1 | relogio=79 | timestamp_ms: 1794259219096 sender: "server_cpp_1" logical_clock: 79 heartbeat_request {   name: "server_cpp_1" }
+reference-1      | 2026-11-09T21:20:19.090Z | reference | ENVIADO | de=reference | relogio=83 | timestamp_ms: 1794259219090 sender: "reference" logical_clock: 83 heartbeat_response {   success: true   time_ms: 1794259219090 }
+reference-1      | 2026-11-09T21:20:19.096Z | reference | RECEBIDO | de=server_cpp_1 | relogio=84 | timestamp_ms: 1794259219096 sender: "server_cpp_1" logical_clock: 84 list_servers_request { }
+reference-1      | 2026-11-09T21:20:19.099Z | reference | ENVIADO | de=reference | relogio=85 | timestamp_ms: 1794259219099 sender: "reference" logical_clock: 85 list_servers_response {   servers {     name: "server_cpp_1"     rank: 1   }   servers {     name: "server_cpp_2"     rank: 2   }   servers {     name: "server_java_1"     rank: 3   }   servers {     name: "server_java_2"     rank: 4   }   servers {     name: "server_node_1"     rank: 5   }   servers {     name: "server_node_2"     rank: 6   } }
+server_java_2-1  | [server_java_2] relógio sincronizado: deslocamento 0 ms -> 2 ms (ida e volta: 16 ms)
+server_java_2-1  | 2026-11-09T21:20:13.836Z | server_java_2 | RECEBIDO | de=bot_java_2 | relogio=55 | timestamp_ms: 1794259213836 sender: "bot_java_2" logical_clock: 55 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "ola pessoal! (#9 de bot_java_2)" }
+server_java_2-1  | 2026-11-09T21:20:13.845Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=61 | timestamp_ms: 1794259213845 sender: "server_java_2" logical_clock: 61 publication {   channel: "canal-bot_cpp_2-7971"   message: "ola pessoal! (#9 de bot_java_2)"   author: "bot_java_2" }
+server_java_2-1  | 2026-11-09T21:20:13.846Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=62 | timestamp_ms: 1794259213846 sender: "server_java_2" logical_clock: 62 publish_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:14.849Z | server_java_2 | RECEBIDO | de=bot_java_2 | relogio=63 | timestamp_ms: 1794259214849 sender: "bot_java_2" logical_clock: 63 publish_request {   channel: "canal-bot_cpp_2-7971"   message: "testando o canal (#10 de bot_java_2)" }
+server_java_2-1  | 2026-11-09T21:20:14.854Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=64 | timestamp_ms: 1794259214854 sender: "server_java_2" logical_clock: 64 publication {   channel: "canal-bot_cpp_2-7971"   message: "testando o canal (#10 de bot_java_2)"   author: "bot_java_2" }
+server_java_2-1  | 2026-11-09T21:20:14.856Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=65 | timestamp_ms: 1794259214856 sender: "server_java_2" logical_clock: 65 publish_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:15.859Z | server_java_2 | RECEBIDO | de=bot_java_2 | relogio=66 | timestamp_ms: 1794259215859 sender: "bot_java_2" logical_clock: 66 list_channels_request { }
+server_java_2-1  | 2026-11-09T21:20:15.869Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=67 | timestamp_ms: 1794259215869 sender: "server_java_2" logical_clock: 67 list_channels_response {   channels: "canal-bot_cpp_1-9124"   channels: "canal-bot_cpp_1-3328"   channels: "canal_aleatorio_344"   channels: "canal_aleatorio_534"   channels: "canal-bot_java_2-2866"   channels: "canal_aleatorio_337"   channels: "canal-bot_node_1-9175"   channels: "canal-bot_cpp_1-2007"   channels: "canal-bot_java_1-8748" }
+server_java_2-1  | 2026-11-09T21:20:16.107Z | server_java_2 | RECEBIDO | de=bot_node_1 | relogio=64 | timestamp_ms: 1794259216107 sender: "bot_node_1" logical_clock: 64 publish_request {   channel: "canal-bot_cpp_2"   message: "zeromq e protobuf (#5 de bot_node_1)" }
+server_java_2-1  | 2026-11-09T21:20:16.113Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=68 | timestamp_ms: 1794259216113 sender: "server_java_2" logical_clock: 68 publication {   channel: "canal-bot_cpp_2"   message: "zeromq e protobuf (#5 de bot_node_1)"   author: "bot_node_1" }
+server_java_2-1  | 2026-11-09T21:20:16.117Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=69 | timestamp_ms: 1794259216117 sender: "server_java_2" logical_clock: 69 publish_response {   success: true }
+server_node_2-1  | [server_node_2] conectado ao broker em tcp://127.0.0.1:5556 e ao proxy Pub/Sub em tcp://127.0.0.1:5557 | referência em tcp://127.0.0.1:5559 | dados em /data | canais carregados: 4
+server_node_2-1  | 2026-11-09T21:20:11.620Z | server_node_2 | ENVIADO | de=server_node_2 | relogio=1 | rank_request{name=server_node_2}
+server_node_2-1  | 2026-11-09T21:20:11.668Z | server_node_2 | RECEBIDO | de=reference | relogio=50 | rank_response{rank=6}
+server_node_2-1  | [server_node_2] rank recebido da referência: 6
+server_node_2-1  | 2026-11-09T21:20:11.673Z | server_node_2 | ENVIADO | de=server_node_2 | relogio=51 | list_servers_request{}
+server_node_2-1  | 2026-11-09T21:20:11.675Z | server_node_2 | RECEBIDO | de=reference | relogio=52 | list_servers_response{servers=[server_cpp_1:1, server_cpp_2:2, server_java_1:3, server_java_2:4, server_node_1:5, server_node_2:6]}
+server_node_2-1  | 2026-11-09T21:20:11.710Z | server_node_2 | RECEBIDO | de=bot_cpp_2 | relogio=41 | publish_request{channel=canal-bot_node_2-8868, message="testando o canal (#7 de bot_cpp_2)"}
+server_node_2-1  | 2026-11-09T21:20:11.718Z | server_node_2 | PUBLICADO | de=server_node_2 | relogio=53 | publication{channel=canal-bot_node_2-8868, author=bot_cpp_2, message="testando o canal (#7 de bot_cpp_2)"}
+server_node_2-1  | 2026-11-09T21:20:11.732Z | server_node_2 | ENVIADO | de=server_node_2 | relogio=54 | publish_response{success=true}
+server_node_2-1  | 2026-11-09T21:20:12.050Z | server_node_2 | RECEBIDO | de=bot_node_2 | relogio=49 | publish_request{channel=canal-bot_cpp_1, message="ping (#1 de bot_node_2)"}
+server_node_2-1  | 2026-11-09T21:20:12.054Z | server_node_2 | PUBLICADO | de=server_node_2 | relogio=55 | publication{channel=canal-bot_cpp_1, author=bot_node_2, message="ping (#1 de bot_node_2)"}
+server_node_2-1  | 2026-11-09T21:20:12.055Z | server_node_2 | ENVIADO | de=server_node_2 | relogio=56 | publish_response{success=true}
+server_node_2-1  | 2026-11-09T21:20:13.060Z | server_node_2 | RECEBIDO | de=bot_node_2 | relogio=57 | publish_request{channel=canal-bot_cpp_1, message="mensagem aleatoria (#2 de bot_node_2)"}
+server_node_2-1  | 2026-11-09T21:20:13.061Z | server_node_2 | PUBLICADO | de=server_node_2 | relogio=58 | publication{channel=canal-bot_cpp_1, author=bot_node_2, message="mensagem aleatoria (#2 de bot_node_2)"}
+server_node_2-1  | 2026-11-09T21:20:13.061Z | server_node_2 | ENVIADO | de=server_node_2 | relogio=59 | publish_response{success=true}
+server_node_2-1  | 2026-11-09T21:20:14.063Z | server_node_2 | RECEBIDO | de=bot_node_2 | relogio=60 | publish_request{channel=canal-bot_cpp_1, message="mensagem aleatoria (#3 de bot_node_2)"}
+server_node_2-1  | 2026-11-09T21:20:14.067Z | server_node_2 | PUBLICADO | de=server_node_2 | relogio=61 | publication{channel=canal-bot_cpp_1, author=bot_node_2, message="mensagem aleatoria (#3 de bot_node_2)"}
+server_java_2-1  | 2026-11-09T21:20:17.119Z | server_java_2 | RECEBIDO | de=bot_node_1 | relogio=70 | timestamp_ms: 1794259217119 sender: "bot_node_1" logical_clock: 70 publish_request {   channel: "canal-bot_cpp_2"   message: "bom dia, canal! (#6 de bot_node_1)" }
+server_java_2-1  | 2026-11-09T21:20:17.123Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=71 | timestamp_ms: 1794259217123 sender: "server_java_2" logical_clock: 71 publication {   channel: "canal-bot_cpp_2"   message: "bom dia, canal! (#6 de bot_node_1)"   author: "bot_node_1" }
+server_java_2-1  | 2026-11-09T21:20:17.124Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=72 | timestamp_ms: 1794259217124 sender: "server_java_2" logical_clock: 72 publish_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:18.127Z | server_java_2 | RECEBIDO | de=bot_node_1 | relogio=73 | timestamp_ms: 1794259218127 sender: "bot_node_1" logical_clock: 73 publish_request {   channel: "canal-bot_cpp_2"   message: "sistemas distribuidos (#7 de bot_node_1)" }
+server_java_2-1  | 2026-11-09T21:20:18.137Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=74 | timestamp_ms: 1794259218137 sender: "server_java_2" logical_clock: 74 publication {   channel: "canal-bot_cpp_2"   message: "sistemas distribuidos (#7 de bot_node_1)"   author: "bot_node_1" }
+server_java_2-1  | 2026-11-09T21:20:18.141Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=75 | timestamp_ms: 1794259218141 sender: "server_java_2" logical_clock: 75 publish_response {   success: true }
+server_java_2-1  | 2026-11-09T21:20:19.146Z | server_java_2 | RECEBIDO | de=bot_node_1 | relogio=76 | timestamp_ms: 1794259219146 sender: "bot_node_1" logical_clock: 76 publish_request {   channel: "canal-bot_cpp_2"   message: "bom dia, canal! (#8 de bot_node_1)" }
+server_java_2-1  | 2026-11-09T21:20:19.154Z | server_java_2 | PUBLICADO | de=server_java_2 | relogio=77 | timestamp_ms: 1794259219154 sender: "server_java_2" logical_clock: 77 publication {   channel: "canal-bot_cpp_2"   message: "bom dia, canal! (#8 de bot_node_1)"   author: "bot_node_1" }
+server_java_2-1  | 2026-11-09T21:20:19.160Z | server_java_2 | ENVIADO | de=server_java_2 | relogio=78 | timestamp_ms: 1794259219160 sender: "server_java_2" logical_clock: 78 publish_response {   success: true }
+server_node_2-1  | 2026-11-09T21:20:14.068Z | server_node_2 | ENVIADO | de=server_node_2 | relogio=62 | publish_response{success=true}
+server_node_2-1  | 2026-11-09T21:20:15.073Z | server_node_2 | RECEBIDO | de=bot_node_2 | relogio=63 | publish_request{channel=canal-bot_cpp_1, message="bom dia, canal! (#4 de bot_node_2)"}
+server_node_2-1  | 2026-11-09T21:20:15.075Z | server_node_2 | PUBLICADO | de=server_node_2 | relogio=64 | publication{channel=canal-bot_cpp_1, author=bot_node_2, message="bom dia, canal! (#4 de bot_node_2)"}
+server_node_2-1  | 2026-11-09T21:20:15.075Z | server_node_2 | ENVIADO | de=server_node_2 | relogio=65 | publish_response{success=true}
+server_node_2-1  | 2026-11-09T21:20:15.913Z | server_node_2 | RECEBIDO | de=bot_java_1 | relogio=68 | create_channel_request{channel_name=canal-bot_java_1-3452}
+server_node_2-1  | 2026-11-09T21:20:15.920Z | server_node_2 | ENVIADO | de=server_node_2 | relogio=69 | create_channel_response{success=true}
+server_node_2-1  | 2026-11-09T21:20:16.226Z | server_node_2 | RECEBIDO | de=bot_java_1 | relogio=70 | publish_request{channel=canal-bot_java_1-3452, message="ola pessoal! (#1 de bot_java_1)"}
+server_node_2-1  | 2026-11-09T21:20:16.230Z | server_node_2 | PUBLICADO | de=server_node_2 | relogio=71 | publication{channel=canal-bot_java_1-3452, author=bot_java_1, message="ola pessoal! (#1 de bot_java_1)"}
+server_node_2-1  | 2026-11-09T21:20:16.231Z | server_node_2 | ENVIADO | de=server_node_2 | relogio=72 | publish_response{success=true}
+server_node_2-1  | 2026-11-09T21:20:17.241Z | server_node_2 | RECEBIDO | de=bot_java_1 | relogio=73 | publish_request{channel=canal-bot_java_1-3452, message="testando o canal (#2 de bot_java_1)"}
+server_node_2-1  | 2026-11-09T21:20:17.253Z | server_node_2 | PUBLICADO | de=server_node_2 | relogio=74 | publication{channel=canal-bot_java_1-3452, author=bot_java_1, message="testando o canal (#2 de bot_java_1)"}
+server_node_2-1  | 2026-11-09T21:20:17.256Z | server_node_2 | ENVIADO | de=server_node_2 | relogio=75 | publish_response{success=true}
+server_node_2-1  | 2026-11-09T21:20:18.272Z | server_node_2 | RECEBIDO | de=bot_java_1 | relogio=76 | publish_request{channel=canal-bot_java_1-3452, message="zeromq e protobuf (#3 de bot_java_1)"}
+server_node_2-1  | 2026-11-09T21:20:18.277Z | server_node_2 | PUBLICADO | de=server_node_2 | relogio=77 | publication{channel=canal-bot_java_1-3452, author=bot_java_1, message="zeromq e protobuf (#3 de bot_java_1)"}
+server_node_2-1  | 2026-11-09T21:20:18.277Z | server_node_2 | ENVIADO | de=server_node_2 | relogio=78 | publish_response{success=true}

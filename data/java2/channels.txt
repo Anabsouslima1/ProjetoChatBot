@@ -11,3 +11,4 @@ canal-bot_java_2-8879
 canal-bot_node_1-7720
 canal-bot_node_2-8516
 canal-bot_cpp_1-9593
+canal-bot_cpp_1-9124
