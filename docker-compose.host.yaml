@@ -75,12 +75,14 @@ services:
     environment:
       BROKER_BACKEND: tcp://127.0.0.1:5556
       PROXY_XSUB: tcp://127.0.0.1:5557
+      REFERENCE_ADDR: tcp://127.0.0.1:5559
 
   server_node_2:
     network_mode: host
     environment:
       BROKER_BACKEND: tcp://127.0.0.1:5556
       PROXY_XSUB: tcp://127.0.0.1:5557
+      REFERENCE_ADDR: tcp://127.0.0.1:5559
 
   client_node_1:
     network_mode: host

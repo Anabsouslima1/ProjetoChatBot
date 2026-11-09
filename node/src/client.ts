@@ -3,9 +3,21 @@
 //   2. se estiver inscrito em menos de 3 canais, se inscreve em mais um (escolhido ao acaso);
 //   3. escolhe um canal da lista e publica 10 mensagens aleatórias com 1 s de intervalo.
 // Em paralelo, recebe (SUB) e exibe tudo que chega nos canais em que o bot está inscrito.
+// Parte 3: relógio lógico (Lamport): incrementa antes de enviar e usa max(local, recebido) ao receber.
 import { Request, Subscriber } from "zeromq";
 import { setTimeout as sleep } from "node:timers/promises";
-import { decode, encode, envInt, envOr, fmtTs, logMsg, makeEnvelope, nowMs } from "./common.js";
+import {
+  decode,
+  encode,
+  envInt,
+  envOr,
+  fmtTs,
+  logMsg,
+  logicalClock,
+  makeEnvelope,
+  nowMs,
+  stamp,
+} from "./common.js";
 import type { Envelope } from "./common.js";
 
 const name = envOr("BOT_NAME", "bot_node");
@@ -28,16 +40,18 @@ class Rpc {
 
   private reset(): void {
     this.sock?.close();
-    this.sock = new Request({ linger: 0, receiveTimeout: 5000 });
+    this.sock = new Request({ linger: 0, receiveTimeout: 5000, sendTimeout: 5000 });
     this.sock.connect(this.endpoint);
   }
 
   async call(req: Envelope): Promise<Envelope | null> {
+    stamp(req); // hora + relógio lógico incrementado, imediatamente antes de enviar
     logMsg(this.who, "ENVIADO", req);
     try {
       await this.sock.send(encode(req));
       const [raw] = await this.sock.receive();
       const rep = decode(raw);
+      logicalClock.observe(rep.logicalClock); // relógio lógico: max(local, recebido)
       logMsg(this.who, "RECEBIDO", rep);
       return rep;
     } catch (e) {
@@ -83,9 +97,13 @@ class Subscriptions {
       try {
         const e = decode(body);
         if (e.body !== "publication") continue;
+        // Relógio lógico: contador = max(contador, valor da mensagem). Retorna o valor já atualizado.
+        const localClock = logicalClock.observe(e.logicalClock);
         console.log(
-          `${fmtTs(receivedAt)} | ${this.who} | MENSAGEM | canal=${channel} | de=${e.publication.author}` +
-            ` | enviada_em=${fmtTs(e.timestampMs)} | recebida_em=${fmtTs(receivedAt)} | "${e.publication.message}"`,
+          `${fmtTs(receivedAt)} | ${this.who} | MENSAGEM | canal=${channel}` +
+            ` | relogio_msg=${e.logicalClock} | relogio_local=${localClock}` +
+            ` | de=${e.publication.author} | enviada_em=${fmtTs(e.timestampMs)}` +
+            ` | recebida_em=${fmtTs(receivedAt)} | "${e.publication.message}"`,
         );
       } catch {
         // mensagem inválida: ignora

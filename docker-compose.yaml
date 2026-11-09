@@ -135,10 +135,11 @@ services:
       SERVER_NAME: server_node_1
       BROKER_BACKEND: tcp://broker:5556
       PROXY_XSUB: tcp://proxy:5557
+      REFERENCE_ADDR: tcp://reference:5559
       DATA_DIR: /data
     volumes:
       - server_node_1_data:/data
-    depends_on: [broker, proxy]
+    depends_on: [broker, proxy, reference]
 
   server_node_2:
     <<: *node
@@ -147,10 +148,11 @@ services:
       SERVER_NAME: server_node_2
       BROKER_BACKEND: tcp://broker:5556
       PROXY_XSUB: tcp://proxy:5557
+      REFERENCE_ADDR: tcp://reference:5559
       DATA_DIR: /data
     volumes:
       - server_node_2_data:/data
-    depends_on: [broker, proxy]
+    depends_on: [broker, proxy, reference]
 
   # CLIENTES NODE
   client_node_1:
