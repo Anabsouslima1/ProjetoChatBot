@@ -63,3 +63,15 @@ canal-bot_java_1-2086
 canal-bot_node_2-8054
 canal-bot_java_1-6003
 canal-bot_node_2-2132
+canal-bot_java_2-4188
+canal-bot_node_2-7507
+canal-bot_node_1-4446
+canal-bot_java_1-4727
+canal-bot_java_2-7936
+canal-bot_node_2-5088
+canal-bot_cpp_1-4112
+canal-bot_java_1-2696
+canal-bot_node_1-8857
+canal-bot_java_2-3595
+canal-bot_node_2-8259
+canal-bot_node_1-2005

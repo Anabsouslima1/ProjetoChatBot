@@ -23,14 +23,15 @@ export interface Envelope {
 // Relógio físico
 //   nowMs()   : hora da máquina, sem correção (usada para medir a sincronização)
 //   clockMs() : hora usada nas mensagens = hora da máquina + deslocamento calculado pela
-//               sincronização com a referência (só os servidores alteram o deslocamento).
+//               sincronização com o coordenador (só os servidores alteram o deslocamento).
 //               Nunca retorna um valor menor que o anterior, mesmo se o deslocamento diminuir.
+// CLOCK_SKEW_MS: só para testes (simula uma máquina com o relógio adiantado/atrasado).
 // ---------------------------------------------------------------------------
 export function nowMs(): number {
   return Date.now();
 }
 
-let clockOffsetMs = 0;
+let clockOffsetMs = Number(process.env.CLOCK_SKEW_MS ?? 0) || 0;
 let lastClockMs = 0;
 
 export function getClockOffset(): number {
@@ -150,6 +151,11 @@ const BODIES = [
   "listServersResponse",
   "heartbeatRequest",
   "heartbeatResponse",
+  "clockRequest",
+  "clockResponse",
+  "electionRequest",
+  "electionResponse",
+  "coordinatorAnnouncement",
 ];
 
 // Texto legível do conteúdo da mensagem (para os logs de envio/recebimento)
@@ -190,6 +196,16 @@ export function describe(e: Envelope): string {
       return `heartbeat_request{name=${e.heartbeatRequest.name}}`;
     case "heartbeatResponse":
       return `heartbeat_response{success=${e.heartbeatResponse.success}, time_ms=${e.heartbeatResponse.timeMs}}`;
+    case "clockRequest":
+      return "clock_request{}";
+    case "clockResponse":
+      return `clock_response{time_ms=${e.clockResponse.timeMs}}`;
+    case "electionRequest":
+      return `election_request{name=${e.electionRequest.name}, rank=${e.electionRequest.rank}}`;
+    case "electionResponse":
+      return `election_response{ok=${e.electionResponse.ok}}`;
+    case "coordinatorAnnouncement":
+      return `coordinator_announcement{name=${e.coordinatorAnnouncement.name}}`;
     default:
       return "(mensagem vazia/desconhecida)";
   }

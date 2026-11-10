@@ -2,6 +2,7 @@
 # broker  5555 = clientes (REQ -> ROUTER)      5556 = servidores (REP <- DEALER)
 # proxy   5557 = XSUB (servidores publicam)     5558 = XPUB (bots assinam)
 # Existe UM proxy Pub/Sub só, usado por todos os serviços (C++, Java e Node.js).
+# Servidores falam entre si em PEER_PORT_BASE (5560) + rank.
 
 x-cpp: &cpp
   build:
@@ -104,7 +105,7 @@ services:
       REFERENCE_ADDR: tcp://reference:5559
       DATA_DIR: /data
     volumes:
-      - ./data/java1:/data
+      - ./data/java2:/data
     depends_on: [broker, proxy, reference]
 
   reference:
@@ -140,6 +141,7 @@ services:
       SERVER_NAME: server_node_1
       BROKER_BACKEND: tcp://broker:5556
       PROXY_XSUB: tcp://proxy:5557
+      PROXY_XPUB: tcp://proxy:5558
       REFERENCE_ADDR: tcp://reference:5559
       DATA_DIR: /data
     volumes:
@@ -153,6 +155,7 @@ services:
       SERVER_NAME: server_node_2
       BROKER_BACKEND: tcp://broker:5556
       PROXY_XSUB: tcp://proxy:5557
+      PROXY_XPUB: tcp://proxy:5558
       REFERENCE_ADDR: tcp://reference:5559
       DATA_DIR: /data
     volumes:
