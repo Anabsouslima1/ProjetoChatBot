@@ -223,6 +223,23 @@ inline std::string describe(const chat::Envelope& e) {
     case chat::Envelope::kCoordinatorAnnouncement:
       o << "coordinator_announcement{name=" << e.coordinator_announcement().name() << "}";
       break;
+    case chat::Envelope::kReplicateRequest: {
+      const auto& rs = e.replicate_request().records();
+      o << "replicate_request{registros=" << rs.size();
+      if (rs.size()) o << ", primeiro=" << rs[0].origin() << "#" << rs[0].seq();
+      o << "}";
+      break;
+    }
+    case chat::Envelope::kReplicateResponse:
+      o << "replicate_response{ok=" << (e.replicate_response().ok() ? "true" : "false") << "}";
+      break;
+    case chat::Envelope::kSyncRequest:
+      o << "sync_request{origens=" << e.sync_request().have_size() << "}";
+      break;
+    case chat::Envelope::kSyncResponse:
+      o << "sync_response{registros=" << e.sync_response().records_size() << ", more="
+        << (e.sync_response().more() ? "true" : "false") << "}";
+      break;
     default:
       o << "(mensagem vazia/desconhecida)";
   }
@@ -233,6 +250,15 @@ inline std::string describe(const chat::Envelope& e) {
 inline void log_msg(const std::string& who, const char* dir, const chat::Envelope& e) {
   println_locked(fmt_ts(e.timestamp_ms()) + " | " + who + " | " + dir + " | de=" + e.sender() +
                  " | relogio=" + std::to_string(e.logical_clock()) + " | " + describe(e));
+}
+
+// Carimba E registra no log de forma atômica. Com várias threads (clientes, pares, replicação), carimbar
+// e logar em momentos diferentes faz as linhas aparecerem fora da ordem real do relógio lógico.
+inline std::mutex g_stamp_log_mutex;
+inline void stamp_log(const std::string& who, const char* dir, chat::Envelope& e) {
+  std::lock_guard<std::mutex> lock(g_stamp_log_mutex);
+  stamp(e);
+  log_msg(who, dir, e);
 }
 
 // Envia a mensagem como está. Chame stamp(e) antes, logo antes do envio.

@@ -53,8 +53,10 @@ def main(path):
 
     # --- relógio lógico (continua valendo) ---
     bad_clock, bad_inc, bad_lamport = {}, {}, {}
+    examples = defaultdict(list)  # (processo, tipo) -> linhas que violaram (até 2)
     for s in procs:
         last_sent = max_recv = 0
+        max_recv_line = ""
         nc = ni = nl = 0
         for l in lines[s]:
             m = MSG.match(l)
@@ -66,8 +68,13 @@ def main(path):
                 continue
             v = int(c.group(1))
             if m.group("dir") == "RECEBIDO":
-                max_recv = max(max_recv, v)
+                if v > max_recv:
+                    max_recv, max_recv_line = v, l
             else:
+                if v <= last_sent and len(examples[(s, "inc")]) < 2:
+                    examples[(s, "inc")].append(l)
+                if v <= max_recv and len(examples[(s, "lamport")]) < 2:
+                    examples[(s, "lamport")].append(f"{l}\n             (maior RECEBIDO antes dele: {max_recv_line})")
                 ni += v <= last_sent
                 nl += v <= max_recv
                 last_sent = max(last_sent, v)
@@ -76,7 +83,13 @@ def main(path):
                      ("Relógio dos envios sempre cresce", bad_inc),
                      ("Regra de Lamport: todo envio é maior que qualquer relógio recebido", bad_lamport)):
         bad = {s: n for s, n in d.items() if n}
-        add("OK" if not bad else "FALHA", title, "; ".join(f"{s}: {n}" for s, n in bad.items()))
+        kind = "inc" if "cresce" in title else "lamport" if "Lamport" in title else None
+        detail = "; ".join(f"{s}: {n}" for s, n in bad.items())
+        if kind:
+            for s in bad:
+                for ex in examples[(s, kind)]:
+                    detail += f"\n           {s}: {ex}"
+        add("OK" if not bad else "FALHA", title, detail)
 
     # --- referência não devolve mais a hora ---
     times = [int(m.group(1)) for l in lines.get("reference", []) for m in [HBT.search(l)] if m]

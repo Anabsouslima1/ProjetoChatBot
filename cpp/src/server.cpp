@@ -24,6 +24,9 @@
 
 #include <algorithm>
 #include <atomic>
+#include <condition_variable>
+#include <deque>
+#include <map>
 #include <mutex>
 #include <chrono>
 #include <cmath>
@@ -38,63 +41,261 @@
 
 #include "common.hpp"
 
-class Storage {
+// ---------------------------------------------------------------------------
+// Parte 5: réplica dos dados.
+// Todo dado aceito por este servidor (login, canal, publicação) vira um ReplicaRecord com id único
+// (origin, seq). A "origem" é <servidor>@<instante de partida>, para que um servidor que reinicia sem
+// disco nunca reaproveite ids antigos. records.bin guarda todos os registros (os próprios e os
+// recebidos de outros servidores); logins.tsv, channels.txt e publications.bin são visões derivadas.
+// Aplicar o mesmo registro duas vezes não faz nada (idempotente).
+// ---------------------------------------------------------------------------
+class Replica {
  public:
-  explicit Storage(const std::string& dir) : dir_(dir) {
+  struct Stats {
+    size_t total = 0, logins = 0, channels = 0, publications = 0;
+    uint32_t hash = 0;  // resumo dos ids: servidores com o mesmo conjunto de registros têm o mesmo hash
+  };
+
+  Replica(const std::string& dir, const std::string& server_name)
+      : dir_(dir), name_(server_name), origin_(server_name + "@" + std::to_string(now_ms())) {
     mkdir(dir_.c_str(), 0755);
-    std::ifstream in(dir_ + "/channels.txt");
-    std::string line;
-    while (std::getline(in, line))
-      if (!line.empty()) channels_.insert(line);
+    load();
   }
 
+  // ---- escritas feitas por este servidor (a pedido de um cliente) ----
   bool add_login(const std::string& user, int64_t ts) {
-    std::ofstream out(dir_ + "/logins.tsv", std::ios::app);
-    out << ts << '\t' << user << '\n';
-    out.flush();
-    return static_cast<bool>(out);
+    chat::ReplicaRecord r;
+    r.set_kind(chat::ReplicaRecord::KIND_LOGIN);
+    r.set_name(user);
+    r.set_timestamp_ms(ts);
+    r.set_logical_clock(g_clock.value());
+    std::lock_guard<std::mutex> l(m_);
+    return add_local_locked(r);
   }
 
-  // 0 = criado, 1 = já existe, 2 = erro de disco
-  int add_channel(const std::string& name) {
-    if (channels_.count(name)) return 1;
-    std::ofstream out(dir_ + "/channels.txt", std::ios::app);
-    out << name << '\n';
-    out.flush();
-    if (!out) return 2;
-    channels_.insert(name);
-    return 0;
+  // 0 = criado, 1 = já existe (em qualquer servidor), 2 = erro de disco
+  int add_channel(const std::string& channel) {
+    std::lock_guard<std::mutex> l(m_);
+    if (channels_.count(channel)) return 1;
+    chat::ReplicaRecord r;
+    r.set_kind(chat::ReplicaRecord::KIND_CHANNEL);
+    r.set_name(channel);
+    r.set_timestamp_ms(clock_ms());
+    r.set_logical_clock(g_clock.value());
+    return add_local_locked(r) ? 0 : 2;
   }
 
-  // Grava a publicação (Envelope) em publications.bin
-  bool add_publication(const chat::Envelope& e) {
-    std::string buf;
-    if (!e.SerializeToString(&buf)) return false;
+  // pubmsg = a publicação já carimbada (hora e relógio lógico) que vai para o tópico
+  bool add_publication(const chat::Envelope& pubmsg) {
+    chat::ReplicaRecord r;
+    r.set_kind(chat::ReplicaRecord::KIND_PUBLICATION);
+    r.set_name(pubmsg.publication().channel());
+    r.set_text(pubmsg.publication().message());
+    r.set_author(pubmsg.publication().author());
+    r.set_timestamp_ms(pubmsg.timestamp_ms());
+    r.set_logical_clock(pubmsg.logical_clock());
+    std::lock_guard<std::mutex> l(m_);
+    return add_local_locked(r);
+  }
+
+  std::set<std::string> channels() {
+    std::lock_guard<std::mutex> l(m_);
+    return channels_;
+  }
+
+  // ---- registros vindos de outros servidores. Retorna quantos eram novos ----
+  int apply_remote(const google::protobuf::RepeatedPtrField<chat::ReplicaRecord>& recs) {
+    std::lock_guard<std::mutex> l(m_);
+    int added = 0;
+    for (const auto& r : recs) {
+      if (r.origin().empty() || r.seq() <= 0 || known_locked(r)) continue;
+      store_locked(r, /*write_views=*/true);
+      ++added;
+    }
+    return added;
+  }
+
+  // ---- anti-entropia ----
+  // até que seq (sem buracos) temos registros de cada origem
+  std::map<std::string, int64_t> version() {
+    std::lock_guard<std::mutex> l(m_);
+    std::map<std::string, int64_t> v;
+    for (auto& [o, p] : progress_) v[o] = p.contig;
+    return v;
+  }
+
+  // registros que quem pediu (com a versão "have") ainda não tem; no máximo max
+  std::vector<chat::ReplicaRecord> missing(const std::map<std::string, int64_t>& have, size_t max, bool* more) {
+    std::lock_guard<std::mutex> l(m_);
+    std::vector<chat::ReplicaRecord> out;
+    *more = false;
+    for (auto& [origin, recs] : all_) {
+      auto it_have = have.find(origin);
+      int64_t from = it_have == have.end() ? 0 : it_have->second;
+      for (auto it = recs.upper_bound(from); it != recs.end(); ++it) {
+        if (out.size() >= max) {
+          *more = true;
+          return out;
+        }
+        out.push_back(it->second);
+      }
+    }
+    return out;
+  }
+
+  // ---- fila de propagação (usada pela thread que empurra registros aos outros servidores) ----
+  std::vector<chat::ReplicaRecord> wait_outbox(int timeout_ms, size_t max) {
+    std::unique_lock<std::mutex> l(m_);
+    cv_.wait_for(l, std::chrono::milliseconds(timeout_ms), [&] { return !outbox_.empty(); });
+    std::vector<chat::ReplicaRecord> out;
+    while (!outbox_.empty() && out.size() < max) {
+      out.push_back(std::move(outbox_.front()));
+      outbox_.pop_front();
+    }
+    return out;
+  }
+
+  Stats stats() {
+    std::lock_guard<std::mutex> l(m_);
+    Stats s;
+    s.total = total_;
+    s.logins = logins_;
+    s.channels = channel_records_;
+    s.publications = publications_;
+    uint32_t h = 2166136261u;  // FNV-1a sobre "origem#seq" de todos os registros, em ordem
+    auto mix = [&h](const std::string& str) {
+      for (unsigned char c : str) h = (h ^ c) * 16777619u;
+    };
+    for (auto& [origin, recs] : all_)
+      for (auto& [seq, r] : recs) mix(origin + "#" + std::to_string(seq) + ";");
+    s.hash = h;
+    return s;
+  }
+
+ private:
+  struct Progress {
+    int64_t contig = 0;           // tenho 1..contig de uma origem
+    std::set<int64_t> above;      // seqs recebidas além de contig+1 (chegaram fora de ordem)
+  };
+
+  bool known_locked(const chat::ReplicaRecord& r) {
+    auto o = all_.find(r.origin());
+    return o != all_.end() && o->second.count(r.seq());
+  }
+
+  bool add_local_locked(chat::ReplicaRecord r) {
+    r.set_origin(origin_);
+    r.set_seq(++next_seq_);
+    if (!store_locked(r, true)) return false;  // falha de disco: o cliente recebe ERROR_INTERNAL
+    outbox_.push_back(r);
+    cv_.notify_one();
+    return true;
+  }
+
+  // Guarda em memória (index_locked) e em disco (records.bin + visões). Retorna false se o disco falhou.
+  bool store_locked(const chat::ReplicaRecord& r, bool write_views) {
+    bool ok = append_record(r);
+    index_locked(r);
+    if (write_views) ok = write_view(r) && ok;
+    return ok;
+  }
+
+  void index_locked(const chat::ReplicaRecord& r) {
+    all_[r.origin()][r.seq()] = r;
+    Progress& p = progress_[r.origin()];
+    if (r.seq() == p.contig + 1) {
+      ++p.contig;
+      while (p.above.erase(p.contig + 1)) ++p.contig;
+    } else if (r.seq() > p.contig + 1) {
+      p.above.insert(r.seq());
+    }
+    ++total_;
+    switch (r.kind()) {
+      case chat::ReplicaRecord::KIND_LOGIN: ++logins_; break;
+      case chat::ReplicaRecord::KIND_CHANNEL:
+        ++channel_records_;
+        channels_.insert(r.name());
+        break;
+      case chat::ReplicaRecord::KIND_PUBLICATION: ++publications_; break;
+      default: break;
+    }
+  }
+
+  bool append_record(const chat::ReplicaRecord& r) { return append_framed(dir_ + "/records.bin", r.SerializeAsString()); }
+
+  static bool append_framed(const std::string& path, const std::string& buf) {
     uint32_t n = static_cast<uint32_t>(buf.size());
-    const char hdr[4] = {static_cast<char>(n >> 24), static_cast<char>(n >> 16),
-                         static_cast<char>(n >> 8), static_cast<char>(n)};
-    std::ofstream out(dir_ + "/publications.bin", std::ios::app | std::ios::binary);
+    const char hdr[4] = {static_cast<char>(n >> 24), static_cast<char>(n >> 16), static_cast<char>(n >> 8),
+                         static_cast<char>(n)};
+    std::ofstream out(path, std::ios::app | std::ios::binary);
     out.write(hdr, 4);
     out.write(buf.data(), static_cast<std::streamsize>(n));
     out.flush();
     return static_cast<bool>(out);
   }
 
-  const std::set<std::string>& channels() const { return channels_; }
+  // Visões legíveis (as mesmas dos requisitos das partes 1 e 2)
+  bool write_view(const chat::ReplicaRecord& r) {
+    switch (r.kind()) {
+      case chat::ReplicaRecord::KIND_LOGIN: {
+        std::ofstream out(dir_ + "/logins.tsv", std::ios::app);
+        out << r.timestamp_ms() << '\t' << r.name() << '\n';
+        out.flush();
+        return static_cast<bool>(out);
+      }
+      case chat::ReplicaRecord::KIND_CHANNEL: {
+        std::ofstream out(dir_ + "/channels.txt", std::ios::app);
+        out << r.name() << '\n';
+        out.flush();
+        return static_cast<bool>(out);
+      }
+      case chat::ReplicaRecord::KIND_PUBLICATION: {
+        chat::Envelope e;
+        e.set_timestamp_ms(r.timestamp_ms());
+        e.set_sender(r.origin().substr(0, r.origin().find('@')));
+        e.set_logical_clock(r.logical_clock());
+        auto* p = e.mutable_publication();
+        p->set_channel(r.name());
+        p->set_message(r.text());
+        p->set_author(r.author());
+        return append_framed(dir_ + "/publications.bin", e.SerializeAsString());
+      }
+      default: return true;
+    }
+  }
 
- private:
-  std::string dir_;
+  void load() {
+    std::ifstream in(dir_ + "/records.bin", std::ios::binary);
+    unsigned char hdr[4];
+    while (in.read(reinterpret_cast<char*>(hdr), 4)) {
+      uint32_t n = (uint32_t(hdr[0]) << 24) | (uint32_t(hdr[1]) << 16) | (uint32_t(hdr[2]) << 8) | hdr[3];
+      std::string buf(n, '\0');
+      if (!in.read(&buf[0], n)) break;
+      chat::ReplicaRecord r;
+      if (r.ParseFromString(buf) && !known_locked(r)) index_locked(r);
+    }
+  }
+
+  std::string dir_, name_, origin_;
+  std::mutex m_;
+  std::condition_variable cv_;
+  std::map<std::string, std::map<int64_t, chat::ReplicaRecord>> all_;
+  std::map<std::string, Progress> progress_;
   std::set<std::string> channels_;
+  std::deque<chat::ReplicaRecord> outbox_;
+  int64_t next_seq_ = 0;
+  size_t total_ = 0, logins_ = 0, channel_records_ = 0, publications_ = 0;
 };
 
-// Lê publications.bin e imprime o conteúdo de cada registro.
+// Lê publications.bin e imprime as publicações em ORDEM TOTAL (relógio lógico, desempate pelo servidor
+// de origem): todos os servidores com os mesmos registros mostram exatamente a mesma sequência.
 static int dump_publications(const std::string& path) {
   std::ifstream in(path, std::ios::binary);
   if (!in) {
     std::cerr << "não foi possível abrir " << path << std::endl;
     return 1;
   }
-  int count = 0;
+  std::vector<chat::Envelope> all;
   unsigned char hdr[4];
   while (in.read(reinterpret_cast<char*>(hdr), 4)) {
     uint32_t n = (uint32_t(hdr[0]) << 24) | (uint32_t(hdr[1]) << 16) | (uint32_t(hdr[2]) << 8) | hdr[3];
@@ -105,13 +306,17 @@ static int dump_publications(const std::string& path) {
     }
     chat::Envelope e;
     if (!e.ParseFromString(buf)) {
-      std::cerr << "registro " << count << " inválido" << std::endl;
+      std::cerr << "registro " << all.size() << " inválido" << std::endl;
       return 1;
     }
-    log_msg("dump", "ARMAZENADO", e);
-    ++count;
+    all.push_back(std::move(e));
   }
-  std::cout << count << " publicação(ões) no arquivo" << std::endl;
+  std::stable_sort(all.begin(), all.end(), [](const chat::Envelope& a, const chat::Envelope& b) {
+    if (a.logical_clock() != b.logical_clock()) return a.logical_clock() < b.logical_clock();
+    return a.sender() < b.sender();
+  });
+  for (const auto& e : all) log_msg("dump", "ARMAZENADO", e);
+  std::cout << all.size() << " publicação(ões) no arquivo" << std::endl;
   return 0;
 }
 
@@ -185,8 +390,7 @@ class ReferenceClient {
   // Envia a requisição e espera a resposta. rtt_ms / local_at_receive (opcionais) medem o tempo
   // entre o send e o recv e a hora da máquina no instante do recv, sem incluir serialização/log.
   bool call(chat::Envelope req, chat::Envelope* rep, double* rtt_ms, int64_t* local_at_receive) {
-    stamp(req);
-    log_msg(who_, "ENVIADO", req);
+    stamp_log(who_, "ENVIADO", req);
     std::string buf;
     if (!req.SerializeToString(&buf)) return false;
 
@@ -256,6 +460,10 @@ struct Cluster {
     std::lock_guard<std::mutex> l(m);
     coordinator = c;
   }
+  std::vector<std::pair<std::string, int>> peers_snapshot() {
+    std::lock_guard<std::mutex> l(m);
+    return peers;
+  }
   int rank_of(const std::string& n) {
     std::lock_guard<std::mutex> l(m);
     for (auto& p : peers)
@@ -280,8 +488,7 @@ static std::string peer_endpoint(const std::string& server_name, int rank) {
 // Mede o RTT só entre o send e o recv.
 static bool peer_request(zmq::context_t& ctx, const std::string& who, const std::string& ep, chat::Envelope req,
                          chat::Envelope* rep, double* rtt_ms, int64_t* local_at_receive, int timeout_ms) {
-  stamp(req);
-  log_msg(who, "ENVIADO", req);
+  stamp_log(who, "ENVIADO", req);
   std::string buf;
   if (!req.SerializeToString(&buf)) return false;
   try {
@@ -321,8 +528,7 @@ static bool ask_higher_servers(zmq::context_t& ctx, const std::string& who, int 
       auto* er = req.mutable_election_request();
       er->set_name(who);
       er->set_rank(my_rank);
-      stamp(req);
-      log_msg(who, "ENVIADO", req);
+      stamp_log(who, "ENVIADO", req);
       std::string buf;
       req.SerializeToString(&buf);
       s->send(zmq::buffer(buf), zmq::send_flags::dontwait);
@@ -360,8 +566,8 @@ static bool ask_higher_servers(zmq::context_t& ctx, const std::string& who, int 
   }
 }
 
-// Thread: atende os pedidos dos outros servidores (clock_request e election_request).
-static void peer_server_loop(zmq::context_t& ctx, std::string who, int rank, Cluster& cl) {
+// Thread: atende os pedidos dos outros servidores (relógio, eleição e replicação).
+static void peer_server_loop(zmq::context_t& ctx, std::string who, int rank, Cluster& cl, Replica& replica) {
   const std::string bind = "tcp://*:" + std::to_string(peer_port_base() + rank);
   zmq::socket_t rep(ctx, zmq::socket_type::rep);
   rep.set(zmq::sockopt::linger, 0);
@@ -387,16 +593,30 @@ static void peer_server_loop(zmq::context_t& ctx, std::string who, int rank, Clu
         bool ok = req.election_request().rank() < rank;
         resp.mutable_election_response()->set_ok(ok);
         if (ok) cl.election_wanted = true;
+      } else if (req.has_replicate_request()) {
+        replica.apply_remote(req.replicate_request().records());
+        resp.mutable_replicate_response()->set_ok(true);
+      } else if (req.has_sync_request()) {
+        std::map<std::string, int64_t> have;
+        for (const auto& v : req.sync_request().have()) have[v.origin()] = v.last_seq();
+        size_t max = req.sync_request().max_records() > 0 ? static_cast<size_t>(req.sync_request().max_records()) : 500;
+        bool more = false;
+        auto* sresp = resp.mutable_sync_response();
+        for (auto& r : replica.missing(have, max, &more)) *sresp->add_records() = std::move(r);
+        sresp->set_more(more);
       } else {
         resp.mutable_election_response()->set_ok(false);
       }
     } else {
       resp.mutable_election_response()->set_ok(false);
     }
-    stamp(resp);
-    if (resp.has_clock_response()) resp.mutable_clock_response()->set_time_ms(resp.timestamp_ms());
+    {
+      std::lock_guard<std::mutex> lk(g_stamp_log_mutex);  // carimbo + log atômicos (ver common.hpp)
+      stamp(resp);
+      if (resp.has_clock_response()) resp.mutable_clock_response()->set_time_ms(resp.timestamp_ms());
+      log_msg(who, "ENVIADO", resp);
+    }
     send_envelope(rep, resp);
-    log_msg(who, "ENVIADO", resp);
   }
 }
 
@@ -431,6 +651,65 @@ static void coordinator_listener(std::string who, std::string xpub, Cluster& cl)
   }
 }
 
+// Thread: empurra cada registro novo (login, canal, publicação) para todos os outros servidores.
+// Um servidor que não responde é pulado por 5 s; o que ele perder é recuperado pela anti-entropia.
+static void replication_push_loop(zmq::context_t& ctx, std::string who, Replica& replica, Cluster& cl) {
+  std::map<std::string, int64_t> skip_until;
+  while (true) {
+    auto batch = replica.wait_outbox(500, 100);
+    if (batch.empty()) continue;
+    auto peers = cl.peers_snapshot();
+    for (const auto& [pname, prank] : peers) {
+      if (pname == who) continue;
+      if (steady_ms() < skip_until[pname]) continue;
+      chat::Envelope req = make_envelope(who);
+      auto* rr = req.mutable_replicate_request();
+      for (const auto& r : batch) *rr->add_records() = r;
+      chat::Envelope rep;
+      if (!peer_request(ctx, who, peer_endpoint(pname, prank), req, &rep, nullptr, nullptr, 500) ||
+          !rep.has_replicate_response() || !rep.replicate_response().ok())
+        skip_until[pname] = steady_ms() + 5000;
+    }
+  }
+}
+
+// Thread: anti-entropia. A cada SYNC_INTERVAL_MS pergunta a cada servidor o que falta (comparando
+// versões) e aplica. Também faz a recuperação de quem entra/volta depois e de registros perdidos.
+static void anti_entropy_loop(zmq::context_t& ctx, std::string who, Replica& replica, Cluster& cl, int interval_ms) {
+  std::this_thread::sleep_for(std::chrono::milliseconds(3000));  // espera o cadastro na referência
+  while (true) {
+    int fetched = 0, reached = 0;
+    for (const auto& [pname, prank] : cl.peers_snapshot()) {
+      if (pname == who) continue;
+      for (int round = 0; round < 50; ++round) {  // pede em lotes até não haver mais
+        chat::Envelope req = make_envelope(who);
+        auto* sr = req.mutable_sync_request();
+        for (auto& [o, seq] : replica.version()) {
+          auto* v = sr->add_have();
+          v->set_origin(o);
+          v->set_last_seq(seq);
+        }
+        sr->set_max_records(500);
+        chat::Envelope rep;
+        if (!peer_request(ctx, who, peer_endpoint(pname, prank), req, &rep, nullptr, nullptr, 2000) ||
+            !rep.has_sync_response())
+          break;
+        if (round == 0) ++reached;
+        fetched += replica.apply_remote(rep.sync_response().records());
+        if (!rep.sync_response().more()) break;
+      }
+    }
+    auto st = replica.stats();
+    char h[16];
+    snprintf(h, sizeof h, "%08x", st.hash);
+    println_locked("[" + who + "] réplica: registros=" + std::to_string(st.total) + " (logins=" +
+                   std::to_string(st.logins) + ", canais=" + std::to_string(st.channels) + ", publicações=" +
+                   std::to_string(st.publications) + ") hash=" + h + " | sincronizou com " +
+                   std::to_string(reached) + " servidor(es), " + std::to_string(fetched) + " registro(s) novo(s)");
+    std::this_thread::sleep_for(std::chrono::milliseconds(interval_ms));
+  }
+}
+
 template <typename Resp>
 static void fill(Resp* r, bool ok, chat::ErrorCode code, const std::string& msg) {
   r->set_success(ok);
@@ -461,7 +740,7 @@ int main(int argc, char** argv) {
   }
   const std::string xpub = env_or("PROXY_XPUB", "tcp://proxy:5558");
 
-  Storage st(data_dir);
+  Replica replica(data_dir, name);
 
   zmq::context_t ctx(1);
   zmq::socket_t sock(ctx, zmq::socket_type::rep);  // requisições dos bots (via broker)
@@ -471,10 +750,17 @@ int main(int argc, char** argv) {
   pub.connect(pubsub);
   std::cout << "[" << name << "] conectado ao broker em " << backend << " e ao proxy Pub/Sub em "
             << pubsub << " | referência em " << reference_ep << " | dados em " << data_dir
-            << " | canais carregados: " << st.channels().size() << std::endl;
+            << " | registros carregados: " << replica.stats().total << std::endl;
 
   // --- Parte 3: cadastro na referência (rank) ---
   Cluster cl;
+  int sync_interval_ms = 10000;  // anti-entropia (Parte 5)
+  try {
+    sync_interval_ms = std::max(500, std::stoi(env_or("SYNC_INTERVAL_MS", "10000")));
+  } catch (...) {
+  }
+  std::thread(replication_push_loop, std::ref(ctx), name, std::ref(replica), std::ref(cl)).detach();
+  std::thread(anti_entropy_loop, std::ref(ctx), name, std::ref(replica), std::ref(cl), sync_interval_ms).detach();
   std::thread(coordinator_listener, name, xpub, std::ref(cl)).detach();  // escuta o tópico "servers"
 
   ReferenceClient ref(reference_ep, name);
@@ -497,7 +783,7 @@ int main(int argc, char** argv) {
       println_locked("[" + name + "] rank recebido da referência: " + std::to_string(rank));
       if (!peer_thread_started) {  // passa a atender os outros servidores em PEER_PORT_BASE + rank
         peer_thread_started = true;
-        std::thread(peer_server_loop, std::ref(ctx), name, rank, std::ref(cl)).detach();
+        std::thread(peer_server_loop, std::ref(ctx), name, rank, std::ref(cl), std::ref(replica)).detach();
       }
     }
   };
@@ -518,12 +804,11 @@ int main(int argc, char** argv) {
   auto announce = [&]() {
     chat::Envelope e = make_envelope(name);
     e.mutable_coordinator_announcement()->set_name(name);
-    stamp(e);
+    stamp_log(name, "PUBLICADO", e);
     std::string payload;
     e.SerializeToString(&payload);
     pub.send(zmq::buffer(std::string("servers")), zmq::send_flags::sndmore);
     pub.send(zmq::buffer(payload), zmq::send_flags::none);
-    log_msg(name, "PUBLICADO", e);
   };
 
   // Bully: pede eleição aos servidores de rank maior; se nenhum responde OK, este servidor assume.
@@ -642,7 +927,7 @@ int main(int argc, char** argv) {
         if (!valid_name(user)) {
           fill(resp, false, chat::ERROR_INVALID_USERNAME,
                "usuário deve ter 1-32 caracteres [A-Za-z0-9_-]");
-        } else if (!st.add_login(user, clock_ms())) {
+        } else if (!replica.add_login(user, clock_ms())) {
           fill(resp, false, chat::ERROR_INTERNAL, "falha ao gravar login em disco");
         } else {
           fill(resp, true, chat::ERROR_NONE, "");
@@ -656,7 +941,7 @@ int main(int argc, char** argv) {
           fill(resp, false, chat::ERROR_INVALID_CHANNEL_NAME,
                "canal deve ter 1-32 caracteres [A-Za-z0-9_-]");
         } else {
-          int res = st.add_channel(ch);
+          int res = replica.add_channel(ch);
           if (res == 0) fill(resp, true, chat::ERROR_NONE, "");
           else if (res == 1) fill(resp, false, chat::ERROR_CHANNEL_EXISTS, "canal já existe");
           else fill(resp, false, chat::ERROR_INTERNAL, "falha ao gravar canal em disco");
@@ -665,7 +950,7 @@ int main(int argc, char** argv) {
       }
       case chat::Envelope::kListChannelsRequest: {
         auto* resp = rep.mutable_list_channels_response();
-        for (const auto& c : st.channels()) resp->add_channels(c);
+        for (const auto& c : replica.channels()) resp->add_channels(c);
         break;
       }
       case chat::Envelope::kPublishRequest: {
@@ -688,10 +973,10 @@ int main(int argc, char** argv) {
           p->set_channel(ch);
           p->set_message(text);
           p->set_author(req.sender());
-          stamp(pubmsg);
+          stamp_log(name, "PUBLICADO", pubmsg);  // carimbo + log juntos; vai para disco e para o tópico a seguir
 
           std::string payload;
-          if (!st.add_publication(pubmsg)) {
+          if (!replica.add_publication(pubmsg)) {
             fill(resp, false, chat::ERROR_INTERNAL, "falha ao gravar publicação em disco");
           } else if (!pubmsg.SerializeToString(&payload)) {
             fill(resp, false, chat::ERROR_INTERNAL, "falha ao serializar publicação");
@@ -699,7 +984,6 @@ int main(int argc, char** argv) {
             // PUB: frame 1 = tópico (nome do canal), frame 2 = Envelope
             pub.send(zmq::buffer(ch), zmq::send_flags::sndmore);
             pub.send(zmq::buffer(payload), zmq::send_flags::none);
-            log_msg(name, "PUBLICADO", pubmsg);
             fill(resp, true, chat::ERROR_NONE, "");
           }
         }
@@ -710,9 +994,8 @@ int main(int argc, char** argv) {
              "tipo de requisição não suportado");
     }
 
-    stamp(rep);  // hora + relógio lógico incrementado, imediatamente antes de enviar
+    stamp_log(name, "ENVIADO", rep);  // hora + relógio lógico incrementado, imediatamente antes de enviar
     send_envelope(sock, rep);
-    log_msg(name, "ENVIADO", rep);
 
     after_client_message();  // sincronização/heartbeat depois de responder ao bot
     maintain();

@@ -4,6 +4,10 @@
 //   2. se estiver inscrito em menos de 3 canais, se inscreve em mais um (escolhido ao acaso);
 //   3. escolhe um canal da lista e publica 10 mensagens aleatórias com 1 s de intervalo.
 // Uma thread própria recebe (SUB) e exibe tudo que chega nos canais em que o bot está inscrito.
+//
+// Parte 3: relógio lógico. Cada mensagem enviada leva o contador (incrementado antes do envio) e,
+// ao receber qualquer mensagem (resposta de servidor ou publicação), contador = max(contador,
+// valor recebido). O contador é compartilhado entre as duas threads (protegido por mutex).
 #include <zmq.hpp>
 
 #include <algorithm>
@@ -18,7 +22,8 @@
 
 #include "common.hpp"
 
-// REQ com timeout: se o servidor não responder, o socket REQ fica travado, então ele é recriado (padrão "lazy pirate").
+// REQ com timeout: se o servidor não responder, o socket REQ fica travado, então
+// ele é recriado (padrão "lazy pirate").
 class Rpc {
  public:
   Rpc(std::string endpoint, std::string who) : ctx_(1), ep_(std::move(endpoint)), who_(std::move(who)) {
@@ -26,8 +31,7 @@ class Rpc {
   }
 
   bool call(chat::Envelope req, chat::Envelope& rep) {
-    stamp(req);  // hora + relógio lógico incrementado, imediatamente antes de enviar
-    log_msg(who_, "ENVIADO", req);
+    stamp_log(who_, "ENVIADO", req);  // hora + relógio lógico incrementado, imediatamente antes de enviar
     if (!send_envelope(*sock_, req)) {
       reset();
       return false;
@@ -168,10 +172,21 @@ int main() {
     sleep_ms(2000);
   }
 
-  const std::vector<std::string> phrases = {
-      "ola pessoal!",        "alguem por ai?",        "testando o canal",     "mensagem aleatoria",
-      "sistemas distribuidos", "zeromq e protobuf",    "bom dia, canal!",      "publicando de novo",
-      "ping",                "tudo certo por aqui"};
+ const std::vector<std::string> phrases = {
+    "Olá, mundo!",
+    "Hello world!",
+    "Bonjour le monde!",
+    "¡Hola Mundo!",
+    "Hallo Welt!",
+    "Ciao mondo!",
+    "Kon'nichiwa sekai!",
+    "Annyeonghaseyo, sesang!",
+    "Nǐ hǎo shìjiè!",
+    "Salve, mundus!",
+    "Geia sou, kósme!",
+    "Privet, mir!",
+    "Hej, världen!"
+  };
 
   while (true) {
     // Lista os canais disponíveis
@@ -182,8 +197,7 @@ int main() {
       sleep_ms(2000);
       continue;
     }
-    std::vector<std::string> channels(lrep.list_channels_response().channels().begin(),
-                                      lrep.list_channels_response().channels().end());
+    std::vector<std::string> channels(lrep.list_channels_response().channels().begin(), lrep.list_channels_response().channels().end());
 
     // 1) menos de 5 canais -> cria um novo
     if (channels.size() < 5) {

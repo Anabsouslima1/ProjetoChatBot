@@ -127,6 +127,53 @@ message CoordinatorAnnouncement {
   string name = 1;          // nome do coordenador
 }
 
+// ---- Parte 5: replicação dos dados entre os servidores ----
+// Método: multi-mestre por propagação de escritas + anti-entropia (ver README).
+// Todo dado gravado por um servidor (login, canal, publicação) vira um ReplicaRecord com id único
+// (origin, seq); aplicar o mesmo registro duas vezes não muda nada (idempotente).
+
+message ReplicaRecord {
+  enum Kind {
+    KIND_LOGIN = 0;
+    KIND_CHANNEL = 1;
+    KIND_PUBLICATION = 2;
+  }
+  Kind kind = 1;
+  string origin = 2;        // "<servidor>@<instante de partida>": quem aceitou a escrita do cliente
+  int64 seq = 3;            // 1, 2, 3... por origem (id do registro = origin + seq)
+  int64 logical_clock = 4;  // relógio lógico no momento da escrita (ordem do histórico)
+  int64 timestamp_ms = 5;   // hora da escrita (epoch ms)
+  string name = 6;          // usuário (LOGIN) ou canal (CHANNEL, PUBLICATION)
+  string text = 7;          // texto da publicação
+  string author = 8;        // bot que publicou
+}
+
+// Servidor -> Servidor (REQ/REP): empurra registros novos. Resposta: ReplicateResponse.
+message ReplicateRequest {
+  repeated ReplicaRecord records = 1;
+}
+
+message ReplicateResponse {
+  bool ok = 1;
+}
+
+// Servidor -> Servidor (REQ/REP): anti-entropia. "have" diz, por origem, até que seq o
+// solicitante tem TODOS os registros (sem buracos). A resposta traz os que faltam.
+message VersionEntry {
+  string origin = 1;
+  int64 last_seq = 2;
+}
+
+message SyncRequest {
+  repeated VersionEntry have = 1;
+  int32 max_records = 2;    // 0 = padrão do servidor
+}
+
+message SyncResponse {
+  repeated ReplicaRecord records = 1;
+  bool more = 2;            // ainda há registros além destes
+}
+
 // Todo mensagem trafega dentro de um Envelope, que garante o timestamp
 // obrigatório do envio. Serialização: Protocol Buffers (binário).
 message Envelope {
@@ -155,5 +202,9 @@ message Envelope {
     ElectionRequest election_request = 27;
     ElectionResponse election_response = 28;
     CoordinatorAnnouncement coordinator_announcement = 29;
+    ReplicateRequest replicate_request = 30;
+    ReplicateResponse replicate_response = 31;
+    SyncRequest sync_request = 32;
+    SyncResponse sync_response = 33;
   }
 }
