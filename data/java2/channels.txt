@@ -25,3 +25,8 @@ canal-bot_node_1-7952
 canal-bot_cpp_1-6928
 canal-bot_java_2-8800
 canal-bot_cpp_1-2251
+canal-bot_java_1-2717
+canal-bot_java_1-9315
+canal-bot_cpp_2-5847
+canal-bot_node_2-2933
+canal-bot_cpp_2-8808

@@ -5,6 +5,7 @@ import protobuf from "protobufjs";
 const PROTO_PATH = process.env.PROTO_PATH ?? "../proto/chat.proto";
 const root = protobuf.loadSync(PROTO_PATH);
 const EnvelopeType = root.lookupType("chat.Envelope");
+const ReplicaRecordType = root.lookupType("chat.ReplicaRecord");
 
 export const MAX_MESSAGE_LEN = 1000; // tamanho máximo (bytes) do texto de uma publicação
 
@@ -17,6 +18,18 @@ export interface Envelope {
   logicalClock: number;
   body?: string;
   [campo: string]: any;
+}
+
+// Parte 5: um dado gravado por algum servidor (login, canal ou publicação). Id = (origin, seq).
+export interface ReplicaRecord {
+  kind: "KIND_LOGIN" | "KIND_CHANNEL" | "KIND_PUBLICATION";
+  origin: string; // "<servidor>@<instante de partida>"
+  seq: number; // 1, 2, 3... por origem
+  logicalClock: number;
+  timestampMs: number;
+  name: string; // usuário (LOGIN) ou canal (CHANNEL, PUBLICATION)
+  text: string; // texto da publicação
+  author: string; // bot que publicou
 }
 
 // ---------------------------------------------------------------------------
@@ -118,6 +131,20 @@ export function decode(buf: Uint8Array): Envelope {
   }) as Envelope;
 }
 
+// Parte 5: (de)serialização de um registro da réplica (usado em records.bin).
+export function encodeRecord(r: ReplicaRecord): Uint8Array {
+  return ReplicaRecordType.encode(ReplicaRecordType.fromObject(r)).finish();
+}
+
+export function decodeRecord(buf: Uint8Array): ReplicaRecord {
+  const msg = ReplicaRecordType.decode(buf);
+  return ReplicaRecordType.toObject(msg, {
+    longs: Number,
+    enums: String,
+    defaults: true,
+  }) as ReplicaRecord;
+}
+
 // Nome do usuário/canal: 1..32 caracteres entre [A-Za-z0-9_-]
 export function validName(s: string): boolean {
   return /^[A-Za-z0-9_-]{1,32}$/.test(s);
@@ -156,6 +183,10 @@ const BODIES = [
   "electionRequest",
   "electionResponse",
   "coordinatorAnnouncement",
+  "replicateRequest",
+  "replicateResponse",
+  "syncRequest",
+  "syncResponse",
 ];
 
 // Texto legível do conteúdo da mensagem (para os logs de envio/recebimento)
@@ -206,6 +237,16 @@ export function describe(e: Envelope): string {
       return `election_response{ok=${e.electionResponse.ok}}`;
     case "coordinatorAnnouncement":
       return `coordinator_announcement{name=${e.coordinatorAnnouncement.name}}`;
+    case "replicateRequest": {
+      const rs = e.replicateRequest.records as any[];
+      return `replicate_request{registros=${rs.length}${rs.length ? `, primeiro=${rs[0].origin}#${rs[0].seq}` : ""}}`;
+    }
+    case "replicateResponse":
+      return `replicate_response{ok=${e.replicateResponse.ok}}`;
+    case "syncRequest":
+      return `sync_request{origens=${(e.syncRequest.have as any[]).length}}`;
+    case "syncResponse":
+      return `sync_response{registros=${(e.syncResponse.records as any[]).length}, more=${e.syncResponse.more}}`;
     default:
       return "(mensagem vazia/desconhecida)";
   }

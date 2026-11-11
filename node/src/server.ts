@@ -1,10 +1,13 @@
-// Servidor (REP + PUB + REQ para a referência): login, canais, publicações, relógios, heartbeat e eleição.
-// Persistência (por servidor, em DATA_DIR):
+// Servidor (REP + PUB + REQ para a referência): login, canais, publicações, relógios, heartbeat,
+// eleição e réplica dos dados.
+// Persistência (por servidor, em DATA_DIR) — ver replica.ts:
+//   records.bin       -> TODOS os registros (próprios e replicados): 4 bytes (big-endian) com o tamanho
+//                        + ReplicaRecord serializado (protobuf)
 //   logins.tsv        -> "<timestamp_ms>\t<usuario>" por login
 //   channels.txt      -> um canal por linha
 //   publications.bin  -> cada publicação: 4 bytes (big-endian) com o tamanho + Envelope serializado
 //                        (protobuf). Mesmo formato do servidor C++.
-// Para listar o conteúdo de publications.bin:  tsx src/server.ts --dump /data/publications.bin
+// Para listar o conteúdo de publications.bin (em ordem total):  tsx src/server.ts --dump /data/publications.bin
 //
 // Parte 3: relógio lógico (Lamport); cadastro na referência (rank);
 //          a cada HEARTBEAT_EVERY (10) mensagens de clientes: heartbeat + lista de servidores.
@@ -17,10 +20,15 @@
 //     rank maior (election_request / OK); se ninguém responde, assume e publica no tópico "servers";
 //   - cada servidor atende os outros em tcp://*:(PEER_PORT_BASE + rank). O endereço de um par é
 //     tcp://<PEER_HOST ou nome do servidor>:(PEER_PORT_BASE + rank do par).
+//
+// Parte 5: réplica (multi-mestre, consistência eventual):
+//   - qualquer servidor aceita escritas dos bots (o broker distribui em round-robin);
+//   - cada registro novo é empurrado a todos os outros servidores (replicate_request / replicate_response);
+//   - a cada SYNC_INTERVAL_MS (10 s) a anti-entropia pergunta a cada servidor o que falta
+//     (sync_request / sync_response) e aplica, recuperando quem caiu, entrou depois ou perdeu mensagens.
 import { Reply, Publisher, Request, Subscriber } from "zeromq";
 import { setTimeout as sleep } from "node:timers/promises";
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
 import {
   MAX_MESSAGE_LEN,
   clockMs,
@@ -38,9 +46,11 @@ import {
   validMessage,
   validName,
 } from "./common.js";
-import type { Envelope } from "./common.js";
+import type { Envelope, ReplicaRecord } from "./common.js";
+import { Replica } from "./replica.js";
 
-// Lê publications.bin e imprime o conteúdo de cada registro.
+// Lê publications.bin e imprime as publicações em ORDEM TOTAL (relógio lógico, desempate pelo servidor
+// de origem): todos os servidores com os mesmos registros mostram exatamente a mesma sequência.
 function dumpPublications(path: string): number {
   if (!existsSync(path)) {
     console.error(`não foi possível abrir ${path}`);
@@ -48,7 +58,7 @@ function dumpPublications(path: string): number {
   }
   const buf = readFileSync(path);
   let off = 0;
-  let count = 0;
+  const all: Envelope[] = [];
   while (off < buf.length) {
     if (off + 4 > buf.length) {
       console.error("registro truncado no final do arquivo");
@@ -60,11 +70,15 @@ function dumpPublications(path: string): number {
       console.error("registro truncado no final do arquivo");
       return 1;
     }
-    logMsg("dump", "ARMAZENADO", decode(buf.subarray(off, off + n)));
+    all.push(decode(buf.subarray(off, off + n)));
     off += n;
-    count++;
   }
-  console.log(`${count} publicação(ões) no arquivo`);
+  all.sort((a, b) => {
+    if (a.logicalClock !== b.logicalClock) return a.logicalClock - b.logicalClock;
+    return a.sender < b.sender ? -1 : a.sender > b.sender ? 1 : 0;
+  });
+  for (const e of all) logMsg("dump", "ARMAZENADO", e);
+  console.log(`${all.length} publicação(ões) no arquivo`);
   return 0;
 }
 
@@ -83,29 +97,15 @@ const dataDir = envOr("DATA_DIR", "/data");
 const heartbeatEvery = Math.max(1, envInt("HEARTBEAT_EVERY", 10));
 const clockSyncEvery = Math.max(1, envInt("CLOCK_SYNC_EVERY", 15));
 const peerPortBase = envInt("PEER_PORT_BASE", 5560);
+const syncIntervalMs = Math.max(500, envInt("SYNC_INTERVAL_MS", 10000)); // anti-entropia (Parte 5)
 
-mkdirSync(dataDir, { recursive: true });
-const channelsFile = join(dataDir, "channels.txt");
-const loginsFile = join(dataDir, "logins.tsv");
-const publicationsFile = join(dataDir, "publications.bin");
-
-const channels = new Set<string>(
-  existsSync(channelsFile)
-    ? readFileSync(channelsFile, "utf8").split("\n").filter((l) => l.length > 0)
-    : [],
-);
+// Parte 5: toda a persistência passa pela réplica (records.bin + visões legíveis)
+const replica = new Replica(dataDir, name);
 
 function fail(error: string, errorMessage: string) {
   return { success: false, error, errorMessage };
 }
 const ok = { success: true, error: "ERROR_NONE", errorMessage: "" };
-
-// Grava a publicação (Envelope serializado) com o tamanho de 4 bytes na frente
-function addPublication(payload: Uint8Array): void {
-  const hdr = Buffer.alloc(4);
-  hdr.writeUInt32BE(payload.length);
-  appendFileSync(publicationsFile, Buffer.concat([hdr, payload]));
-}
 
 // ---------------------------------------------------------------------------
 // Algoritmo de Cristian: a hora de quem respondeu chegou depois de ~metade do tempo de ida e volta,
@@ -264,7 +264,7 @@ function askHigherServers(higher: Peer[], timeoutMs: number): Promise<boolean> {
   });
 }
 
-// Atende os pedidos dos outros servidores (clock_request e election_request).
+// Atende os pedidos dos outros servidores (relógio, eleição e replicação).
 async function peerServerLoop(): Promise<void> {
   const bind = `tcp://*:${peerPortBase + rank}`;
   const rep = new Reply({ linger: 0 });
@@ -288,6 +288,17 @@ async function peerServerLoop(): Promise<void> {
         const okElection = req.electionRequest.rank < rank;
         resp = makeEnvelope(name, { electionResponse: { ok: okElection } });
         if (okElection) electionWanted = true;
+      } else if (req.body === "replicateRequest") {
+        // Parte 5: registros novos empurrados por outro servidor (idempotente)
+        replica.applyRemote(req.replicateRequest.records as ReplicaRecord[]);
+        resp = makeEnvelope(name, { replicateResponse: { ok: true } });
+      } else if (req.body === "syncRequest") {
+        // Parte 5: anti-entropia: devolve o que quem pediu ainda não tem
+        const have = new Map<string, number>();
+        for (const v of req.syncRequest.have as { origin: string; lastSeq: number }[]) have.set(v.origin, v.lastSeq);
+        const max = req.syncRequest.maxRecords > 0 ? req.syncRequest.maxRecords : 500;
+        const m = replica.missing(have, max);
+        resp = makeEnvelope(name, { syncResponse: { records: m.records, more: m.more } });
       } else {
         resp = makeEnvelope(name, { electionResponse: { ok: false } });
       }
@@ -331,6 +342,59 @@ async function coordinatorListener(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Parte 5: propagação dos registros e anti-entropia
+// ---------------------------------------------------------------------------
+
+// Empurra cada registro novo (login, canal, publicação) para todos os outros servidores.
+// Um servidor que não responde é pulado por 5 s; o que ele perder é recuperado pela anti-entropia.
+async function replicationPushLoop(): Promise<void> {
+  const skipUntil = new Map<string, number>();
+  while (true) {
+    const batch = await replica.waitOutbox(500, 100);
+    if (batch.length === 0) continue;
+    const targets = peers.filter((p) => p.name !== name && steadyMs() >= (skipUntil.get(p.name) ?? 0));
+    await Promise.all(
+      targets.map(async (p) => {
+        const r = await peerRequest(peerEndpoint(p.name, p.rank), { replicateRequest: { records: batch } }, 500);
+        if (!r || r.rep.body !== "replicateResponse" || !r.rep.replicateResponse.ok) {
+          skipUntil.set(p.name, steadyMs() + 5000);
+        }
+      }),
+    );
+  }
+}
+
+// A cada syncIntervalMs pergunta a cada servidor o que falta (comparando versões) e aplica.
+// Também faz a recuperação de quem entra/volta depois e de registros perdidos.
+async function antiEntropyLoop(intervalMs: number): Promise<void> {
+  await sleep(3000); // espera o cadastro na referência
+  while (true) {
+    let fetched = 0;
+    let reached = 0;
+    for (const p of [...peers]) {
+      if (p.name === name) continue;
+      for (let round = 0; round < 50; round++) {
+        // pede em lotes até não haver mais
+        const r = await peerRequest(
+          peerEndpoint(p.name, p.rank),
+          { syncRequest: { have: replica.version(), maxRecords: 500 } },
+          2000,
+        );
+        if (!r || r.rep.body !== "syncResponse") break;
+        if (round === 0) reached++;
+        fetched += replica.applyRemote(r.rep.syncResponse.records as ReplicaRecord[]);
+        if (!r.rep.syncResponse.more) break;
+      }
+    }
+    const st = replica.stats();
+    console.log(
+      `[${name}] réplica: registros=${st.total} (logins=${st.logins}, canais=${st.channels}, publicações=${st.publications}) hash=${st.hash} | sincronizou com ${reached} servidor(es), ${fetched} registro(s) novo(s)`,
+    );
+    await sleep(intervalMs);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Sockets principais
 // ---------------------------------------------------------------------------
 const sock = new Reply(); // requisições dos bots (via broker)
@@ -347,9 +411,7 @@ async function handle(req: Envelope): Promise<Envelope> {
           loginResponse: fail("ERROR_INVALID_USERNAME", "usuário deve ter 1-32 caracteres [A-Za-z0-9_-]"),
         });
       }
-      try {
-        appendFileSync(loginsFile, `${clockMs()}\t${user}\n`);
-      } catch {
+      if (!replica.addLogin(user, clockMs())) {
         return makeEnvelope(name, {
           loginResponse: fail("ERROR_INTERNAL", "falha ao gravar login em disco"),
         });
@@ -364,30 +426,27 @@ async function handle(req: Envelope): Promise<Envelope> {
           createChannelResponse: fail("ERROR_INVALID_CHANNEL_NAME", "canal deve ter 1-32 caracteres [A-Za-z0-9_-]"),
         });
       }
-      if (channels.has(ch)) {
+      const res = replica.addChannel(ch);
+      if (res === 1) {
         return makeEnvelope(name, {
           createChannelResponse: fail("ERROR_CHANNEL_EXISTS", "canal já existe"),
         });
       }
-      try {
-        appendFileSync(channelsFile, `${ch}\n`);
-      } catch {
+      if (res === 2) {
         return makeEnvelope(name, {
           createChannelResponse: fail("ERROR_INTERNAL", "falha ao gravar canal em disco"),
         });
       }
-      channels.add(ch);
       return makeEnvelope(name, { createChannelResponse: ok });
     }
 
     case "listChannelsRequest":
-      return makeEnvelope(name, { listChannelsResponse: { channels: [...channels] } });
+      return makeEnvelope(name, { listChannelsResponse: { channels: replica.channels() } });
 
     case "publishRequest": {
       const ch: string = req.publishRequest.channel;
       const text: string = req.publishRequest.message;
-      // Cada servidor conhece só os canais criados nele (dados separados), então não exigimos
-      // que o canal exista aqui: basta o nome ser válido (o tópico é só o nome).
+      // Basta o nome do canal ser válido (o tópico é só o nome).
       if (!validName(ch)) {
         return makeEnvelope(name, {
           publishResponse: fail("ERROR_INVALID_CHANNEL_NAME", "canal deve ter 1-32 caracteres [A-Za-z0-9_-]"),
@@ -398,14 +457,15 @@ async function handle(req: Envelope): Promise<Envelope> {
           publishResponse: fail("ERROR_INVALID_MESSAGE", `mensagem deve ter 1-${MAX_MESSAGE_LEN} bytes`),
         });
       }
+      // Mensagem que vai para o tópico: carimbada (hora + relógio lógico) logo antes de
+      // gravar e publicar; autor = bot que pediu.
       const pubmsg = makeEnvelope(name, {
         publication: { channel: ch, message: text, author: req.sender },
       });
       stamp(pubmsg);
       const payload = encode(pubmsg);
-      try {
-        addPublication(payload);
-      } catch {
+      // Grava como registro da réplica (vai para disco e para a fila de propagação aos outros servidores)
+      if (!replica.addPublication(pubmsg)) {
         return makeEnvelope(name, {
           publishResponse: fail("ERROR_INTERNAL", "falha ao gravar publicação em disco"),
         });
@@ -424,7 +484,7 @@ async function handle(req: Envelope): Promise<Envelope> {
 }
 
 console.log(
-  `[${name}] conectado ao broker em ${backend} e ao proxy Pub/Sub em ${pubsub} (XPUB ${xpub}) | referência em ${referenceEp} | dados em ${dataDir} | canais carregados: ${channels.size}`,
+  `[${name}] conectado ao broker em ${backend} e ao proxy Pub/Sub em ${pubsub} (XPUB ${xpub}) | referência em ${referenceEp} | dados em ${dataDir} | registros carregados: ${replica.stats().total}`,
 );
 
 // --- Parte 3: cadastro na referência (rank) ---
@@ -452,6 +512,9 @@ async function tryRegister(): Promise<void> {
 }
 
 coordinatorListener().catch((e) => console.error(`[${name}] erro no SUB de "servers":`, e));
+// Parte 5: propagação dos registros novos e anti-entropia periódica
+replicationPushLoop().catch((e) => console.error(`[${name}] erro na propagação da réplica:`, e));
+antiEntropyLoop(syncIntervalMs).catch((e) => console.error(`[${name}] erro na anti-entropia:`, e));
 
 // Poucas tentativas na partida (o servidor não deve ficar parado esperando a referência);
 // se não der, tenta de novo nos próximos heartbeats.
