@@ -1,0 +1,109 @@
+# Override APENAS para ambientes (ex.: alguns Codespaces) em que o tráfego entre
+# containers da rede bridge do Docker é bloqueado. Usa a rede do host.
+
+# docker compose -f docker-compose.yaml -f docker-compose.host.yaml up --build
+
+# Na rede do host todos os serviços compartilham o mesmo "localhost": por isso só pode haver
+# UM broker e UM proxy (portas 5555/5556 e 5557/5558).
+# PEER_HOST: os servidores se acham em 127.0.0.1:(5560 + rank), pois os nomes dos serviços não resolvem.
+
+services:
+  broker:
+    network_mode: host
+  proxy:
+    network_mode: host
+
+  server_cpp_1:
+    network_mode: host
+    environment:
+      BROKER_BACKEND: tcp://127.0.0.1:5556
+      PROXY_XSUB: tcp://127.0.0.1:5557
+      PROXY_XPUB: tcp://127.0.0.1:5558
+      REFERENCE_ADDR: tcp://127.0.0.1:5559
+      PEER_HOST: 127.0.0.1
+
+  server_cpp_2:
+    network_mode: host
+    environment:
+      BROKER_BACKEND: tcp://127.0.0.1:5556
+      PROXY_XSUB: tcp://127.0.0.1:5557
+      PROXY_XPUB: tcp://127.0.0.1:5558
+      REFERENCE_ADDR: tcp://127.0.0.1:5559
+      PEER_HOST: 127.0.0.1
+
+  client_cpp_1:
+    network_mode: host
+    environment:
+      BROKER_FRONTEND: tcp://127.0.0.1:5555
+      PROXY_XPUB: tcp://127.0.0.1:5558
+
+  client_cpp_2:
+    network_mode: host
+    environment:
+      BROKER_FRONTEND: tcp://127.0.0.1:5555
+      PROXY_XPUB: tcp://127.0.0.1:5558
+
+  server_java_1:
+    network_mode: host
+    environment:
+      BROKER_BACKEND: tcp://127.0.0.1:5556
+      PROXY_XSUB: tcp://127.0.0.1:5557
+      PROXY_XPUB: tcp://127.0.0.1:5558
+      REFERENCE_ADDR: tcp://127.0.0.1:5559
+      PEER_HOST: 127.0.0.1
+
+  server_java_2:
+    network_mode: host
+    environment:
+      BROKER_BACKEND: tcp://127.0.0.1:5556
+      PROXY_XSUB: tcp://127.0.0.1:5557
+      PROXY_XPUB: tcp://127.0.0.1:5558
+      REFERENCE_ADDR: tcp://127.0.0.1:5559
+      PEER_HOST: 127.0.0.1
+
+  client_java_1:
+    network_mode: host
+    environment:
+      BROKER_FRONTEND: tcp://127.0.0.1:5555
+      PROXY_XPUB: tcp://127.0.0.1:5558
+
+  client_java_2:
+    network_mode: host
+    environment:
+      BROKER_FRONTEND: tcp://127.0.0.1:5555
+      PROXY_XPUB: tcp://127.0.0.1:5558
+
+  reference:
+    network_mode: host
+    environment:
+      REFERENCE_BIND: tcp://*:5559
+
+  server_node_1:
+    network_mode: host
+    environment:
+      BROKER_BACKEND: tcp://127.0.0.1:5556
+      PROXY_XSUB: tcp://127.0.0.1:5557
+      PROXY_XPUB: tcp://127.0.0.1:5558
+      REFERENCE_ADDR: tcp://127.0.0.1:5559
+      PEER_HOST: 127.0.0.1
+
+  server_node_2:
+    network_mode: host
+    environment:
+      BROKER_BACKEND: tcp://127.0.0.1:5556
+      PROXY_XSUB: tcp://127.0.0.1:5557
+      PROXY_XPUB: tcp://127.0.0.1:5558
+      REFERENCE_ADDR: tcp://127.0.0.1:5559
+      PEER_HOST: 127.0.0.1
+
+  client_node_1:
+    network_mode: host
+    environment:
+      BROKER_FRONTEND: tcp://127.0.0.1:5555
+      PROXY_XPUB: tcp://127.0.0.1:5558
+
+  client_node_2:
+    network_mode: host
+    environment:
+      BROKER_FRONTEND: tcp://127.0.0.1:5555
+      PROXY_XPUB: tcp://127.0.0.1:5558

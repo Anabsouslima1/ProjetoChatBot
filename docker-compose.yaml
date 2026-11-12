@@ -1,0 +1,188 @@
+# Portas (rede interna do compose):
+# broker  5555 = clientes (REQ -> ROUTER)      5556 = servidores (REP <- DEALER)
+# proxy   5557 = XSUB (servidores publicam)     5558 = XPUB (bots assinam)
+# Existe UM proxy Pub/Sub só, usado por todos os serviços (C++, Java e Node.js).
+# Servidores falam entre si em PEER_PORT_BASE (5560) + rank.
+
+x-cpp: &cpp
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: chat-cpp
+
+x-java: &java
+  build:
+    context: .
+    dockerfile: java/Dockerfile
+  image: chat-java
+
+x-node: &node
+  build:
+    context: .
+    dockerfile: node/Dockerfile
+  image: chat-node
+
+services:
+  broker:
+    <<: *cpp
+    command: ["/app/broker"]
+
+  proxy:
+    <<: *cpp
+    command: ["/app/proxy"]
+
+  # SERVIDORES C++
+  server_cpp_1:
+    <<: *cpp
+    command: ["/app/server"]
+    environment:
+      SERVER_NAME: server_cpp_1
+      BROKER_BACKEND: tcp://broker:5556
+      PROXY_XSUB: tcp://proxy:5557
+      PROXY_XPUB: tcp://proxy:5558
+      REFERENCE_ADDR: tcp://reference:5559
+      DATA_DIR: /data
+    volumes:
+      - server_cpp_1_data:/data
+    depends_on: [broker, proxy, reference]
+
+  server_cpp_2:
+    <<: *cpp
+    command: ["/app/server"]
+    environment:
+      SERVER_NAME: server_cpp_2
+      BROKER_BACKEND: tcp://broker:5556
+      PROXY_XSUB: tcp://proxy:5557
+      PROXY_XPUB: tcp://proxy:5558
+      REFERENCE_ADDR: tcp://reference:5559
+      DATA_DIR: /data
+    volumes:
+      - server_cpp_2_data:/data
+    depends_on: [broker, proxy, reference]
+
+  # CLIENTES C++
+  client_cpp_1:
+    <<: *cpp
+    command: ["/app/client"]
+    environment:
+      BOT_NAME: bot_cpp_1
+      BROKER_FRONTEND: tcp://broker:5555
+      PROXY_XPUB: tcp://proxy:5558
+    depends_on: [broker, proxy, server_cpp_1, server_cpp_2]
+
+  client_cpp_2:
+    <<: *cpp
+    command: ["/app/client"]
+    environment:
+      BOT_NAME: bot_cpp_2
+      BROKER_FRONTEND: tcp://broker:5555
+      PROXY_XPUB: tcp://proxy:5558
+    depends_on: [broker, proxy, server_cpp_1, server_cpp_2]
+
+  # SERVIDORES JAVA
+  server_java_1:
+    <<: *java
+    command: ["java", "-cp", "app.jar", "chat.java.Server"]
+    environment:
+      SERVER_NAME: server_java_1
+      BROKER_BACKEND: tcp://broker:5556
+      PROXY_XSUB: tcp://proxy:5557
+      PROXY_XPUB: tcp://proxy:5558
+      REFERENCE_ADDR: tcp://reference:5559
+      DATA_DIR: /data
+    volumes:
+      - ./data/java1:/data
+    depends_on: [broker, proxy, reference]
+
+  server_java_2:
+    <<: *java
+    command: ["java", "-cp", "app.jar", "chat.java.Server"]
+    environment:
+      SERVER_NAME: server_java_2
+      BROKER_BACKEND: tcp://broker:5556
+      PROXY_XSUB: tcp://proxy:5557
+      PROXY_XPUB: tcp://proxy:5558
+      REFERENCE_ADDR: tcp://reference:5559
+      DATA_DIR: /data
+    volumes:
+      - ./data/java2:/data
+    depends_on: [broker, proxy, reference]
+
+  reference:
+    <<: *java
+    command: ["java", "-cp", "app.jar", "chat.java.Reference"]
+    environment:
+      REFERENCE_BIND: tcp://*:5559
+
+  # CLIENTES JAVA
+  client_java_1:
+    <<: *java
+    command: ["java", "-cp", "app.jar", "chat.java.Client"]
+    environment:
+      BOT_NAME: bot_java_1
+      BROKER_FRONTEND: tcp://broker:5555
+      PROXY_XPUB: tcp://proxy:5558
+    depends_on: [broker, proxy, server_java_1, server_java_2]
+
+  client_java_2:
+    <<: *java
+    command: ["java", "-cp", "app.jar", "chat.java.Client"]
+    environment:
+      BOT_NAME: bot_java_2
+      BROKER_FRONTEND: tcp://broker:5555
+      PROXY_XPUB: tcp://proxy:5558
+    depends_on: [broker, proxy, server_java_1, server_java_2]
+
+  # SERVIDORES NODE
+  server_node_1:
+    <<: *node
+    command: ["npx", "tsx", "src/server.ts"]
+    environment:
+      SERVER_NAME: server_node_1
+      BROKER_BACKEND: tcp://broker:5556
+      PROXY_XSUB: tcp://proxy:5557
+      PROXY_XPUB: tcp://proxy:5558
+      REFERENCE_ADDR: tcp://reference:5559
+      DATA_DIR: /data
+    volumes:
+      - server_node_1_data:/data
+    depends_on: [broker, proxy, reference]
+
+  server_node_2:
+    <<: *node
+    command: ["npx", "tsx", "src/server.ts"]
+    environment:
+      SERVER_NAME: server_node_2
+      BROKER_BACKEND: tcp://broker:5556
+      PROXY_XSUB: tcp://proxy:5557
+      PROXY_XPUB: tcp://proxy:5558
+      REFERENCE_ADDR: tcp://reference:5559
+      DATA_DIR: /data
+    volumes:
+      - server_node_2_data:/data
+    depends_on: [broker, proxy, reference]
+
+  # CLIENTES NODE
+  client_node_1:
+    <<: *node
+    command: ["npx", "tsx", "src/client.ts"]
+    environment:
+      BOT_NAME: bot_node_1
+      BROKER_FRONTEND: tcp://broker:5555
+      PROXY_XPUB: tcp://proxy:5558
+    depends_on: [broker, proxy, server_node_1, server_node_2]
+
+  client_node_2:
+    <<: *node
+    command: ["npx", "tsx", "src/client.ts"]
+    environment:
+      BOT_NAME: bot_node_2
+      BROKER_FRONTEND: tcp://broker:5555
+      PROXY_XPUB: tcp://proxy:5558
+    depends_on: [broker, proxy, server_node_1, server_node_2]
+
+volumes:
+  server_cpp_1_data:
+  server_cpp_2_data:
+  server_node_1_data:
+  server_node_2_data:
