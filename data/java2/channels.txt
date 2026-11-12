@@ -58,3 +58,8 @@ canal-bot_cpp_1-5164
 canal-bot_node_2-4436
 canal-bot_node_1-7538
 canal-bot_java_2-6789
+canal-bot_node_1-7704
+canal-bot_cpp_1-7012
+canal-bot_java_2-5533
+canal-bot_node_1-4556
+canal-bot_node_2-3179
