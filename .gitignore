@@ -1,3 +1,4 @@
 build/
 data/
 *.o
+run.log

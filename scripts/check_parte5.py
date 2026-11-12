@@ -6,9 +6,11 @@ Como os bots escrevem o tempo todo, o teste precisa de uma pausa no final para a
 
     docker compose -f docker-compose.yaml -f docker-compose.host.yaml up -d --build
     sleep 90
-    docker compose -f docker-compose.yaml -f docker-compose.host.yaml stop client_cpp_1 client_cpp_2 \\
-        client_java_1 client_java_2 client_node_1 client_node_2     # bots param de escrever
-    sleep 30                                                         # 2-3 ciclos de anti-entropia
+    docker compose -f docker-compose.yaml -f docker-compose.host.yaml stop \
+    client_cpp_1 client_cpp_2 \
+    client_java_1 client_java_2 \
+    client_node_1 client_node_2
+    sleep 30
     docker compose -f docker-compose.yaml -f docker-compose.host.yaml logs --no-color > run.log
     docker compose -f docker-compose.yaml -f docker-compose.host.yaml down
     python3 scripts/check_parte5.py run.log
