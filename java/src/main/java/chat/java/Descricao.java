@@ -2,7 +2,9 @@ package chat.java;
 
 import chat.proto.*;
 
-// (cpp/src/common.hpp, função describe), para que o scripts/check_parte4.py leia os logs
+import java.util.List;
+
+
 final class Descricao {
     private Descricao() {
     }
@@ -79,6 +81,21 @@ final class Descricao {
                         + ", rank=" + e.getElectionRequest().getRank() + "}";
             case ELECTION_RESPONSE:
                 return "election_response{ok=" + e.getElectionResponse().getOk() + "}";
+            case REPLICATE_REQUEST: {
+                List<ReplicaRecord> registros = e.getReplicateRequest().getRecordsList();
+                String texto = "replicate_request{registros=" + registros.size();
+                if (!registros.isEmpty()) {
+                    texto += ", primeiro=" + registros.get(0).getOrigin() + "#" + registros.get(0).getSeq();
+                }
+                return texto + "}";
+            }
+            case REPLICATE_RESPONSE:
+                return "replicate_response{ok=" + e.getReplicateResponse().getOk() + "}";
+            case SYNC_REQUEST:
+                return "sync_request{origens=" + e.getSyncRequest().getHaveCount() + "}";
+            case SYNC_RESPONSE:
+                return "sync_response{registros=" + e.getSyncResponse().getRecordsCount()
+                        + ", more=" + e.getSyncResponse().getMore() + "}";
             case COORDINATOR_ANNOUNCEMENT:
                 return "coordinator_announcement{name=" + e.getCoordinatorAnnouncement().getName() + "}";
             default:

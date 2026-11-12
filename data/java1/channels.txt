@@ -117,3 +117,10 @@ canal-bot_node_2-8684
 canal-bot_cpp_2-3128
 canal-bot_java_2-4039
 canal-bot_node_1-5993
+canal-bot_java_2-2584
+canal-bot_cpp_2-2877
+canal-bot_java_1-4749
+canal-bot_cpp_1-6673
+canal-bot_node_1-3336
+canal-bot_java_2-9628
+canal-bot_node_2-5958

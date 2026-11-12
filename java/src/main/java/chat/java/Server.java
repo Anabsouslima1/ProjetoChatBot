@@ -9,55 +9,39 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
-// Servidor (REP + PUB + REQ para a referência): login, canais, publicações, relógios e heartbeat.
-// Persistência (por servidor, em DATA_DIR):
-//   logins.tsv        -> "<timestamp_ms>\t<usuario>" por login
-//   channels.txt      -> um canal por linha
-//   publications.bin  -> cada publicação: 4 bytes (big-endian) com o tamanho + Envelope serializado
-//                        (mesmo formato dos servidores C++ e Node)
-//
-// Parte 3:
-//   - relógio lógico (contador): incrementado antes de cada envio e enviado no Envelope;
-//     ao receber, vira o máximo entre o valor local e o recebido.
-//   - ao subir, pede o rank à referência (isso cadastra o servidor);
-//     a cada HEARTBEAT_EVERY (10) mensagens de clientes, envia heartbeat à referência.
-//
-// Parte 4 (a hora deixa de vir da referência; 
-//   - um servidor é o coordenador (eleição pelo algoritmo do valentão/bully: vence o maior rank);
-//   - a cada CLOCK_SYNC_EVERY (15) mensagens de clientes, o servidor pede a hora ao coordenador
-//     (REQ clock_request / REP clock_response) e ajusta o relógio físico;
-//   - se o coordenador não responde (ou ainda não há um), inicia eleição: pede eleição aos servidores
-//     de rank maior (REQ election_request / REP OK); se ninguém de rank maior responde, assume e
-//     publica o nome no tópico "servers"; todos assinam esse tópico e guardam o coordenador.
-//   - cada servidor atende os pedidos dos outros em tcp://*:(PEER_PORT_BASE + rank). O endereço de um
-//     par é tcp://<PEER_HOST ou nome do servidor>:(PEER_PORT_BASE + rank do par).
-// Para listar publications.bin:  java -cp app.jar chat.java.Server --dump /data/publications.bin
+/**
+ * Servidor (REP + PUB + REQ): Processa logins, canais, publicações, relógios lógicos, 
+ * heartbeats, eleição (Bully) e replicação de dados (Anti-entropia).
+ * 
+ * Persistência (por servidor, em DATA_DIR):
+ *   records.bin        -> Todos os registros (locais e replicados) com prefixo de tamanho e ReplicaRecord serializado.
+ *   logins.tsv         -> <timestamp_ms>\t<usuario>
+ *   channels.txt       -> Um canal por linha
+ *   publications.bin   -> Prefixado por tamanho + Envelope serializado
+ *
+ * Utilitário de leitura: java -cp app.jar chat.java.Server --dump /data/publications.bin
+ */
 public class Server {
     private static final Pattern NOME_VALIDO = Pattern.compile("[A-Za-z0-9_-]{1,32}");
-    private static final int MAX_MENSAGEM = 1000; // bytes
+    private static final int MAX_MENSAGEM = 1000;
 
-    private static Set<String> canais = new HashSet<>();
     private static String dataDir;
+    private static final Object travaCarimboELog = new Object();
 
-    // Relógio lógico: usado pela thread principal, pela que atende os outros servidores e pela do SUB
     private static final AtomicLong relogioLogico = new AtomicLong(0);
-    // Deslocamento do relógio físico em relação ao do coordenador (ms).
-    // CLOCK_SKEW_MS: só para testes (simula uma máquina com o relógio adiantado/atrasado).
     private static final AtomicLong offsetMs = new AtomicLong(longEnv("CLOCK_SKEW_MS", 0));
     private static long ultimaHora = 0;
 
@@ -72,42 +56,42 @@ public class Server {
         String proxyXpub = System.getenv().getOrDefault("PROXY_XPUB", "tcp://proxy:5558");
         String refAddr = System.getenv().getOrDefault("REFERENCE_ADDR", "tcp://reference:5559");
         dataDir = System.getenv().getOrDefault("DATA_DIR", "/data");
-        int heartbeatCada = (int) Math.max(1, longEnv("HEARTBEAT_EVERY", 10)); // enunciado: 10 mensagens
-        int sincCada = (int) Math.max(1, longEnv("CLOCK_SYNC_EVERY", 15));      // enunciado (Parte 4): 15
+        
+        int heartbeatCada = (int) Math.max(1, longEnv("HEARTBEAT_EVERY", 10));
+        int sincCada = (int) Math.max(1, longEnv("CLOCK_SYNC_EVERY", 15));
+        int intervaloSincronizacaoMs = (int) Math.max(500, longEnv("SYNC_INTERVAL_MS", 10000));
 
         Files.createDirectories(Paths.get(dataDir));
-        carregarCanais();
+        Replica replica = new Replica(dataDir, name);
 
         try (ZContext context = new ZContext()) {
             Cluster cl = new Cluster();
+            iniciarThread("propagacao", () -> propagarRegistros(context, name, replica, cl));
+            iniciarThread("anti-entropia", () -> antiEntropia(context, name, replica, cl, intervaloSincronizacaoMs));
             Referencia ref = new Referencia(context, refAddr, name);
             No no = new No(context, name, ref, cl, heartbeatCada, sincCada);
 
-            // Primeiro o servidor se registra na referência (rank). Só depois conecta ao broker,
-            // para o broker não mandar requisições de bots a um servidor que ainda não está pronto.
             while (!no.cadastrar()) {
-                System.out.println("[" + name + "] sem resposta da referência, tentando novamente em 2s");
+                System.out.println("[" + name + "] aguardando serviço de referência (retry em 2s)");
                 Thread.sleep(2000);
             }
 
-            // Threads da Parte 4: atende os outros servidores e escuta o tópico "servers"
             final int meuRank = no.rank;
-            iniciarThread("pares", () -> servirPares(context, name, meuRank, cl));
+            iniciarThread("pares", () -> servirPares(context, name, meuRank, cl, replica));
             iniciarThread("coordenador", () -> escutarCoordenador(name, proxyXpub, cl));
             no.atualizarPares();
 
-            // REP: requisições dos bots (via broker). Acorda a cada 200 ms para cuidar de eleições
-            // mesmo sem clientes.
             ZMQ.Socket socket = context.createSocket(SocketType.REP);
             socket.setReceiveTimeOut(200);
             socket.connect(backend);
-            // PUB: publicações nos canais e anúncios do coordenador (via proxy)
+            
             ZMQ.Socket pubSocket = context.createSocket(SocketType.PUB);
             pubSocket.connect(proxyXsub);
             no.pub = pubSocket;
+            
             System.out.println("[" + name + "] conectado ao broker em " + backend + " e ao proxy Pub/Sub em "
                     + proxyXsub + " | referência em " + refAddr + " | dados em " + dataDir
-                    + " | canais carregados: " + canais.size());
+                    + " | registros carregados: " + replica.estatisticas().total);
 
             while (!Thread.currentThread().isInterrupted()) {
                 byte[] reqBytes = socket.recv(0);
@@ -119,8 +103,7 @@ public class Server {
                 Envelope.Builder repBuilder = Envelope.newBuilder().setSender(name);
                 try {
                     Envelope req = Envelope.parseFrom(reqBytes);
-                    atualizarRelogioLogico(req.getLogicalClock());
-                    log(name, "RECEBIDO", req);
+                    registrarRecebimento(name, req);
 
                     switch (req.getBodyCase()) {
                         case LOGIN_REQUEST: {
@@ -130,8 +113,12 @@ public class Server {
                                         .setSuccess(false)
                                         .setError(ErrorCode.ERROR_INVALID_USERNAME)
                                         .setErrorMessage("usuário deve ter 1-32 caracteres [A-Za-z0-9_-]"));
+                            } else if (!replica.registrarLogin(user, agora())) {
+                                repBuilder.setLoginResponse(LoginResponse.newBuilder()
+                                        .setSuccess(false)
+                                        .setError(ErrorCode.ERROR_INTERNAL)
+                                        .setErrorMessage("falha ao gravar login em disco"));
                             } else {
-                                guardarLogin(user, agora());
                                 repBuilder.setLoginResponse(LoginResponse.newBuilder()
                                         .setSuccess(true).setError(ErrorCode.ERROR_NONE));
                             }
@@ -145,23 +132,29 @@ public class Server {
                                         .setSuccess(false)
                                         .setError(ErrorCode.ERROR_INVALID_CHANNEL_NAME)
                                         .setErrorMessage("canal deve ter 1-32 caracteres [A-Za-z0-9_-]"));
-                            } else if (canais.contains(canal)) {
-                                repBuilder.setCreateChannelResponse(CreateChannelResponse.newBuilder()
-                                        .setSuccess(false)
-                                        .setError(ErrorCode.ERROR_CHANNEL_EXISTS)
-                                        .setErrorMessage("canal já existe"));
                             } else {
-                                guardarCanal(canal);
-                                canais.add(canal);
-                                repBuilder.setCreateChannelResponse(CreateChannelResponse.newBuilder()
-                                        .setSuccess(true).setError(ErrorCode.ERROR_NONE));
+                                int resultado = replica.registrarCanal(canal);
+                                if (resultado == 0) {
+                                    repBuilder.setCreateChannelResponse(CreateChannelResponse.newBuilder()
+                                            .setSuccess(true).setError(ErrorCode.ERROR_NONE));
+                                } else if (resultado == 1) {
+                                    repBuilder.setCreateChannelResponse(CreateChannelResponse.newBuilder()
+                                            .setSuccess(false)
+                                            .setError(ErrorCode.ERROR_CHANNEL_EXISTS)
+                                            .setErrorMessage("canal já existe"));
+                                } else {
+                                    repBuilder.setCreateChannelResponse(CreateChannelResponse.newBuilder()
+                                            .setSuccess(false)
+                                            .setError(ErrorCode.ERROR_INTERNAL)
+                                            .setErrorMessage("falha ao gravar canal em disco"));
+                                }
                             }
                             break;
                         }
 
                         case LIST_CHANNELS_REQUEST: {
                             repBuilder.setListChannelsResponse(ListChannelsResponse.newBuilder()
-                                    .addAllChannels(canais));
+                                    .addAllChannels(replica.canais()));
                             break;
                         }
 
@@ -169,7 +162,6 @@ public class Server {
                             String canal = req.getPublishRequest().getChannel();
                             String texto = req.getPublishRequest().getMessage();
 
-                            // Cada servidor conhece só os canais criados nele (dados separados), então
                             if (!nomeValido(canal)) {
                                 repBuilder.setPublishResponse(PublishResponse.newBuilder()
                                         .setSuccess(false)
@@ -181,34 +173,20 @@ public class Server {
                                         .setError(ErrorCode.ERROR_INVALID_MESSAGE)
                                         .setErrorMessage("mensagem deve ter 1-" + MAX_MENSAGEM + " bytes"));
                             } else {
-                               
-                                Envelope pubMsg = Envelope.newBuilder()
-                                        .setTimestampMs(agora())
-                                        .setLogicalClock(proximoRelogioLogico())
-                                        .setSender(name)
+                                Envelope pubMsg = carimbarERegistrar(Envelope.newBuilder()
                                         .setPublication(Publication.newBuilder()
                                                 .setChannel(canal)
                                                 .setMessage(texto)
-                                                .setAuthor(req.getSender()))
-                                        .build();
+                                                .setAuthor(req.getSender())), name, "PUBLICADO");
 
-                                boolean gravou = true;
-                                try {
-                                    guardarPublicacao(pubMsg);
-                                } catch (IOException e) {
-                                    gravou = false;
-                                }
-
-                                if (!gravou) {
+                                if (!replica.registrarPublicacao(pubMsg)) {
                                     repBuilder.setPublishResponse(PublishResponse.newBuilder()
                                             .setSuccess(false)
                                             .setError(ErrorCode.ERROR_INTERNAL)
                                             .setErrorMessage("falha ao gravar publicação em disco"));
                                 } else {
-                                    // PUB: frame 1 = tópico (nome do canal), frame 2 = Envelope
                                     pubSocket.sendMore(canal);
                                     pubSocket.send(pubMsg.toByteArray(), 0);
-                                    log(name, "PUBLICADO", pubMsg);
                                     repBuilder.setPublishResponse(PublishResponse.newBuilder()
                                             .setSuccess(true).setError(ErrorCode.ERROR_NONE));
                                 }
@@ -231,13 +209,9 @@ public class Server {
                             .setErrorMessage("mensagem não é um Envelope válido"));
                 }
 
-                // REP precisa sempre responder, senão o socket trava
-                repBuilder.setTimestampMs(agora()).setLogicalClock(proximoRelogioLogico());
-                Envelope rep = repBuilder.build();
+                Envelope rep = carimbarERegistrar(repBuilder, name, "ENVIADO");
                 socket.send(rep.toByteArray(), 0);
-                log(name, "ENVIADO", rep);
 
-                // Heartbeat (10) e sincronização do relógio (15), depois de responder ao bot
                 no.depoisDeMensagemDeCliente();
                 no.manter();
             }
@@ -276,33 +250,47 @@ public class Server {
                 + " | de=" + e.getSender() + " | relogio=" + e.getLogicalClock() + " | " + Descricao.de(e));
     }
 
-    // ---- Relógio físico (corrigido pelo coordenador) e relógio lógico ----
+    // ---- Gerenciamento Temporal ----
 
-    // Hora atual do servidor já corrigida pelo deslocamento. Nunca retrocede, mesmo que o
-    // deslocamento diminua numa sincronização.
-    private static synchronized long agora() {
+    static synchronized long agora() {
         long t = System.currentTimeMillis() + offsetMs.get();
         if (t < ultimaHora) t = ultimaHora;
         ultimaHora = t;
         return t;
     }
 
-    // Regra 1: incrementa antes de enviar e devolve o valor para ir na mensagem
+    static long relogioLogicoAtual() {
+        return relogioLogico.get();
+    }
+
     private static long proximoRelogioLogico() {
         return relogioLogico.incrementAndGet();
     }
 
-    // Regra 2: ao receber, usa o máximo entre o valor local e o recebido
     private static void atualizarRelogioLogico(long recebido) {
         relogioLogico.accumulateAndGet(recebido, Math::max);
     }
 
-    // Carimba a mensagem imediatamente antes do envio: remetente, hora (corrigida) e relógio lógico
     private static Envelope carimbar(Envelope.Builder b, String who) {
         return b.setSender(who).setTimestampMs(agora()).setLogicalClock(proximoRelogioLogico()).build();
     }
 
-    // ---- Parte 4: comunicação entre servidores (coordenador, eleição, sincronização) ----
+    private static Envelope carimbarERegistrar(Envelope.Builder b, String who, String dir) {
+        synchronized (travaCarimboELog) {
+            Envelope e = carimbar(b, who);
+            log(who, dir, e);
+            return e;
+        }
+    }
+
+    private static void registrarRecebimento(String who, Envelope e) {
+        synchronized (travaCarimboELog) {
+            atualizarRelogioLogico(e.getLogicalClock());
+            log(who, "RECEBIDO", e);
+        }
+    }
+
+    // ---- Algoritmos Distribuídos (Bully, Cristian e Sincronização) ----
 
     private static final class Par {
         final String nome;
@@ -314,14 +302,12 @@ public class Server {
         }
     }
 
-    // Estado compartilhado entre a thread principal, a que atende os outros servidores (REP)
-    // e a que escuta o tópico "servers" (SUB).
     private static final class Cluster {
-        private String coordenador = ""; // vazio = ainda não há coordenador conhecido
-        private final Map<String, Integer> pares = new LinkedHashMap<>(); // nome -> rank de todos os servidores
+        private String coordenador = "";
+        private final Map<String, Integer> pares = new LinkedHashMap<>();
         volatile int rank = 0;
-        final AtomicBoolean eleicaoPedida = new AtomicBoolean(false); // um servidor de rank menor pediu eleição
-        final AtomicLong esperarAteMs = new AtomicLong(0);            // após perder uma eleição, espera o anúncio até aqui
+        final AtomicBoolean eleicaoPedida = new AtomicBoolean(false);
+        final AtomicLong esperarAteMs = new AtomicLong(0);
 
         synchronized String getCoordenador() {
             return coordenador;
@@ -339,6 +325,14 @@ public class Server {
         synchronized int rankDe(String nome) {
             Integer r = pares.get(nome);
             return r == null ? -1 : r;
+        }
+
+        synchronized List<Par> todosOsPares() {
+            List<Par> out = new ArrayList<>();
+            for (Map.Entry<String, Integer> e : pares.entrySet()) {
+                out.add(new Par(e.getKey(), e.getValue()));
+            }
+            return out;
         }
 
         synchronized List<Par> maiores(int meuRank) {
@@ -361,15 +355,12 @@ public class Server {
 
     private static final class Resposta {
         Envelope rep;
-        double rttMs;       // tempo entre o send e o recv
-        long localAoReceber; // hora da máquina (sem correção) no instante do recv
+        double rttMs;
+        long localAoReceber;
     }
 
-    // REQ avulso a outro servidor (um socket novo por chamada: se o par caiu, nada fica travado).
-    // Mede o RTT só entre o send e o recv. Retorna null se o par não respondeu.
     private static Resposta pedirAoPar(ZContext ctx, String who, String ep, Envelope.Builder b, int timeoutMs) {
-        Envelope req = carimbar(b, who);
-        log(who, "ENVIADO", req);
+        Envelope req = carimbarERegistrar(b, who, "ENVIADO");
         ZMQ.Socket s = null;
         try {
             s = ctx.createSocket(SocketType.REQ);
@@ -387,18 +378,16 @@ public class Server {
             r.rep = Envelope.parseFrom(bytes);
             r.rttMs = (t1 - t0) / 1e6;
             r.localAoReceber = localAgora;
-            atualizarRelogioLogico(r.rep.getLogicalClock());
-            log(who, "RECEBIDO", r.rep);
+            registrarRecebimento(who, r.rep);
             return r;
         } catch (Exception e) {
-            System.out.println("[" + who + "] erro ao falar com " + ep + ": " + e.getMessage());
+            System.out.println("[" + who + "] falha de comunicação com par " + ep + ": " + e.getMessage());
             return null;
         } finally {
             if (s != null) ctx.destroySocket(s);
         }
     }
 
-    // Pede eleição a todos os servidores de rank maior ao mesmo tempo. Retorna true se algum respondeu OK.
     private static boolean perguntarMaiores(ZContext ctx, String who, int meuRank, List<Par> maiores, int timeoutMs) {
         List<ZMQ.Socket> socks = new ArrayList<>();
         try {
@@ -407,9 +396,8 @@ public class Server {
                 try {
                     s.setLinger(0);
                     s.connect(enderecoPar(h.nome, h.rank));
-                    Envelope req = carimbar(Envelope.newBuilder().setElectionRequest(
-                            ElectionRequest.newBuilder().setName(who).setRank(meuRank)), who);
-                    log(who, "ENVIADO", req);
+                    Envelope req = carimbarERegistrar(Envelope.newBuilder().setElectionRequest(
+                            ElectionRequest.newBuilder().setName(who).setRank(meuRank)), who, "ENVIADO");
                     s.send(req.toByteArray(), ZMQ.DONTWAIT);
                     socks.add(s);
                 } catch (Exception e) {
@@ -430,11 +418,10 @@ public class Server {
                     feito[i] = true;
                     try {
                         Envelope rep = Envelope.parseFrom(bytes);
-                        atualizarRelogioLogico(rep.getLogicalClock());
-                        log(who, "RECEBIDO", rep);
+                        registrarRecebimento(who, rep);
                         if (rep.hasElectionResponse() && rep.getElectionResponse().getOk()) return true;
                     } catch (Exception e) {
-                        // resposta inválida: ignora
+                        // Resposta inválida ignorada
                     }
                 }
                 if (pendentes == 0) return false;
@@ -451,8 +438,7 @@ public class Server {
         }
     }
 
-    // Thread: atende os pedidos dos outros servidores (clock_request e election_request).
-    private static void servirPares(ZContext ctx, String who, int rank, Cluster cl) {
+    private static void servirPares(ZContext ctx, String who, int rank, Cluster cl, Replica replica) {
         String bind = "tcp://*:" + (portaBase() + rank);
         ZMQ.Socket rep = ctx.createSocket(SocketType.REP);
         try {
@@ -460,47 +446,63 @@ public class Server {
             rep.setReceiveTimeOut(200);
             rep.bind(bind);
         } catch (Exception e) {
-            System.out.println("[" + who + "] não foi possível escutar em " + bind + ": " + e.getMessage());
+            System.out.println("[" + who + "] falha ao realizar bind em " + bind + ": " + e.getMessage());
             return;
         }
-        System.out.println("[" + who + "] atendendo outros servidores em " + bind);
+        System.out.println("[" + who + "] listeners RPC ativos em " + bind);
         while (!Thread.currentThread().isInterrupted()) {
             byte[] bytes = rep.recv(0);
             if (bytes == null) continue;
 
+            Envelope.Builder respostaBuilder = Envelope.newBuilder().setSender(who)
+                    .setElectionResponse(ElectionResponse.newBuilder().setOk(false));
             boolean pedidoRelogio = false;
-            boolean ok = false;
             try {
                 Envelope req = Envelope.parseFrom(bytes);
-                atualizarRelogioLogico(req.getLogicalClock());
-                log(who, "RECEBIDO", req);
+                registrarRecebimento(who, req);
                 if (req.hasClockRequest()) {
                     pedidoRelogio = true;
                 } else if (req.hasElectionRequest()) {
-                    // "OK" só se quem pede tem rank menor; neste caso eu assumo a eleição
-                    // (no próximo ciclo da thread principal)
-                    ok = req.getElectionRequest().getRank() < rank;
+                    boolean ok = req.getElectionRequest().getRank() < rank;
+                    respostaBuilder.setElectionResponse(ElectionResponse.newBuilder().setOk(ok));
                     if (ok) cl.eleicaoPedida.set(true);
+                } else if (req.hasReplicateRequest()) {
+                    replica.aplicarRemotos(req.getReplicateRequest().getRecordsList());
+                    respostaBuilder.setReplicateResponse(ReplicateResponse.newBuilder().setOk(true));
+                } else if (req.hasSyncRequest()) {
+                    respostaBuilder.setSyncResponse(responderSincronizacao(replica, req.getSyncRequest()));
                 }
             } catch (Exception e) {
-                // mensagem inválida: responde "não" para o REP não travar
+                // Em caso de falha no parse, responde default ok=false para liberar lock
             }
 
-            long ts = agora();
-            Envelope.Builder b = Envelope.newBuilder().setSender(who).setTimestampMs(ts)
-                    .setLogicalClock(proximoRelogioLogico());
-            if (pedidoRelogio) {
-                b.setClockResponse(ClockResponse.newBuilder().setTimeMs(ts)); // hora do coordenador agora
-            } else {
-                b.setElectionResponse(ElectionResponse.newBuilder().setOk(ok));
+            Envelope resposta;
+            synchronized (travaCarimboELog) {
+                long ts = agora();
+                respostaBuilder.setTimestampMs(ts).setLogicalClock(proximoRelogioLogico());
+                if (pedidoRelogio) {
+                    respostaBuilder.setClockResponse(ClockResponse.newBuilder().setTimeMs(ts));
+                }
+                resposta = respostaBuilder.build();
+                log(who, "ENVIADO", resposta);
             }
-            Envelope resp = b.build();
-            rep.send(resp.toByteArray(), 0);
-            log(who, "ENVIADO", resp);
+            rep.send(resposta.toByteArray(), 0);
         }
     }
 
-    // Thread: assina o tópico "servers" (proxy XPUB) e guarda o coordenador anunciado.
+    private static SyncResponse responderSincronizacao(Replica replica, SyncRequest pedido) {
+        Map<String, Long> tem = new HashMap<>();
+        for (VersionEntry v : pedido.getHaveList()) {
+            tem.put(v.getOrigin(), v.getLastSeq());
+        }
+        int maximo = pedido.getMaxRecords() > 0 ? pedido.getMaxRecords() : 500;
+        Replica.Faltantes faltantes = replica.faltantes(tem, maximo);
+        return SyncResponse.newBuilder()
+                .addAllRecords(faltantes.registros)
+                .setMore(faltantes.maisRegistros)
+                .build();
+    }
+
     private static void escutarCoordenador(String who, String xpub, Cluster cl) {
         try (ZContext ctx = new ZContext()) {
             ZMQ.Socket sub = ctx.createSocket(SocketType.SUB);
@@ -514,7 +516,6 @@ public class Server {
                 if (!sub.hasReceiveMore()) continue;
                 byte[] corpo = sub.recv(0);
                 if (corpo == null) continue;
-                // A inscrição casa por prefixo: só aceitamos o tópico exato.
                 if (!"servers".equals(new String(topico, StandardCharsets.UTF_8))) continue;
                 Envelope e;
                 try {
@@ -523,26 +524,78 @@ public class Server {
                     continue;
                 }
                 if (!e.hasCoordinatorAnnouncement()) continue;
-                atualizarRelogioLogico(e.getLogicalClock());
-                log(who, "RECEBIDO", e);
+                registrarRecebimento(who, e);
                 String coord = e.getCoordinatorAnnouncement().getName();
                 if (coord.equals(who)) continue;
                 String atual = cl.getCoordenador();
                 int rc = cl.rankDe(coord);
-                // Alguém de rank menor se anunciou enquanto eu sou o coordenador: contesto (volta a haver eleição).
                 if (atual.equals(who) && rc >= 0 && rc < cl.rank) {
                     cl.eleicaoPedida.set(true);
                     continue;
                 }
                 cl.setCoordenador(coord);
                 if (!coord.equals(atual)) {
-                    System.out.println("[" + who + "] coordenador atual: " + coord);
+                    System.out.println("[" + who + "] topologia atualizada - coordenador atual: " + coord);
                 }
             }
         }
     }
 
-    // Lógica do servidor na Parte 3 e 4 (usada só pela thread principal)
+    private static void propagarRegistros(ZContext ctx, String who, Replica replica, Cluster cl) {
+        Map<String, Long> pularAteMs = new HashMap<>();
+        while (!Thread.currentThread().isInterrupted()) {
+            List<ReplicaRecord> lote;
+            try {
+                lote = replica.esperarFilaDeSaida(500, 100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+            if (lote.isEmpty()) continue;
+            for (Par par : cl.todosOsPares()) {
+                if (par.nome.equals(who)) continue;
+                if (passosMs() < pularAteMs.getOrDefault(par.nome, 0L)) continue;
+                Resposta r = pedirAoPar(ctx, who, enderecoPar(par.nome, par.rank), Envelope.newBuilder()
+                        .setReplicateRequest(ReplicateRequest.newBuilder().addAllRecords(lote)), 500);
+                if (r == null || !r.rep.hasReplicateResponse() || !r.rep.getReplicateResponse().getOk()) {
+                    pularAteMs.put(par.nome, passosMs() + 5000);
+                }
+            }
+        }
+    }
+
+    private static void antiEntropia(ZContext ctx, String who, Replica replica, Cluster cl, int intervaloMs) {
+        try {
+            Thread.sleep(3000);
+            while (!Thread.currentThread().isInterrupted()) {
+                int buscados = 0;
+                int alcancados = 0;
+                for (Par par : cl.todosOsPares()) {
+                    if (par.nome.equals(who)) continue;
+                    for (int rodada = 0; rodada < 50; rodada++) {
+                        SyncRequest.Builder pedido = SyncRequest.newBuilder().setMaxRecords(500);
+                        for (Map.Entry<String, Long> v : replica.versao().entrySet()) {
+                            pedido.addHave(VersionEntry.newBuilder().setOrigin(v.getKey()).setLastSeq(v.getValue()));
+                        }
+                        Resposta r = pedirAoPar(ctx, who, enderecoPar(par.nome, par.rank),
+                                Envelope.newBuilder().setSyncRequest(pedido), 2000);
+                        if (r == null || !r.rep.hasSyncResponse()) break;
+                        if (rodada == 0) alcancados++;
+                        buscados += replica.aplicarRemotos(r.rep.getSyncResponse().getRecordsList());
+                        if (!r.rep.getSyncResponse().getMore()) break;
+                    }
+                }
+                Replica.Estatisticas e = replica.estatisticas();
+                System.out.println("[" + who + "] réplica: registros=" + e.total + " (logins=" + e.logins
+        + ", canais=" + e.canais + ", publicações=" + e.publicacoes + ") hash=" + e.hash
+        + " | sincronizou com " + alcancados + " servidor(es), " + buscados + " registro(s) novo(s)");
+                Thread.sleep(intervaloMs);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
     private static final class No {
         final ZContext ctx;
         final String name;
@@ -565,14 +618,13 @@ public class Server {
             this.sincCada = sincCada;
         }
 
-        // REQ: nome -> REP: rank (isso também cadastra o servidor na referência)
         boolean cadastrar() {
             Integer r = ref.registrar();
             if (r == null) return false;
             registrado = true;
             rank = r;
             cl.rank = r;
-            System.out.println("[" + name + "] rank recebido da referência: " + r);
+            System.out.println("[" + name + "] registro em control plane finalizado (rank: " + r + ")");
             return true;
         }
 
@@ -583,33 +635,29 @@ public class Server {
             return true;
         }
 
-        // Publica no tópico "servers" que este servidor é o coordenador.
         void anunciar() {
-            Envelope e = carimbar(Envelope.newBuilder().setCoordinatorAnnouncement(
-                    CoordinatorAnnouncement.newBuilder().setName(name)), name);
+            Envelope e = carimbarERegistrar(Envelope.newBuilder().setCoordinatorAnnouncement(
+                    CoordinatorAnnouncement.newBuilder().setName(name)), name, "PUBLICADO");
             pub.sendMore("servers");
             pub.send(e.toByteArray(), 0);
-            log(name, "PUBLICADO", e);
         }
 
-        // Bully: pede eleição aos servidores de rank maior; se nenhum responde OK, este servidor assume.
         void eleicao() {
             atualizarPares();
             List<Par> maiores = cl.maiores(rank);
-            System.out.println("[" + name + "] eleição iniciada (rank " + rank + "): consultando "
-                    + maiores.size() + " servidor(es) de rank maior");
+            System.out.println("[" + name + "] iniciando Bully Election (rank " + rank + "): consultando "
+                    + maiores.size() + " nó(s) superior(es)");
             if (!maiores.isEmpty() && perguntarMaiores(ctx, name, rank, maiores, 1000)) {
                 cl.setCoordenador("");
-                cl.esperarAteMs.set(passosMs() + 4000); // alguém de rank maior assume e vai anunciar
-                System.out.println("[" + name + "] um servidor de rank maior respondeu OK; aguardando o anúncio do coordenador");
+                cl.esperarAteMs.set(passosMs() + 4000);
+                System.out.println("[" + name + "] ACK recebido de nó superior; aguardando anúncio");
             } else {
                 cl.setCoordenador(name);
-                System.out.println("[" + name + "] eleito coordenador");
+                System.out.println("[" + name + "] assumindo coordenação do cluster");
                 anunciar();
             }
         }
 
-        // Chamada a cada volta do laço: eleição pedida por outro servidor, ou ainda sem coordenador.
         void manter() {
             if (!registrado) return;
             boolean pedida = cl.eleicaoPedida.getAndSet(false);
@@ -617,13 +665,12 @@ public class Server {
             if (pedida || nenhum) eleicao();
         }
 
-        // A cada CLOCK_SYNC_EVERY mensagens: pede a hora ao coordenador (Cristian com o RTT medido).
         void sincronizar() {
             if (!registrado) return;
             String coord = cl.getCoordenador();
-            if (coord.isEmpty()) return; // manter() cuida da eleição
+            if (coord.isEmpty()) return;
             if (coord.equals(name)) {
-                anunciar(); // reforça o anúncio (quem entrou depois pode não ter recebido o primeiro)
+                anunciar();
                 return;
             }
             int crank = cl.rankDe(coord);
@@ -639,14 +686,12 @@ public class Server {
             if (r != null && r.rep.hasClockResponse()) {
                 aplicarSincronizacao(name, coord, r.rep.getClockResponse().getTimeMs(), r.rttMs, r.localAoReceber);
             } else {
-                System.out.println("[" + name + "] coordenador " + coord + " não respondeu; iniciando eleição");
+                System.out.println("[" + name + "] falha na sincronização de relógio; iniciando eleição");
                 cl.setCoordenador("");
                 eleicao();
             }
         }
 
-        // A cada heartbeatCada mensagens de clientes: heartbeat e lista de servidores.
-        // A cada sincCada: sincronização com o coordenador.
         void depoisDeMensagemDeCliente() {
             if (++desdeSinc >= sincCada) {
                 desdeSinc = 0;
@@ -654,7 +699,7 @@ public class Server {
             }
             if (++desdeHeartbeat < heartbeatCada) return;
             desdeHeartbeat = 0;
-            boolean referenciaOk = false; // só pede a lista se a referência respondeu agora
+            boolean referenciaOk = false;
             if (!registrado) {
                 referenciaOk = cadastrar();
             } else {
@@ -662,7 +707,7 @@ public class Server {
                 if (hb == 1) {
                     referenciaOk = true;
                 } else if (hb == -1) {
-                    System.out.println("[" + name + "] a referência não conhece este servidor; cadastrando de novo");
+                    System.out.println("[" + name + "] serviço de referência reportou nó desconhecido; recadastrando");
                     registrado = false;
                     referenciaOk = cadastrar();
                 }
@@ -671,23 +716,20 @@ public class Server {
         }
     }
 
-
     private static void aplicarSincronizacao(String who, String de, long horaRemota, double rttMs, long localAoReceber) {
         final double maxRttMs = 500.0;
         if (rttMs > maxRttMs) {
-            System.out.println("[" + who + "] sincronização descartada: ida e volta de "
-                    + String.format(Locale.ROOT, "%.1f", rttMs) + " ms é grande demais para uma boa estimativa");
+            System.out.println("[" + who + "] algoritmo de Cristian abortado: limite de latência excedido (RTT "
+                    + String.format(Locale.ROOT, "%.1f", rttMs) + " ms)");
             return;
         }
         long estimada = horaRemota + Math.round(rttMs / 2.0);
         long novoOffset = estimada - localAoReceber;
         long antigo = offsetMs.getAndSet(novoOffset);
         System.out.println("[" + who + "] relógio sincronizado com " + de + ": deslocamento " + antigo
-                + " ms -> " + novoOffset + " ms (ida e volta: " + String.format(Locale.ROOT, "%.1f", rttMs) + " ms)");
+        + " ms -> " + novoOffset + " ms (ida e volta: " + String.format(Locale.ROOT, "%.1f", rttMs) + " ms)");
     }
 
-    // REQ com timeout para o serviço de referência. Se ela não responder, o socket REQ
-    // fica travado, então ele é recriado (padrão "lazy pirate"). Usado só pela thread principal.
     private static class Referencia {
         private final ZContext context;
         private final String endpoint;
@@ -701,22 +743,17 @@ public class Server {
             reset();
         }
 
-        // REQ: nome -> REP: rank. Retorna null se a referência não respondeu.
         Integer registrar() {
             Envelope r = call(Envelope.newBuilder().setRankRequest(RankRequest.newBuilder().setName(who)));
             return (r != null && r.hasRankResponse()) ? Integer.valueOf(r.getRankResponse().getRank()) : null;
         }
 
-        // REQ: heartbeat -> REP: OK. Retorna 1 = ok, 0 = sem resposta válida,
-        // -1 = a referência não conhece este servidor (success=false).
-        // (Parte 4: a hora não vem mais na resposta do heartbeat.)
         int heartbeat() {
             Envelope r = call(Envelope.newBuilder().setHeartbeatRequest(HeartbeatRequest.newBuilder().setName(who)));
             if (r == null || !r.hasHeartbeatResponse()) return 0;
             return r.getHeartbeatResponse().getSuccess() ? 1 : -1;
         }
 
-        // REQ: list -> REP: [nomes e ranks]. Retorna null se a referência não respondeu.
         List<Par> listar() {
             Envelope r = call(Envelope.newBuilder().setListServersRequest(ListServersRequest.newBuilder()));
             if (r == null || !r.hasListServersResponse()) return null;
@@ -727,8 +764,6 @@ public class Server {
             return out;
         }
 
-        // Cria o socket REQ. Se o endereço não puder ser resolvido (ex.: o serviço de referência
-        // ainda não existe/subiu), não derruba o servidor: sock fica null e a próxima chamada tenta de novo.
         private void reset() {
             if (sock != null) {
                 context.destroySocket(sock);
@@ -742,7 +777,7 @@ public class Server {
                 novo.connect(endpoint);
                 sock = novo;
             } catch (Exception e) {
-                System.out.println("[" + who + "] não foi possível conectar à referência em "
+                System.out.println("[" + who + "] falha de resolução do serviço de referência em "
                         + endpoint + ": " + e.getMessage());
                 context.destroySocket(novo);
             }
@@ -753,22 +788,20 @@ public class Server {
                 reset();
                 if (sock == null) return null;
             }
-            Envelope req = carimbar(builder, who);
-            log(who, "ENVIADO", req);
+            Envelope req = carimbarERegistrar(builder, who, "ENVIADO");
             if (!sock.send(req.toByteArray(), 0)) {
                 reset();
                 return null;
             }
             byte[] bytes = sock.recv(0);
             if (bytes == null) {
-                System.out.println("[" + who + "] referência sem resposta em " + endpoint + ", recriando socket");
+                System.out.println("[" + who + "] RPC timeout (Lazy Pirate), forçando recriação do socket para " + endpoint);
                 reset();
                 return null;
             }
             try {
                 Envelope rep = Envelope.parseFrom(bytes);
-                atualizarRelogioLogico(rep.getLogicalClock());
-                log(who, "RECEBIDO", rep);
+                registrarRecebimento(who, rep);
                 return rep;
             } catch (Exception e) {
                 reset();
@@ -777,55 +810,28 @@ public class Server {
         }
     }
 
-    private static void carregarCanais() throws IOException {
-        Path path = Paths.get(dataDir, "channels.txt");
-        if (Files.exists(path)) {
-            for (String linha : Files.readAllLines(path)) {
-                if (!linha.isEmpty()) canais.add(linha);
-            }
-        }
-    }
-
-    private static void guardarLogin(String user, long ts) throws IOException {
-        Files.writeString(Paths.get(dataDir, "logins.tsv"), ts + "\t" + user + "\n",
-                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-    }
-
-    private static void guardarCanal(String canal) throws IOException {
-        Files.writeString(Paths.get(dataDir, "channels.txt"), canal + "\n",
-                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-    }
-
-    // 4 bytes (big-endian) com o tamanho + Envelope serializado
-    private static void guardarPublicacao(Envelope pubMsg) throws IOException {
-        byte[] payload = pubMsg.toByteArray();
-        ByteBuffer buf = ByteBuffer.allocate(4 + payload.length);
-        buf.putInt(payload.length);
-        buf.put(payload);
-        Files.write(Paths.get(dataDir, "publications.bin"), buf.array(),
-                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-    }
-
-    // Lê publications.bin e imprime o conteúdo de cada registro.
     private static int dump(String path) throws IOException {
         if (!Files.exists(Paths.get(path))) {
-            System.err.println("não foi possível abrir " + path);
+            System.err.println("arquivo não encontrado: " + path);
             return 1;
         }
         ByteBuffer buf = ByteBuffer.wrap(Files.readAllBytes(Paths.get(path)));
-        int count = 0;
+        List<Envelope> publicacoes = new ArrayList<>();
         while (buf.remaining() >= 4) {
             int n = buf.getInt();
             if (n < 0 || n > buf.remaining()) {
-                System.err.println("registro truncado no final do arquivo");
+                System.err.println("EOF inconsistente: arquivo truncado");
                 return 1;
             }
             byte[] rec = new byte[n];
             buf.get(rec);
-            log("dump", "ARMAZENADO", Envelope.parseFrom(rec));
-            count++;
+            publicacoes.add(Envelope.parseFrom(rec));
         }
-        System.out.println(count + " publicação(ões) no arquivo");
+        publicacoes.sort(Comparator.comparingLong(Envelope::getLogicalClock).thenComparing(Envelope::getSender));
+        for (Envelope e : publicacoes) {
+            log("dump", "ARMAZENADO", e);
+        }
+        System.out.println(publicacoes.size() + " publicações processadas (ordem total garantida por Lamport Clock)");
         return 0;
     }
 }
