@@ -180,3 +180,6 @@ Para a Parte 5, os bots precisam parar antes de coletar o log, para a réplica c
 - **Canais:** `list_channels` devolve os canais de todos os servidores, e criar um canal confere se ele já existe em qualquer servidor.
 - **Log:** a cada ciclo, o servidor imprime `réplica: registros=N (logins=a, canais=b, publicações=c) hash=H`. O hash resume o conjunto de ids: servidores com os mesmos registros têm o mesmo hash.
 Sincronização do relógio físico (Cristian) — a resposta do heartbeat traz ```time_ms```. O servidor mede o RTT apenas entre o envio e o recebimento, estima e calcula o deslocamento a partir do relógio bruto da máquina e o aplica (descarta se RTT > 500 ms). Os timestamps nunca retrocedem.
+
+### Desenvolvido por:
+ Ana Lima, Luana De Almeida e Ravi Macedo.
