@@ -23,12 +23,24 @@ import java.util.concurrent.atomic.AtomicLong;
 // Parte 3 - relógio lógico: um contador que começa em 0, é incrementado antes de cada envio
 // (e vai no Envelope) e, ao receber qualquer mensagem, vira o máximo entre o valor local e o recebido.
 // Uma thread própria recebe (SUB) e exibe tudo que chega nos canais em que o bot está inscrito.
+
 public class Client {
     private static final String[] FRASES = {
-        "ola pessoal!", "alguem por ai?", "testando o canal", "mensagem aleatoria",
-        "sistemas distribuidos", "zeromq e protobuf", "bom dia, canal!", "publicando de novo",
-        "ping", "tudo certo por aqui"
-    };
+    "Good morning, everyone!",
+    "Ça va bien, merci!",
+    "¡Hola! ¿Cómo están?",
+    "Mir geht es gut!",
+    "Ciao a tutti!",
+    "Kon'nichiwa! Ogenki desu ka?",
+    "Annyeong! Jal jinaeyo?",
+    "Nǐ hǎo! Nǐ zěnmeyàng?",
+    "Salve! Bene valeo!",
+    "Geia sou! Ti kaneis?",
+    "Privet! Kak dela?",
+    "Hej! Hur mår du?",
+    "See you later!",
+    "Até mais, pessoal!"
+};
 
     // Relógio lógico do bot. É usado pela thread principal (REQ) e pela thread do SUB,
     // por isso é atômico.

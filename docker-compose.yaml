@@ -7,7 +7,7 @@
 x-cpp: &cpp
   build:
     context: .
-    dockerfile: Dockerfile
+    dockerfile: cpp/Dockerfile
   image: chat-cpp
 
 x-java: &java

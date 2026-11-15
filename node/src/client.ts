@@ -128,16 +128,19 @@ while (true) {
 }
 
 const phrases = [
-  "ola pessoal!",
-  "alguem por ai?",
-  "testando o canal",
-  "mensagem aleatoria",
-  "sistemas distribuidos",
-  "zeromq e protobuf",
-  "bom dia, canal!",
-  "publicando de novo",
-  "ping",
-  "tudo certo por aqui",
+  "Olá, pessoal!",
+  "How are you?",
+  "Bonjour, ça va?",
+  "¡Buenos días!",
+  "Mir geht's gut!",
+  "Ciao, come stai?",
+  "Kon'nichiwa!",
+  "Annyeong! Jal jinaeyo?",
+  "Nǐ hǎo, péngyou!",
+  "Salve! Quid agis?",
+  "Geia sou! Ti kaneis?",
+  "Privet! Kak dela?",
+  "Hej! Hur mår du?"
 ];
 
 while (true) {
